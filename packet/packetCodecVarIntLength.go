@@ -26,8 +26,7 @@ func (this *PacketCodecVarIntLength) Decode(reader io.Reader, util []byte) (pack
 	if err != nil {
 		return
 	}
-	buffer := bytes.NewBuffer(payload)
-	return this.packetCodec.Decode(buffer, util)
+	return this.packetCodec.Decode(bytes.NewBuffer(payload), util)
 }
 
 func (this *PacketCodecVarIntLength) Encode(writer io.Writer, util []byte, packet Packet) (err error) {
