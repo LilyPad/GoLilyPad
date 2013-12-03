@@ -7,4 +7,4 @@ type RequestRecord struct {
 	callback RequestCallback
 }
 
-type RequestCallback func(uint8, connect.Result)
+type RequestCallback func(statusCode uint8, result connect.Result)

@@ -1,3 +1,3 @@
 package connect
 
-type EventHandler func(Event)
+type EventHandler func(event Event)
