@@ -36,11 +36,10 @@ func (this *PacketCodecVarIntLength) Encode(writer io.Writer, util []byte, packe
 	if err != nil {
 		return
 	}
-	payload := buffer.Bytes()
-	err = WriteVarInt(writer, util, len(payload))
+	err = WriteVarInt(writer, util, buffer.Len())
 	if err != nil {
 		return
 	}
-	_, err = writer.Write(payload)
+	_, err = buffer.WriteTo(writer)
 	return
 }
