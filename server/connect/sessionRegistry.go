@@ -42,7 +42,7 @@ func (this *SessionRegistry) GetAll() (sessions []*Session) {
 	defer this.RUnlock()
 	sessions = make([]*Session, 0, len(this.sessionById))
 	for  _, session := range this.sessionById {
-   		sessions = append(sessions, session)
+		sessions = append(sessions, session)
 	}
 	return
 }

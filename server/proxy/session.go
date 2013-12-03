@@ -269,14 +269,14 @@ func (this *Session) HandlePacket(packet packet.Packet) (err error) {
 				return
 			}
 			this.connCodec.SetReader(&cipher.StreamReader{
-        	    R: this.conn,
-        	    S: decrypter,
-        	})
-        	this.connCodec.SetWriter(&cipher.StreamWriter{
-        	    W: this.conn,
-        	    S: encrypter,
-        	})
-        	var authErr error
+				R: this.conn,
+				S: decrypter,
+			})
+			this.connCodec.SetWriter(&cipher.StreamWriter{
+				W: this.conn,
+				S: encrypter,
+			})
+			var authErr error
 			this.uuid, authErr = auth.Authenticate(this.name, this.serverId, sharedSecret, this.publicKey)
 			if authErr != nil {
 				this.SetAuthenticated(false)

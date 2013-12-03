@@ -106,10 +106,10 @@ func (this *NetworkCache) Players() (players []string) {
 	this.playerToProxyLock.RLock()
 	defer this.playerToProxyLock.RUnlock()
 	players = make([]string, 0, len(this.playerToProxy))
-    for player, _ := range this.playerToProxy {
-        players = append(players, player)
-    }
-    return
+	for player, _ := range this.playerToProxy {
+		players = append(players, player)
+	}
+	return
 }
 
 func (this *NetworkCache) ProxyByPlayer(player string) *Session {

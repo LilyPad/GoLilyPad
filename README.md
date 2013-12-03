@@ -13,12 +13,15 @@ You can currently compile either Server Proxy or Server Connect.
 ### Server Connect ###
 
 1) `cd server/connect/main`
-2) `go build`
-3) `./main`
 
+2) `go build`
+
+3) `./main`
 
 ### Server Proxy ###
 
 1) `cd server/proxy/main`
+
 2) `go build`
+
 3) `./main`
