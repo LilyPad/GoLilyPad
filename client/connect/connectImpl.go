@@ -35,6 +35,9 @@ func (this *ConnectImpl) Connect(addr string) (err error) {
 func (this *ConnectImpl) Disconnect() {
 	if this.records != nil {
 		for _, record := range this.records {
+			if record.callback == nil {
+				continue
+			}
 			record.callback(255, nil)
 		}
 	}
