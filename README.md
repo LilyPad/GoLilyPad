@@ -16,11 +16,11 @@ You can currently compile either Server Proxy or Server Connect.
 
 ### Server Connect ###
 
-3) `cd $GOPATH/pkg/github.com/LilyPad/GoLilyPad/server/connect/main`
+3.A) `cd $GOPATH/pkg/github.com/LilyPad/GoLilyPad/server/connect/main`
 
 ### Server Proxy ###
 
-3) `cd $GOPATH/pkg/github.com/LilyPad/GoLilyPad/server/proxy/main`
+3.B) `cd $GOPATH/pkg/github.com/LilyPad/GoLilyPad/server/proxy/main`
 
 ### Lastly ###
 
