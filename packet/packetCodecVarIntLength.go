@@ -21,6 +21,10 @@ func (this *PacketCodecVarIntLength) Decode(reader io.Reader, util []byte) (pack
 		err = errors.New("Packet length is negative")
 		return
 	}
+	if length > 2097151 { // 2^21
+		err = errors.New("Packet length is above maximum")
+		return
+	}
 	payload := make([]byte, length)
 	_, err = reader.Read(payload)
 	if err != nil {
