@@ -190,7 +190,7 @@ var PlayPacketClientCodecs = []packet.PacketCodec {
 }
 var PlayPacketClientEntityPositions = [][]int {
 	PACKET_CLIENT_USE_BED: { 0 },
-	PACKET_CLIENT_COLLECT_ITEM: { 4 },
+	PACKET_CLIENT_COLLECT_ITEM: { 0, 4 },
 	PACKET_CLIENT_ENTITY_VELOCITY: { 0 },
 	PACKET_CLIENT_ENTITY_STATUS: { 0 },
 	PACKET_CLIENT_ATTACH_ENTITY: { 0, 4 },

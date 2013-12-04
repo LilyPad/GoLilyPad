@@ -1,5 +1,6 @@
 package minecraft
 
+import "bytes"
 import "encoding/binary"
 import "io"
 import "io/ioutil"
@@ -13,6 +14,23 @@ type PacketGeneric struct {
 func (this *PacketGeneric) SwapEntities(a int32, b int32) {
 	if a == b {
 		return
+	}
+	if this.id == PACKET_CLIENT_SPAWN_OBJECT {
+		buffer := bytes.NewBuffer(this.Bytes)
+		bufferUtil := make([]byte, packet.UTIL_BUFFER_LENGTH)
+		_, err := packet.ReadVarInt(buffer, bufferUtil)
+		varIntLength := len(this.Bytes) - buffer.Len()
+		if err == nil && len(this.Bytes) > varIntLength + 19 {
+			objectType := this.Bytes[varIntLength]
+			if objectType == 60 || objectType == 61 || objectType == 62 || objectType == 63 || objectType == 64 || objectType == 65 || objectType == 66 || objectType == 90 {
+				id := int32(binary.BigEndian.Uint32(this.Bytes[varIntLength+15:varIntLength+19]))
+				if id == a {
+					binary.BigEndian.PutUint32(this.Bytes[varIntLength+15:varIntLength+19], uint32(b))
+				} else if id == b {
+					binary.BigEndian.PutUint32(this.Bytes[varIntLength+15:varIntLength+19], uint32(a))
+				}
+			}
+		}
 	}
 	if this.id < 0 {
 		return
