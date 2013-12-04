@@ -76,10 +76,9 @@ func WriteBool(writer io.Writer, util []byte, val bool) (err error) {
 	if val {
 		err = WriteUint8(writer, util, 1)
 		return
-	} else {
-		err = WriteUint8(writer, util, 0)
-		return
 	}
+	err = WriteUint8(writer, util, 0)
+	return
 }
 
 func ReadInt8(reader io.Reader, util []byte) (val int8, err error) {

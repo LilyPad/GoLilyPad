@@ -18,11 +18,10 @@ func (this *Config) Route(domain string) string {
 	if server, ok := this.Proxy.routes[domain]; ok {
 		return server
 	}
-	if domain == "" {
-		return ""
-	} else {
+	if domain != "" {
 		return this.Route("")
 	}
+	return ""
 }
 
 func (this *Config) LocaleFull() string {
