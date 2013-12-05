@@ -24,7 +24,7 @@ func main() {
 		for {
 			str, err := reader.ReadString('\n')
 			if err != nil {
-				stdinErr <- nil
+				stdinErr <- err
 			}
 			stdinString <- str
 		}

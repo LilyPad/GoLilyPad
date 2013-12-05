@@ -27,7 +27,7 @@ func main() {
 		for {
 			str, err := reader.ReadString('\n')
 			if err != nil {
-				stdinErr <- nil
+				stdinErr <- err
 			}
 			stdinString <- str
 		}
@@ -42,6 +42,7 @@ func main() {
 	serverErr := make(chan error, 1)
 	var server *proxy.Server
 	go func() {
+		var err error
 		server, err = proxy.NewServer(&cfg.Proxy.Motd, &cfg.Proxy.MaxPlayers, &cfg.Proxy.Authenticate, cfg, cfg, proxyConnect)
 		if err != nil {
 			serverErr <- err
