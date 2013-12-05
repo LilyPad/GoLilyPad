@@ -44,7 +44,9 @@ func (this *Server) ListenAndServe(addr string) (err error) {
 }
 
 func (this *Server) Close() {
-	this.listener.Close()
+	if this.listener != nil {
+		this.listener.Close()
+	}
 	if this.keepaliveDone != nil {
 		close(this.keepaliveDone)
 	}
