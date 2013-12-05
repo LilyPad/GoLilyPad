@@ -9,6 +9,8 @@ import "github.com/LilyPad/GoLilyPad/server/proxy"
 import "github.com/LilyPad/GoLilyPad/server/proxy/connect"
 import "github.com/LilyPad/GoLilyPad/server/proxy/main/config"
 
+var VERSION string
+
 func main() {
 	cfg, err := config.LoadConfig("proxy.yml")
 	if err != nil {
@@ -59,7 +61,7 @@ func main() {
 		}
 	}
 
-	fmt.Println("Proxy server started")
+	fmt.Println("Proxy server started, version:", VERSION)
 
 	for {
 		select {

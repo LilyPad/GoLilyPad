@@ -6,6 +6,8 @@ import "os"
 import "github.com/LilyPad/GoLilyPad/server/connect"
 import "github.com/LilyPad/GoLilyPad/server/connect/main/config"
 
+var VERSION string
+
 func main() {
 	cfg, err := config.LoadConfig("connect.yml")
 	if err != nil {
@@ -41,7 +43,7 @@ func main() {
 		server.Close()
 	}
 
-	fmt.Println("Connect server started")
+	fmt.Println("Connect server started, version:", VERSION)
 
 	for {
 		select {
