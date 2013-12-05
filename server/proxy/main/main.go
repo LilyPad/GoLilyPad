@@ -58,6 +58,8 @@ func main() {
 		}
 	}
 
+	fmt.Println("Proxy server started")
+
 	for {
 		select {
 		case str := <-stdinString:

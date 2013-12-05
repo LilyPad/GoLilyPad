@@ -41,6 +41,8 @@ func main() {
 		server.Close()
 	}
 
+	fmt.Println("Connect server started")
+
 	for {
 		select {
 		case str := <-stdinString:
