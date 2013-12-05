@@ -33,6 +33,10 @@ func AutoAuthenticate(connectClient Connect, user *string, pass *string) {
 				return
 			}
 			connectClient.RequestLater(&connect.RequestAuthenticate{*user, PasswordAndSaltHash(*pass, result.(*connect.ResultGetSalt).Salt)}, func(statusCode uint8, result connect.Result) {
+				if statusCode == connect.STATUS_ERROR_GENERIC {
+					fmt.Println("Connect, Invalid username or password")
+					return
+				}
 				if result == nil {
 					fmt.Println("Connect, Connection timed out while authenticating")
 					return
