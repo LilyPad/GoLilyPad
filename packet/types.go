@@ -23,6 +23,10 @@ func ReadString(reader io.Reader, util []byte) (s string, err error) {
 		err = errors.New("String length is negative")
 		return
 	}
+	if length > 2097151 { // 2^21
+		err = errors.New("String length is above maximum")
+		return
+	}
 	bytes := make([]byte, length)
 	_, err = reader.Read(bytes)
 	if err != nil {
