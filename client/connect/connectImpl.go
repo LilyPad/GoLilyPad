@@ -46,7 +46,7 @@ func (this *ConnectImpl) Disconnect() {
 			if record.callback == nil {
 				continue
 			}
-			record.callback(255, nil)
+			go record.callback(255, nil)
 		}
 	}
 	if this.conn != nil {
@@ -122,7 +122,7 @@ func (this *ConnectImpl) DispatchResult(sequenceId int32, statusCode uint8, resu
 		return // should there be an error here?
 	}
 	if this.records[sequenceId].callback != nil {
-		this.records[sequenceId].callback(statusCode, result)
+		go this.records[sequenceId].callback(statusCode, result)
 	}
 	delete(this.records, sequenceId)
 }
