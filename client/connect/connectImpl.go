@@ -2,6 +2,7 @@ package connect
 
 import "errors"
 import "net"
+import "sync"
 import "sync/atomic"
 import "time"
 import "github.com/LilyPad/GoLilyPad/packet"
@@ -13,11 +14,14 @@ type ConnectImpl struct {
 	connCodec *packet.PacketConnCodec
 
 	records map[int32]*RequestRecord
+	recordsMutex *sync.Mutex
 	sequenceId int32 
 }
 
 func NewConnect() Connect {
-	return &ConnectImpl{}
+	return &ConnectImpl{
+		recordsMutex: &sync.Mutex{},
+	}
 }
 
 func (this *ConnectImpl) Connect(addr string) (err error) {
@@ -26,6 +30,8 @@ func (this *ConnectImpl) Connect(addr string) (err error) {
 	if err != nil {
 		return
 	}
+	this.recordsMutex.Lock()
+	defer this.recordsMutex.Unlock()
 	this.records = make(map[int32]*RequestRecord)
 	this.connCodec = packet.NewPacketConnCodec(this.conn, NewCodec(this), 10 * time.Second)
 	go this.connCodec.ReadConn(this)
@@ -33,6 +39,8 @@ func (this *ConnectImpl) Connect(addr string) (err error) {
 }
 
 func (this *ConnectImpl) Disconnect() {
+	this.recordsMutex.Lock()
+	defer this.recordsMutex.Unlock()
 	if this.records != nil {
 		for _, record := range this.records {
 			if record.callback == nil {
@@ -99,11 +107,17 @@ func (this *ConnectImpl) RequestLater(request connect.Request, callback RequestC
 	if err != nil {
 		return
 	}
-	this.records[sequenceId] = &RequestRecord{request, callback}
+	this.recordsMutex.Lock()
+	defer this.recordsMutex.Unlock()
+	if this.records != nil {
+		this.records[sequenceId] = &RequestRecord{request, callback}
+	}
 	return
 }
 
 func (this *ConnectImpl) DispatchResult(sequenceId int32, statusCode uint8, result connect.Result) {
+	this.recordsMutex.Lock()
+	defer this.recordsMutex.Unlock()
 	if _, ok := this.records[sequenceId]; !ok {
 		return // should there be an error here?
 	}
@@ -114,6 +128,8 @@ func (this *ConnectImpl) DispatchResult(sequenceId int32, statusCode uint8, resu
 }
 
 func (this *ConnectImpl) RequestIdBySequenceId(sequenceId int32) int {
+	this.recordsMutex.Lock()
+	defer this.recordsMutex.Unlock()
 	if _, ok := this.records[sequenceId]; !ok {
 		return -1
 	}
