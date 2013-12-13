@@ -44,7 +44,7 @@ func (this *PacketGeneric) SwapEntities(a int32, b int32) {
 	}
 	var id int32
 	for _, position := range positions {
-		if len(this.Bytes) >= position + 4 {
+		if len(this.Bytes) < position + 4 {
 			continue
 		}
 		id = int32(binary.BigEndian.Uint32(this.Bytes[position:position+4]))
