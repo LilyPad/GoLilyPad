@@ -15,10 +15,11 @@ func MojangSha1Hex(arrBytes ...[]byte) string {
 		twosCompliment(hash)
 	}
 	hexString := hex.EncodeToString(hash)
+	hexString = strings.TrimLeft(hexString, "0")
 	if negative {
 		hexString = "-" + hexString
 	}
-	return strings.TrimLeft(hexString, "0")
+	return hexString
 }
 
 func twosCompliment(p []byte) {
