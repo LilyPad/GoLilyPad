@@ -281,10 +281,10 @@ func (this *Session) HandlePacket(packet packet.Packet) (err error) {
 			this.uuid, authErr = auth.Authenticate(this.name, this.serverId, sharedSecret, this.publicKey)
 			if authErr != nil {
 				this.SetAuthenticated(false)
-				fmt.Println("Proxy server, authorized:", this.name, "ip:", this.RemoteIp())
+				fmt.Println("Proxy server, failed to authorize:", this.name, "ip:", this.RemoteIp())
 			} else {
 				this.SetAuthenticated(true)
-				fmt.Println("Proxy server, failed to authorize:", this.name, "ip:", this.RemoteIp())
+				fmt.Println("Proxy server, authorized:", this.name, "ip:", this.RemoteIp())
 			}
 		} else {
 			err = errors.New("Unexpected packet")
