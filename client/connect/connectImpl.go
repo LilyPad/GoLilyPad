@@ -1,6 +1,7 @@
 package connect
 
 import "errors"
+import "fmt"
 import "net"
 import "sync"
 import "sync/atomic"
@@ -82,6 +83,7 @@ func (this *ConnectImpl) HandlePacket(packet packet.Packet) (err error) {
 }
 
 func (this *ConnectImpl) ErrorCaught(err error) {
+	fmt.Println("Connect client, disconnected:", err)
 	this.Disconnect()
 }
 

@@ -15,7 +15,7 @@ func AutoConnect(connectClient Connect, addr *string, done chan bool) {
 			connectClient.DispatchEvent("preconnect", nil)
 			err := connectClient.Connect(*addr)
 			if err != nil {
-				fmt.Println("Connect, Couldn't connect to remote host")
+				fmt.Println("Connect client, Couldn't connect to remote host:", err)
 			}
 			connectClient.DispatchEvent("connect", nil)
 		case <-done:
@@ -29,20 +29,20 @@ func AutoAuthenticate(connectClient Connect, user *string, pass *string) {
 	connectClient.RegisterEvent("connect", func(event Event) {
 		connectClient.RequestLater(&connect.RequestGetSalt{}, func(statusCode uint8, result connect.Result) {
 			if result == nil {
-				fmt.Println("Connect, Connection timed out while keying")
+				fmt.Println("Connect client, Connection timed out while keying")
 				return
 			}
 			connectClient.RequestLater(&connect.RequestAuthenticate{*user, PasswordAndSaltHash(*pass, result.(*connect.ResultGetSalt).Salt)}, func(statusCode uint8, result connect.Result) {
 				if statusCode == connect.STATUS_ERROR_GENERIC {
-					fmt.Println("Connect, Invalid username or password")
+					fmt.Println("Connect client, Invalid username or password")
 					return
 				}
 				if result == nil {
-					fmt.Println("Connect, Connection timed out while authenticating")
+					fmt.Println("Connect client, Connection timed out while authenticating")
 					return
 				}
 				connectClient.DispatchEvent("authenticate", nil)
-				fmt.Println("Connect, authenticated to remote host")
+				fmt.Println("Connect client, authenticated to remote host")
 			})
 		});
 	});

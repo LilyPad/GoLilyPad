@@ -9,6 +9,7 @@ import "crypto/x509"
 import "encoding/base64"
 import "encoding/json"
 import "errors"
+import "fmt"
 import "io/ioutil"
 import "net"
 import "time"
@@ -280,8 +281,10 @@ func (this *Session) HandlePacket(packet packet.Packet) (err error) {
 			this.uuid, authErr = auth.Authenticate(this.name, this.serverId, sharedSecret, this.publicKey)
 			if authErr != nil {
 				this.SetAuthenticated(false)
+				fmt.Println("Proxy server, authorized:", this.name, "ip:", this.RemoteIp())
 			} else {
 				this.SetAuthenticated(true)
+				fmt.Println("Proxy server, failed to authorize:", this.name, "ip:", this.RemoteIp())
 			}
 		} else {
 			err = errors.New("Unexpected packet")
@@ -303,6 +306,7 @@ func (this *Session) ErrorCaught(err error) {
 	if this.Authenticated() {
 		this.server.Connect().RemoveLocalPlayer(this.name)
 		this.server.SessionRegistry().Unregister(this)
+		fmt.Println("Proxy server, name:", this.name, "ip:", this.RemoteIp(), "disconnected:", err)
 	}
 	this.state = STATE_DISCONNECTED
 	this.conn.Close()
@@ -311,6 +315,15 @@ func (this *Session) ErrorCaught(err error) {
 
 func (this *Session) Name() string {
 	return this.name
+}
+
+func (this *Session) RemoteAddr() (addr net.Addr) {
+	return this.conn.RemoteAddr()
+}
+
+func (this *Session) RemoteIp() (ip string) {
+	ip, _, _ = net.SplitHostPort(this.RemoteAddr().String())
+	return
 }
 
 func (this *Session) Authenticated() bool {

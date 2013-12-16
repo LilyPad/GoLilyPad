@@ -1,6 +1,7 @@
 package connect
 
 import "errors"
+import "fmt"
 import "net"
 import "time"
 import "github.com/LilyPad/GoLilyPad/packet"
@@ -82,12 +83,8 @@ func (this *Session) RegisterProxy(address string, port uint16, motd string, ver
 	if sessionRegistry.HasId(this.username) {
 		return false
 	}
-	var err error
 	if len(address) == 0 {
-		address, err = this.RemoteIp()
-		if err != nil {
-			return false
-		}
+		address = this.RemoteIp()
 	}
 	this.Unregister()
 	this.role = ROLE_PROXY
@@ -111,12 +108,8 @@ func (this *Session) RegisterServer(address string, port uint16) bool {
 	if sessionRegistry.HasId(this.username) {
 		return false
 	}
-	var err error
 	if len(address) == 0 {
-		address, err = this.RemoteIp()
-		if err != nil {
-			return false
-		}
+		address = this.RemoteIp()
 	}
 	securityKey, err := GenSalt()
 	if err != nil {
@@ -182,9 +175,11 @@ func (this *Session) HandlePacket(packet packet.Packet) (err error) {
 				}
 				if ok {
 					this.RegisterAuthorized(username)
+					fmt.Println("Connect server, authorized:", this.Id(), "ip:", this.RemoteIp())
 					result = &connect.ResultAuthenticate{}
 					statusCode = connect.STATUS_SUCCESS
 				} else {
+					fmt.Println("Connect server, failure to authorize:", username, "ip:", this.RemoteIp())
 					statusCode = connect.STATUS_ERROR_GENERIC
 				}
 			} else {
@@ -193,6 +188,7 @@ func (this *Session) HandlePacket(packet packet.Packet) (err error) {
 		case connect.REQUEST_AS_PROXY:
 			if this.Authorized() {
 				if this.RegisterProxy(request.(*connect.RequestAsProxy).Address, request.(*connect.RequestAsProxy).Port, request.(*connect.RequestAsProxy).Motd, request.(*connect.RequestAsProxy).Version, request.(*connect.RequestAsProxy).Maxplayers) {
+					fmt.Println("Connect server, roled as proxy:", this.Id(), "ip:", this.RemoteIp())
 					result = &connect.ResultAsProxy{}
 					statusCode = connect.STATUS_SUCCESS
 				} else {
@@ -204,6 +200,7 @@ func (this *Session) HandlePacket(packet packet.Packet) (err error) {
 		case connect.REQUEST_AS_SERVER:
 			if this.Authorized() {
 				if this.RegisterServer(request.(*connect.RequestAsServer).Address, request.(*connect.RequestAsServer).Port) {
+					fmt.Println("Connect server, roled as server:", this.Id(), "ip:", this.RemoteIp())
 					result = &connect.ResultAsServer{this.serverSecurityKey}
 					statusCode = connect.STATUS_SUCCESS
 				} else {
@@ -317,6 +314,10 @@ func (this *Session) HandlePacket(packet packet.Packet) (err error) {
 }
 
 func (this *Session) ErrorCaught(err error) {
+	id := this.Id()
+	if len(id) > 0 {
+		fmt.Println("Connect server, id:", this.Id(), "ip:", this.RemoteIp(), "disconnected:", err)
+	}
 	this.conn.Close()
 	this.Unregister()
 	return
@@ -330,8 +331,8 @@ func (this *Session) RemoteAddr() (addr net.Addr) {
 	return this.conn.RemoteAddr()
 }
 
-func (this *Session) RemoteIp() (ip string, err error) {
-	ip, _, err = net.SplitHostPort(this.RemoteAddr().String())
+func (this *Session) RemoteIp() (ip string) {
+	ip, _, _ = net.SplitHostPort(this.RemoteAddr().String())
 	return
 }
 
