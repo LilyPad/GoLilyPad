@@ -21,7 +21,7 @@ func NewProxyConnect(addr *string, user *string, pass *string, proxy *ProxyConfi
 	client := clientConnect.NewConnect()
 	connect = &ProxyConnect{
 		client: client,
-		servers := make(map[string]*Server),
+		servers: make(map[string]*Server),
 		serversMutex: &sync.RWMutex{},
 		localPlayers: make(map[string]bool),
 		localPlayersMutex: &sync.RWMutex{},
@@ -56,7 +56,7 @@ func NewProxyConnect(addr *string, user *string, pass *string, proxy *ProxyConfi
 			defer connect.serversMutex.Unlock()
 			connect.servers[serverEvent.Server] = &Server{serverEvent.Server, address + ":" + strconv.FormatInt(int64(serverEvent.Port), 10), serverEvent.SecurityKey}
 		} else {
-			onnect.serversMutex.Lock()
+			connect.serversMutex.Lock()
 			defer connect.serversMutex.Unlock()
 			delete(connect.servers, serverEvent.Server)
 		}
