@@ -10,6 +10,7 @@ import packetConnect "github.com/LilyPad/GoLilyPad/packet/connect"
 type ProxyConnect struct {
 	client clientConnect.Connect
 	servers map[string]*Server
+	serversMutex *sync.RWMutex
 	localPlayers map[string]bool
 	localPlayersMutex *sync.RWMutex
 	players uint16
@@ -20,11 +21,17 @@ func NewProxyConnect(addr *string, user *string, pass *string, proxy *ProxyConfi
 	client := clientConnect.NewConnect()
 	connect = &ProxyConnect{
 		client: client,
+		servers := make(map[string]*Server),
+		serversMutex: &sync.RWMutex{},
 		localPlayers: make(map[string]bool),
 		localPlayersMutex: &sync.RWMutex{},
 	}
 	client.RegisterEvent("preconnect", func(event clientConnect.Event) {
-		connect.servers = make(map[string]*Server)
+		if len(connect.servers) > 0 {
+			connect.serversMutex.Lock()
+			connect.servers = make(map[string]*Server)
+			connect.serversMutex.Unlock()
+		}
 		connect.players = 0
 		connect.maxPlayers = 0
 	})
@@ -45,8 +52,12 @@ func NewProxyConnect(addr *string, user *string, pass *string, proxy *ProxyConfi
 			} else {
 				address = serverEvent.Address
 			}
+			connect.serversMutex.Lock()
+			defer connect.serversMutex.Unlock()
 			connect.servers[serverEvent.Server] = &Server{serverEvent.Server, address + ":" + strconv.FormatInt(int64(serverEvent.Port), 10), serverEvent.SecurityKey}
 		} else {
+			onnect.serversMutex.Lock()
+			defer connect.serversMutex.Unlock()
 			delete(connect.servers, serverEvent.Server)
 		}
 	})
@@ -116,6 +127,8 @@ func (this *ProxyConnect) QueryRemotePlayers() {
 }
 
 func (this *ProxyConnect) Server(name string) *Server {
+	this.serversMutex.RLock()
+	defer this.serversMutex.RUnlock()
 	if server, ok := this.servers[name]; ok {
 		return server
 	}
