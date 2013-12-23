@@ -47,26 +47,25 @@ func WriteVarInt(writer io.Writer, util []byte, val int) (err error) {
 	return WriteUint8(writer, util, byte(val))
 }
 
-func ReadVarInt(reader io.Reader, util []byte) (val int, err error) {
-	var s uint
+func ReadVarInt(reader io.Reader, util []byte) (result int, err error) {
+	var bytes byte = 0
 	var b byte
-	i := 0
 	for {
 		b, err = ReadUint8(reader, util)
 		if err != nil {
 			return
 		}
-		if b < 0x80 {
-			return (val | int(b) << s), nil
+		result |= int(uint(b & 0x7F) << uint(bytes * 7))
+		bytes++
+		if bytes > 5 {
+			return 0, errors.New("VarInt is too long")
 		}
-		if i > 5 {
-			return 0, errors.New("VarInt too long")
+		if (b & 0x80) == 0x80 {
+			continue
 		}
-		val |= int(b & 0x7f) << s
-		s += 7
-		i++
+		break
 	}
-	return 0, nil
+	return result, nil
 }
 
 func ReadBool(reader io.Reader, util []byte) (val bool, err error) {
