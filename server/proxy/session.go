@@ -75,13 +75,13 @@ func (this *Session) Write(packet packet.Packet) (err error) {
 func (this *Session) Redirect(server *connect.Server) {
 	conn, err := net.Dial("tcp", server.Addr)
 	if err != nil {
-		fmt.Println("Proxy server, name:", this.name, "ip:", this.RemoteIp(), "failed to redirect: ", server.Name, "err:", err)
+		fmt.Println("Proxy server, name:", this.name, "ip:", this.RemoteIp(), "failed to redirect:", server.Name, "err:", err)
 		if this.Initializing() {
 			this.Disconnect("Error: Outbound Connection Mismatch")
 		}
 		return
 	}
-	fmt.Println("Proxy server, name:", this.name, "ip:", this.RemoteIp(), "redirected: ", server.Name)
+	fmt.Println("Proxy server, name:", this.name, "ip:", this.RemoteIp(), "redirected:", server.Name)
 	NewSessionOutBridge(this, server, conn).Serve()
 }
 
