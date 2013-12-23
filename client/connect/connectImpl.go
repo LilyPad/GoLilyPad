@@ -105,28 +105,35 @@ func (this *ConnectImpl) RequestLater(request connect.Request, callback RequestC
 		return errors.New("Not connected")
 	}
 	sequenceId := atomic.AddInt32(&this.sequenceId, 1)
-	err = this.Write(&connect.PacketRequest{sequenceId, request})
-	if err != nil {
-		return
-	}
 	this.recordsMutex.Lock()
-	defer this.recordsMutex.Unlock()
 	if this.records != nil {
 		this.records[sequenceId] = &RequestRecord{request, callback}
+	}
+	this.recordsMutex.Unlock()
+	err = this.Write(&connect.PacketRequest{sequenceId, request})
+	if err != nil {
+		this.recordsMutex.Lock()
+		delete(this.records, sequenceId)
+		this.recordsMutex.Unlock()
+		return
 	}
 	return
 }
 
 func (this *ConnectImpl) DispatchResult(sequenceId int32, statusCode uint8, result connect.Result) {
 	this.recordsMutex.Lock()
-	defer this.recordsMutex.Unlock()
-	if _, ok := this.records[sequenceId]; !ok {
+	var record RequestRecord
+	var ok bool
+	if record, ok = this.records[sequenceId]; !ok {
 		return // should there be an error here?
 	}
-	if this.records[sequenceId].callback != nil {
-		go this.records[sequenceId].callback(statusCode, result)
+	this.recordsMutex.Unlock()
+	if record.callback != nil {
+		go record.callback(statusCode, result)
 	}
+	this.recordsMutex.Lock()
 	delete(this.records, sequenceId)
+	this.recordsMutex.Unlock()
 }
 
 func (this *ConnectImpl) RequestIdBySequenceId(sequenceId int32) int {
