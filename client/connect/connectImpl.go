@@ -122,7 +122,7 @@ func (this *ConnectImpl) RequestLater(request connect.Request, callback RequestC
 
 func (this *ConnectImpl) DispatchResult(sequenceId int32, statusCode uint8, result connect.Result) {
 	this.recordsMutex.Lock()
-	var record RequestRecord
+	var record *RequestRecord
 	var ok bool
 	if record, ok = this.records[sequenceId]; !ok {
 		return // should there be an error here?
