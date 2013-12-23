@@ -303,12 +303,12 @@ func (this *Session) HandlePacket(packet packet.Packet) (err error) {
 				statusCode = connect.STATUS_ERROR_ROLE
 			}
 		default:
-			err = errors.New(fmt.Sprintf("Request Id is not handled by server: %i", request.Id()))
+			err = errors.New(fmt.Sprintf("Request Id is not handled by server: %d", request.Id()))
 			return
 		}
 		err = this.Write(&connect.PacketResult{packet.(*connect.PacketRequest).SequenceId, statusCode, result})
 	default:
-		err = errors.New(fmt.Sprintf("Packet Id is not handled by server: %i", packet.Id()))
+		err = errors.New(fmt.Sprintf("Packet Id is not handled by server: %d", packet.Id()))
 	}
 	return
 }

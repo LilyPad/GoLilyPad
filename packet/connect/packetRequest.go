@@ -30,11 +30,11 @@ func (this *PacketRequestCodec) Decode(reader io.Reader, util []byte) (decode pa
 		return
 	}
 	if requestId < 0 {
-		err = errors.New(fmt.Sprintf("Request Id is below zero: %i", requestId))
+		err = errors.New(fmt.Sprintf("Request Id is below zero: %d", requestId))
 		return
 	}
 	if int(requestId) >= len(requestCodecs) {
-		err = errors.New(fmt.Sprintf("Request Id is above maximum: %i", requestId))
+		err = errors.New(fmt.Sprintf("Request Id is above maximum: %d", requestId))
 		return
 	}
 	payloadSize, err := packet.ReadUint16(reader, util)
@@ -49,7 +49,7 @@ func (this *PacketRequestCodec) Decode(reader io.Reader, util []byte) (decode pa
 	buffer := bytes.NewBuffer(payload)
 	codec := requestCodecs[requestId]
 	if codec == nil {
-		err = errors.New(fmt.Sprintf("Request Id does not have a codec: %i", requestId))
+		err = errors.New(fmt.Sprintf("Request Id does not have a codec: %d", requestId))
 		return
 	}
 	packetRequest.Request, err = codec.Decode(buffer, util)
@@ -70,17 +70,17 @@ func (this *PacketRequestCodec) Encode(writer io.Writer, util []byte, encode pac
 		return
 	}
 	if packetRequest.Request.Id() < 0 {
-		err = errors.New(fmt.Sprintf("Request Id is below zero: %i", packetRequest.Request.Id()))
+		err = errors.New(fmt.Sprintf("Request Id is below zero: %d", packetRequest.Request.Id()))
 		return
 	}
 	if packetRequest.Request.Id() >= len(requestCodecs) {
-		err = errors.New(fmt.Sprintf("Request Id is above maximum: %i", packetRequest.Request.Id()))
+		err = errors.New(fmt.Sprintf("Request Id is above maximum: %d", packetRequest.Request.Id()))
 		return
 	}
 	buffer := &bytes.Buffer{}
 	codec := requestCodecs[packetRequest.Request.Id()]
 	if codec == nil {
-		err = errors.New(fmt.Sprintf("Request Id does not have a codec: %i", packetRequest.Request.Id()))
+		err = errors.New(fmt.Sprintf("Request Id does not have a codec: %d", packetRequest.Request.Id()))
 		return
 	}
 	err = codec.Encode(buffer, util, packetRequest.Request)

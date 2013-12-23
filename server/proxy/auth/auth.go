@@ -22,7 +22,7 @@ func Authenticate(name string, serverId string, sharedSecret []byte, publicKey [
 		return
 	}
 	if len(responseJson.Id) != 32 {
-		err = errors.New(fmt.Sprintf("Id is not 32 characters: %i", len(responseJson.Id)))
+		err = errors.New(fmt.Sprintf("Id is not 32 characters: %d", len(responseJson.Id)))
 		return
 	}
 	uuid = responseJson.Id
