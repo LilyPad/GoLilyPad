@@ -1,8 +1,9 @@
 package packet
 
-import "io"
 import "encoding/binary"
 import "errors"
+import "fmt"
+import "io"
 
 func WriteString(writer io.Writer, util []byte, s string) (err error) {
 	bytes := []byte(s)
@@ -20,11 +21,11 @@ func ReadString(reader io.Reader, util []byte) (s string, err error) {
 		return
 	}
 	if length < 0 {
-		err = errors.New("String length is negative")
+		err = errors.New(fmt.Sprintf("String length is negative: %i", length))
 		return
 	}
 	if length > 2097151 { // 2^21
-		err = errors.New("String length is above maximum")
+		err = errors.New(fmt.Sprintf("String length is above maximum: %i", length))
 		return
 	}
 	bytes := make([]byte, length)

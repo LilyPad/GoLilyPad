@@ -2,6 +2,7 @@ package connect
 
 import "bytes"
 import "errors"
+import "fmt"
 import "io"
 import "github.com/LilyPad/GoLilyPad/packet"
 
@@ -51,16 +52,16 @@ func (this *PacketResultCodec) Decode(reader io.Reader, util []byte) (decode pac
 		buffer := bytes.NewBuffer(payload)
 		requestId := this.sequencer.RequestIdBySequenceId(packetResult.SequenceId)
 		if requestId < 0 {
-			err = errors.New("Request Id is below zero")
+			err = errors.New(fmt.Sprintf("Request Id is below zero: %i", requestId))
 			return
 		}
 		if int(requestId) >= len(requestCodecs) {
-			err = errors.New("Request Id is above maximum")
+			err = errors.New(fmt.Sprintf("Request Id is above maximum: %i", requestId))
 			return
 		}
 		codec := resultCodecs[requestId]
 		if codec == nil {
-			err = errors.New("Request Id does not have a codec")
+			err = errors.New(fmt.Sprintf("Request Id does not have a codec: %i", requestId))
 			return
 		}
 		packetResult.Result, err = codec.Decode(buffer, util)
@@ -80,15 +81,19 @@ func (this *PacketResultCodec) Encode(writer io.Writer, util []byte, encode pack
 	err = packet.WriteUint8(writer, util, packetResult.StatusCode)
 	if packetResult.StatusCode == STATUS_SUCCESS {
 		if packetResult.Result.Id() < 0 {
-			err = errors.New("Request Id is below zero")
+			err = errors.New(fmt.Sprintf("Request Id is below zero: %i", packetResult.Result.Id()))
 			return
 		}
 		if packetResult.Result.Id() >= len(requestCodecs) {
-			err = errors.New("Request Id is above maximum")
+			err = errors.New(fmt.Sprintf("Request Id is above maximum: %i", packetResult.Result.Id()))
 			return
 		}
 		buffer := &bytes.Buffer{}
 		codec := resultCodecs[packetResult.Result.Id()]
+		if codec == nil {
+			err = errors.New(fmt.Sprintf("Request Id does not have a codec: %i", packetResult.Result.Id()))
+			return
+		}
 		err = codec.Encode(buffer, util, packetResult.Result)
 		if err != nil {
 			return
