@@ -19,7 +19,7 @@ func (this *PacketCodecVarIntLength) Decode(reader io.Reader, util []byte) (pack
 		return
 	}
 	if length < 0 {
-		err = errors.New(fmt.Sprintf("Packet length is negative: %d", length))
+		err = errors.New(fmt.Sprintf("Packet length is below zero: %d", length))
 		return
 	}
 	if length > 2097151 { // 2^21
