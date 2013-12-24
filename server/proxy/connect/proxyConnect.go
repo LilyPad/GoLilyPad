@@ -126,6 +126,15 @@ func (this *ProxyConnect) QueryRemotePlayers() {
 	})
 }
 
+func (this *ProxyConnect) HasServer(name string) bool {
+	this.serversMutex.RLock()
+	defer this.serversMutex.RUnlock()
+	if _, ok := this.servers[name]; ok {
+		return true
+	}
+	return false
+}
+
 func (this *ProxyConnect) Server(name string) *Server {
 	this.serversMutex.RLock()
 	defer this.serversMutex.RUnlock()

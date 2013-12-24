@@ -8,20 +8,28 @@ type Config struct {
 	Proxy ConfigProxy `yaml:"proxy"`
 }
 
-func (this *Config) Route(domain string) string {
+func (this *Config) Route(domain string) []string {
 	if this.Proxy.routes == nil {
-		this.Proxy.routes = make(map[string]string);
+		this.Proxy.routes = make(map[string]ConfigProxyRoute);
 		for _, route := range this.Proxy.Routes {
-			this.Proxy.routes[route.Domain] = route.Server
+			this.Proxy.routes[route.Domain] = route
 		}
 	}
-	if server, ok := this.Proxy.routes[domain]; ok {
-		return server
+	if route, ok := this.Proxy.routes[domain]; ok {
+		if route.Servers == nil {
+			if len(route.Server) == 0 {
+				return []string{}
+			} else {
+				return []string{route.Server}
+			}
+		} else {
+			return route.Servers
+		}
 	}
 	if domain != "" {
 		return this.Route("")
 	}
-	return ""
+	return nil
 }
 
 func (this *Config) LocaleFull() string {
@@ -57,7 +65,7 @@ type ConfigConnectCredentials struct {
 type ConfigProxy struct {
 	Bind string `yaml:"bind"`
 	Routes []ConfigProxyRoute `yaml:"routes"`
-	routes map[string]string
+	routes map[string]ConfigProxyRoute
 	Locale ConfigProxyLocale `yaml:"locale"`
 	Motd string `yaml:"motd"`
 	MaxPlayers uint16 `yaml:"maxPlayers"`
@@ -74,7 +82,8 @@ type ConfigProxyLocale struct {
 
 type ConfigProxyRoute struct {
 	Domain string `yaml:"domain"`
-	Server string `yaml:"server"`
+	Server string `yaml:"server,omitempty"`
+	Servers []string `yaml:"servers,omitempty"`
 }
 
 func DefaultConfig() (config *Config) {
@@ -89,7 +98,8 @@ func DefaultConfig() (config *Config) {
 		Proxy: ConfigProxy{
 			Bind: ":25565",
 			Routes: []ConfigProxyRoute{
-				ConfigProxyRoute{"", "example"},
+				ConfigProxyRoute{"", "example", nil},
+				ConfigProxyRoute{"example.com", "", []string{"hub1", "hub2"}},
 			},
 			Locale: ConfigProxyLocale{
 				Full: "The server seems to be currently full. Try again later!",

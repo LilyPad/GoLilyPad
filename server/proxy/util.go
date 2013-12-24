@@ -1,6 +1,7 @@
 package proxy
 
-import "crypto/rand"
+import cryptoRand "crypto/rand"
+import "math/rand"
 import "crypto/sha1"
 import "encoding/hex"
 import "io"
@@ -12,13 +13,17 @@ func MinecraftVersion() string {
 
 func RandomBytes(size int) (bytes []byte, err error) {
 	bytes = make([]byte, size)
-	_, err = io.ReadFull(rand.Reader, bytes)
+	_, err = io.ReadFull(cryptoRand.Reader, bytes)
 	return
+}
+
+func RandomInt(max int) int {
+	return rand.Intn(max)
 }
 
 func GenSalt() (str string, err error) {
 	salt := make([]byte, 10)
-	_, err = io.ReadFull(rand.Reader, salt)
+	_, err = io.ReadFull(cryptoRand.Reader, salt)
 	if err != nil {
 		return
 	}

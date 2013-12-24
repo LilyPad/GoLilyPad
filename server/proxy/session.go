@@ -98,16 +98,18 @@ func (this *Session) SetAuthenticated(result bool) {
 		this.Disconnect(minecraft.Colorize(this.server.Localizer().LocaleFull()))
 		return
 	}
-	serverName := this.server.Router().Route(this.serverAddress)
-	if len(serverName) == 0 {
+	servers := this.server.Router().Route(this.serverAddress)
+	for i, serverName := range servers {
+		if this.server.Connect().HasServer(serverName) {
+			continue
+		}
+		servers = append(servers[:i], servers[i+1:]...)
+	}
+	if len(servers) == 0 {
 		this.Disconnect(minecraft.Colorize(this.server.Localizer().LocaleOffline()))
 		return
 	}
-	server := this.server.Connect().Server(serverName)
-	if server == nil {
-		this.Disconnect(minecraft.Colorize(this.server.Localizer().LocaleOffline()))
-		return
-	}
+	server := this.server.Connect().Server(servers[RandomInt(len(servers))])
 	addResult := this.server.Connect().AddLocalPlayer(this.name)
 	if addResult == 0 {
 		this.Disconnect(minecraft.Colorize(this.server.Localizer().LocaleLoggedIn()))
