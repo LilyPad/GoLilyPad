@@ -1,6 +1,7 @@
 package config
 
 import "io/ioutil"
+import "sync"
 import yaml "launchpad.net/goyaml"
 
 type Config struct {
@@ -9,12 +10,14 @@ type Config struct {
 }
 
 func (this *Config) Route(domain string) []string {
+	this.Proxy.Lock()
 	if this.Proxy.routes == nil {
 		this.Proxy.routes = make(map[string]ConfigProxyRoute);
 		for _, route := range this.Proxy.Routes {
 			this.Proxy.routes[route.Domain] = route
 		}
 	}
+	this.Proxy.Unlock()
 	if route, ok := this.Proxy.routes[domain]; ok {
 		if route.Servers == nil {
 			if len(route.Server) == 0 {
@@ -30,6 +33,26 @@ func (this *Config) Route(domain string) []string {
 		return this.Route("")
 	}
 	return nil
+}
+
+func (this *Config) RouteMotd(domain string) (motd string) {
+	this.Proxy.Lock()
+	if this.Proxy.routes == nil {
+		this.Proxy.routes = make(map[string]ConfigProxyRoute);
+		for _, route := range this.Proxy.Routes {
+			this.Proxy.routes[route.Domain] = route
+		}
+	}
+	this.Proxy.Unlock()
+	if route, ok := this.Proxy.routes[domain]; ok {
+		if len(route.Motd) > 0 {
+			return route.Motd
+		}
+	}
+	if domain != "" {
+		return this.RouteMotd("")
+	}
+	return this.Proxy.Motd
 }
 
 func (this *Config) LocaleFull() string {
@@ -63,6 +86,7 @@ type ConfigConnectCredentials struct {
 }
 
 type ConfigProxy struct {
+	sync.RWMutex
 	Bind string `yaml:"bind"`
 	Routes []ConfigProxyRoute `yaml:"routes"`
 	routes map[string]ConfigProxyRoute
@@ -84,6 +108,7 @@ type ConfigProxyRoute struct {
 	Domain string `yaml:"domain"`
 	Server string `yaml:"server,omitempty"`
 	Servers []string `yaml:"servers,omitempty"`
+	Motd string `yaml:"motd,omitempty"`
 }
 
 func DefaultConfig() (config *Config) {
@@ -98,8 +123,8 @@ func DefaultConfig() (config *Config) {
 		Proxy: ConfigProxy{
 			Bind: ":25565",
 			Routes: []ConfigProxyRoute{
-				ConfigProxyRoute{"", "example", nil},
-				ConfigProxyRoute{"example.com", "", []string{"hub1", "hub2"}},
+				ConfigProxyRoute{"", "example", nil, ""},
+				ConfigProxyRoute{"example.com", "", []string{"hub1", "hub2"}, "Example Custom MOTD"},
 			},
 			Locale: ConfigProxyLocale{
 				Full: "The server seems to be currently full. Try again later!",

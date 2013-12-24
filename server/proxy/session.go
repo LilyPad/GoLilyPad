@@ -180,7 +180,7 @@ func (this *Session) HandlePacket(packet packet.Packet) (err error) {
 			players["max"] = this.server.Connect().MaxPlayers()
 			players["online"] = this.server.Connect().Players()
 			description := make(map[string]interface{})
-			description["text"] = minecraft.Colorize(this.server.Motd())
+			description["text"] = minecraft.Colorize(this.server.Router().RouteMotd(this.serverAddress))
 			response := make(map[string]interface{})
 			response["version"] = version
 			response["players"] = players
