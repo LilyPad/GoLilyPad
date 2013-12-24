@@ -32,7 +32,7 @@ func (this *Config) Route(domain string) []string {
 	if domain != "" {
 		return this.Route("")
 	}
-	return nil
+	return []string{}
 }
 
 func (this *Config) RouteMotd(domain string) (motd string) {
