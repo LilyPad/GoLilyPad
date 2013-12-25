@@ -13,7 +13,7 @@ type PacketConnCodec struct {
 	timeout time.Duration
 	writeMutex *sync.Mutex
 	writeUtil []byte
-	readUtil []byte
+	readUtils []byte
 
 }
 

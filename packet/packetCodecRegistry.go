@@ -18,16 +18,16 @@ func (this *PacketCodecRegistry) Decode(reader io.Reader, util []byte) (packet P
 		return
 	}
 	if id < 0 {
-		err = errors.New(fmt.Sprintf("Packet Id is below zero: %d", id))
+		err = errors.New(fmt.Sprintf("Decode, Packet Id is below zero: %d", id))
 		return
 	}
 	if id >= len(this.packetCodecs) {
-		err = errors.New(fmt.Sprintf("Packet Id is above maximum: %d", id))
+		err = errors.New(fmt.Sprintf("Decode, Packet Id is above maximum: %d", id))
 		return
 	} 
 	codec := this.packetCodecs[id]
 	if codec == nil {
-		err = errors.New(fmt.Sprintf("Packet Id does not have a codec: %d", id))
+		err = errors.New(fmt.Sprintf("Decode, Packet Id does not have a codec: %d", id))
 		return
 	}
 	return codec.Decode(reader, util)
@@ -40,16 +40,16 @@ func (this *PacketCodecRegistry) Encode(writer io.Writer, util []byte, packet Pa
 		return
 	}
 	if id < 0 {
-		err = errors.New(fmt.Sprintf("Packet Id is below zero: %d", id))
+		err = errors.New(fmt.Sprintf("Encode, Packet Id is below zero: %d", id))
 		return
 	}
 	if id >= len(this.packetCodecs) {
-		err = errors.New(fmt.Sprintf("Packet Id is above maximum: %d", id))
+		err = errors.New(fmt.Sprintf("Encode, Packet Id is above maximum: %d", id))
 		return
 	}
 	codec := this.packetCodecs[id]
 	if codec == nil {
-		err = errors.New(fmt.Sprintf("Packet Id does not have a codec: %d", id))
+		err = errors.New(fmt.Sprintf("Encode, Packet Id does not have a codec: %d", id))
 		return
 	}
 	return codec.Encode(writer, util, packet)

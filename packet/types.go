@@ -21,11 +21,11 @@ func ReadString(reader io.Reader, util []byte) (s string, err error) {
 		return
 	}
 	if length < 0 {
-		err = errors.New(fmt.Sprintf("String length is below zero: %d", length))
+		err = errors.New(fmt.Sprintf("Decode, String length is below zero: %d", length))
 		return
 	}
-	if length > 2097151 { // 2^21
-		err = errors.New(fmt.Sprintf("String length is above maximum: %d", length))
+	if length > 1048576 { // 2^(21-1)
+		err = errors.New(fmt.Sprintf("Decode, String length is above maximum: %d", length))
 		return
 	}
 	bytes := make([]byte, length)
@@ -58,7 +58,7 @@ func ReadVarInt(reader io.Reader, util []byte) (result int, err error) {
 		result |= int(uint(b & 0x7F) << uint(bytes * 7))
 		bytes++
 		if bytes > 5 {
-			return 0, errors.New("VarInt is too long")
+			return 0, errors.New("Decode, VarInt is too long")
 		}
 		if (b & 0x80) == 0x80 {
 			continue
