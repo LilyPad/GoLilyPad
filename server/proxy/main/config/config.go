@@ -10,14 +10,14 @@ type Config struct {
 }
 
 func (this *Config) Route(domain string) []string {
-	this.Proxy.Lock()
+	this.Proxy.routesMutex.Lock()
 	if this.Proxy.routes == nil {
 		this.Proxy.routes = make(map[string]ConfigProxyRoute);
 		for _, route := range this.Proxy.Routes {
 			this.Proxy.routes[route.Domain] = route
 		}
 	}
-	this.Proxy.Unlock()
+	this.Proxy.routesMutex.Unlock()
 	if route, ok := this.Proxy.routes[domain]; ok {
 		if route.Servers == nil {
 			if len(route.Server) == 0 {
@@ -36,14 +36,14 @@ func (this *Config) Route(domain string) []string {
 }
 
 func (this *Config) RouteMotd(domain string) (motd string) {
-	this.Proxy.Lock()
+	this.Proxy.routesMutex.Lock()
 	if this.Proxy.routes == nil {
 		this.Proxy.routes = make(map[string]ConfigProxyRoute);
 		for _, route := range this.Proxy.Routes {
 			this.Proxy.routes[route.Domain] = route
 		}
 	}
-	this.Proxy.Unlock()
+	this.Proxy.routesMutex.Unlock()
 	if route, ok := this.Proxy.routes[domain]; ok {
 		if len(route.Motd) > 0 {
 			return route.Motd
@@ -86,10 +86,10 @@ type ConfigConnectCredentials struct {
 }
 
 type ConfigProxy struct {
-	sync.RWMutex
 	Bind string `yaml:"bind"`
 	Routes []ConfigProxyRoute `yaml:"routes"`
 	routes map[string]ConfigProxyRoute
+	routesMutex sync.RWMutex
 	Locale ConfigProxyLocale `yaml:"locale"`
 	Motd string `yaml:"motd"`
 	MaxPlayers uint16 `yaml:"maxPlayers"`
