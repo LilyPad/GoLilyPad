@@ -99,11 +99,17 @@ func (this *Session) SetAuthenticated(result bool) {
 		return
 	}
 	servers := this.server.Router().Route(this.serverAddress)
-	for i, serverName := range servers {
+	for _, serverName := range servers {
 		if this.server.Connect().HasServer(serverName) {
 			continue
 		}
-		servers = append(servers[:i], servers[i+1:]...)
+		for i, otherServerName := range servers {
+			if otherServerName != serverName {
+				continue
+			}
+			servers = append(servers[:i], servers[i+1:]...)
+			break
+		}
 	}
 	if len(servers) == 0 {
 		this.Disconnect(minecraft.Colorize(this.server.Localizer().LocaleOffline()))
