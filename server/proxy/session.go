@@ -270,11 +270,11 @@ func (this *Session) HandlePacket(packet packet.Packet) (err error) {
 				return
 			}
 			this.connCodec.SetReader(&cipher.StreamReader{
-				R: this.conn,
+				R: this.connCodec.Reader(),
 				S: minecraft.NewCFB8Decrypter(block, sharedSecret),
 			})
 			this.connCodec.SetWriter(&cipher.StreamWriter{
-				W: this.conn,
+				W: this.connCodec.Writer(),
 				S: minecraft.NewCFB8Encrypter(block, sharedSecret),
 			})
 			var authErr error

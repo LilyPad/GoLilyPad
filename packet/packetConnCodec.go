@@ -62,3 +62,11 @@ func (this *PacketConnCodec) SetReader(reader io.Reader) {
 func (this *PacketConnCodec) SetWriter(writer io.Writer) {
 	this.writer = writer
 }
+
+func (this *PacketConnCodec) Reader() (reader io.Reader) {
+	return this.reader
+}
+
+func (this *PacketConnCodec) Writer() (writer io.Writer) {
+	return this.writer
+}
