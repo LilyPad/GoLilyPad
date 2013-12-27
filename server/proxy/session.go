@@ -269,23 +269,13 @@ func (this *Session) HandlePacket(packet packet.Packet) (err error) {
 			if err != nil {
 				return
 			}
-			var decrypter cipher.Stream
-			decrypter, err = minecraft.NewCFB8Decrypter(block, sharedSecret)
-			if err != nil {
-				return
-			}
-			var encrypter cipher.Stream
-			encrypter, err = minecraft.NewCFB8Encrypter(block, sharedSecret)
-			if err != nil {
-				return
-			}
 			this.connCodec.SetReader(&cipher.StreamReader{
 				R: this.conn,
-				S: decrypter,
+				S: minecraft.NewCFB8Decrypter(block, sharedSecret),
 			})
 			this.connCodec.SetWriter(&cipher.StreamWriter{
 				W: this.conn,
-				S: encrypter,
+				S: minecraft.NewCFB8Encrypter(block, sharedSecret),
 			})
 			var authErr error
 			this.uuid, authErr = auth.Authenticate(this.name, this.serverId, sharedSecret, this.publicKey)
