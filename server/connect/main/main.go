@@ -3,12 +3,15 @@ package main
 import "bufio"
 import "fmt"
 import "os"
+import "runtime"
 import "github.com/LilyPad/GoLilyPad/server/connect"
 import "github.com/LilyPad/GoLilyPad/server/connect/main/config"
 
 var VERSION string
 
 func main() {
+	runtime.GOMAXPROCS(runtime.NumCPU())
+
 	cfg, err := config.LoadConfig("connect.yml")
 	if err != nil {
 		cfg = config.DefaultConfig()

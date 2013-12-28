@@ -3,6 +3,7 @@ package main
 import "bufio"
 import "fmt"
 import "os"
+import "runtime"
 import "strconv"
 import "strings"
 import "github.com/LilyPad/GoLilyPad/server/proxy"
@@ -12,6 +13,8 @@ import "github.com/LilyPad/GoLilyPad/server/proxy/main/config"
 var VERSION string
 
 func main() {
+	runtime.GOMAXPROCS(runtime.NumCPU())
+
 	cfg, err := config.LoadConfig("proxy.yml")
 	if err != nil {
 		cfg = config.DefaultConfig()
