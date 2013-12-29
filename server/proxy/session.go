@@ -241,6 +241,7 @@ func (this *Session) HandlePacket(packet packet.Packet) (err error) {
 				}
 				this.state = STATE_LOGIN_ENCRYPT
 			} else {
+				this.uuid = GenNameUUID("OfflinePlayer:" + this.name)
 				this.SetAuthenticated(true)
 			}
 		} else {
