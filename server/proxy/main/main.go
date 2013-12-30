@@ -77,6 +77,13 @@ func main() {
 					continue
 				}
 				*cfg = *newCfg
+			} else if str == "debug\n" {
+				fmt.Println("runtime.NumCPU:", runtime.NumCPU())
+				fmt.Println("runtime.NumGoroutine:", runtime.NumGoroutine())
+				memStats := &runtime.MemStats{}
+				runtime.ReadMemStats(memStats)
+				fmt.Println("runtime.MemStats.Alloc:", memStats.Alloc, "bytes")
+				fmt.Println("runtime.MemStats.TotalAlloc:", memStats.TotalAlloc, "bytes")
 			} else if str == "exit\n" || str == "stop\n" || str == "halt\n" {
 				fmt.Println("Stopping...")
 				closeAll()
