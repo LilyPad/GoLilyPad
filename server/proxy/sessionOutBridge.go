@@ -71,12 +71,12 @@ func (this *SessionOutBridge) HandlePacket(packet packet.Packet) (err error) {
 	case STATE_INIT:
 		if packet.Id() == 0x08 {
 			oldOutBridge := this.session.outBridge
-			this.session.outBridge = this
-			this.session.redirecting = false
-			this.session.state = STATE_CONNECTED
 			if oldOutBridge != nil {
 				oldOutBridge.conn.Close()
 			}
+			this.session.outBridge = this
+			this.session.redirecting = false
+			this.session.state = STATE_CONNECTED
 			this.state = STATE_CONNECTED
 		}
 		fallthrough
