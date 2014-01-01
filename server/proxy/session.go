@@ -12,6 +12,7 @@ import "errors"
 import "fmt"
 import "io/ioutil"
 import "net"
+import "sync"
 import "time"
 import "github.com/LilyPad/GoLilyPad/packet"
 import "github.com/LilyPad/GoLilyPad/packet/minecraft"
@@ -24,6 +25,7 @@ type Session struct {
 	connCodec *packet.PacketConnCodec
 	codec *packet.PacketCodecVariable
 	outBridge *SessionOutBridge
+	outMutex *sync.Mutex
 	active bool
 	redirecting bool
 
@@ -51,6 +53,7 @@ func NewSession(server *Server, conn net.Conn) *Session {
 	return &Session{
 		server: server,
 		conn: conn,
+		outMutex: &sync.Mutex{},
 		active: true,
 		redirecting: false,
 		playerList: make(map[string]bool),

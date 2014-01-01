@@ -48,6 +48,8 @@ func (this *SessionOutBridge) Write(packet packet.Packet) (err error) {
 }
 
 func (this *SessionOutBridge) HandlePacket(packet packet.Packet) (err error) {
+	this.session.outMutex.Lock()
+	defer this.session.outMutex.Unlock()
 	if !this.session.Authenticated() {
 		this.conn.Close()
 		return
