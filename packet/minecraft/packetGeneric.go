@@ -11,7 +11,7 @@ type PacketGeneric struct {
 	Bytes []byte
 }
 
-func (this *PacketGeneric) SwapEntities(a int32, b int32) {
+func (this *PacketGeneric) SwapEntities(a int32, b int32, clientServer bool) {
 	if a == b {
 		return
 	}
@@ -32,18 +32,24 @@ func (this *PacketGeneric) SwapEntities(a int32, b int32) {
 			}
 		}
 	}
+	var positions [][]int
+	if clientServer {
+		positions = PlayPacketClientEntityPositions
+	} else {
+		positions = PlayPacketServerEntityPositions
+	}
 	if this.id < 0 {
 		return
 	}
-	if this.id >= len(PlayPacketClientEntityPositions) {
+	if this.id >= len(positions) {
 		return
 	}
-	positions := PlayPacketClientEntityPositions[this.id]
-	if positions == nil {
+	idPositions := positions[this.id]
+	if idPositions == nil {
 		return
 	}
 	var id int32
-	for _, position := range positions {
+	for _, position := range idPositions {
 		if len(this.Bytes) < position + 4 {
 			continue
 		}

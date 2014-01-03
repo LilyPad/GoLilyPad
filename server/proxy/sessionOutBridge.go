@@ -147,7 +147,7 @@ func (this *SessionOutBridge) HandlePacket(packet packet.Packet) (err error) {
 			return
 		default:
 			if genericPacket, ok := packet.(*minecraft.PacketGeneric); ok {
-				genericPacket.SwapEntities(this.session.clientEntityId, this.session.serverEntityId)
+				genericPacket.SwapEntities(this.session.clientEntityId, this.session.serverEntityId, true)
 			}
 		}
 		this.session.Write(packet)

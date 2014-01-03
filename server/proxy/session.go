@@ -301,6 +301,9 @@ func (this *Session) HandlePacket(packet packet.Packet) (err error) {
 		if this.redirecting {
 			break
 		}
+		if genericPacket, ok := packet.(*minecraft.PacketGeneric); ok {
+			genericPacket.SwapEntities(this.clientEntityId, this.serverEntityId, false)
+		}
 		this.outBridge.Write(packet)
 	}
 	return
