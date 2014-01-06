@@ -26,7 +26,9 @@ func (this *Config) Route(domain string) []string {
 				return []string{route.Server}
 			}
 		} else {
-			return route.Servers
+			servers := make([]string, len(route.Servers))
+			copy(servers, route.Servers)
+			return servers
 		}
 	}
 	if domain != "" {
