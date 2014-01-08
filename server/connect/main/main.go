@@ -70,6 +70,8 @@ func main() {
 				fmt.Println("Stopping...")
 				closeAll()
 				return
+			} else {
+				fmt.Println("Command not found. Use \"help\" to view available commands.")
 			}
 		case err := <-stdinErr:
 			fmt.Println("Error during stdin", err)
