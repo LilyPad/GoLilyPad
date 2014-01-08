@@ -70,6 +70,11 @@ func main() {
 				fmt.Println("Stopping...")
 				closeAll()
 				return
+			} else if str == "help\n" {
+				fmt.Println("LilyPad Connect - Help")
+				fmt.Println("reload - Reloads the connect.yml")
+				fmt.Println("debug  - Prints out CPU, Memory, and Routine stats")
+				fmt.Println("stop   - Stops the process. (Aliases: 'exit', 'halt')")
 			} else {
 				fmt.Println("Command not found. Use \"help\" to view available commands.")
 			}
