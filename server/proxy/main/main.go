@@ -69,7 +69,8 @@ func main() {
 	for {
 		select {
 		case str := <-stdinString:
-			if str == "reload\n" {
+			str = strings.TrimSpace(str)
+			if str == "reload" {
 				fmt.Println("Reloading config...")
 				newCfg, err := config.LoadConfig("proxy.yml")
 				if err != nil {
@@ -77,18 +78,18 @@ func main() {
 					continue
 				}
 				*cfg = *newCfg
-			} else if str == "debug\n" {
+			} else if str == "debug" {
 				fmt.Println("runtime.NumCPU:", runtime.NumCPU())
 				fmt.Println("runtime.NumGoroutine:", runtime.NumGoroutine())
 				memStats := &runtime.MemStats{}
 				runtime.ReadMemStats(memStats)
 				fmt.Println("runtime.MemStats.Alloc:", memStats.Alloc, "bytes")
 				fmt.Println("runtime.MemStats.TotalAlloc:", memStats.TotalAlloc, "bytes")
-			} else if str == "exit\n" || str == "stop\n" || str == "halt\n" {
+			} else if str == "exit" || str == "stop" || str == "halt" {
 				fmt.Println("Stopping...")
 				closeAll()
 				return
-			} else if str == "help\n" {
+			} else if str == "help" {
 				fmt.Println("LilyPad Proxy - Help")
 				fmt.Println("reload - Reloads the connect.yml")
 				fmt.Println("debug  - Prints out CPU, Memory, and Routine stats")
