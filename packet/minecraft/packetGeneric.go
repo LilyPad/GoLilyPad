@@ -15,7 +15,7 @@ func (this *PacketGeneric) SwapEntities(a int32, b int32, clientServer bool) {
 	if a == b {
 		return
 	}
-	if this.id == PACKET_CLIENT_SPAWN_OBJECT {
+	if this.id == PACKET_CLIENT_SPAWN_OBJECT && clientServer {
 		buffer := bytes.NewBuffer(this.Bytes)
 		bufferUtil := make([]byte, packet.UTIL_BUFFER_LENGTH)
 		_, err := packet.ReadVarInt(buffer, bufferUtil)
