@@ -31,12 +31,19 @@ func (this *PacketGeneric) SwapEntities(a int32, b int32, clientServer bool) {
 				}
 			}
 		}
+	} else if this.id == PACKET_CLIENT_DESTROY_ENTITIES && clientServer {
+		// TODO
 	}
+	this.SwapEntitiesInt(a, b, clientServer)
+	this.SwapEntitiesVarInt(a, b, clientServer)
+}
+
+func (this *PacketGeneric) SwapEntitiesInt(a int32, b int32, clientServer bool) {
 	var positions [][]int
 	if clientServer {
-		positions = PlayPacketClientEntityPositions
+		positions = PlayPacketClientEntityIntPositions
 	} else {
-		positions = PlayPacketServerEntityPositions
+		positions = PlayPacketServerEntityIntPositions
 	}
 	if this.id < 0 {
 		return
@@ -60,6 +67,48 @@ func (this *PacketGeneric) SwapEntities(a int32, b int32, clientServer bool) {
 			binary.BigEndian.PutUint32(this.Bytes[position:position+4], uint32(a))
 		}
 	}
+}
+
+func (this *PacketGeneric) SwapEntitiesVarInt(a int32, b int32, clientServer bool) {
+	var positions []bool
+	if clientServer {
+		positions = PlayPacketClientEntityVarIntPositions
+	} else {
+		positions = PlayPacketServerEntityVarIntPositions
+	}
+	if this.id < 0 {
+		return
+	}
+	if this.id >= len(positions) {
+		return
+	}
+	if positions[this.id] == false {
+		return
+	}
+	// Read the old Id
+	buffer := bytes.NewBuffer(this.Bytes)
+	bufferUtil := make([]byte, packet.UTIL_BUFFER_LENGTH)
+	id, err := packet.ReadVarInt(buffer, bufferUtil)
+	if err != nil {
+		return
+	}
+	// Check the Id
+	var newId int
+	if id == int(a) {
+		newId = int(b)
+	} else if id == int(b) {
+		newId = int(a)
+	} else {
+		return
+	}
+	// Apply the new Id
+	newBuffer := &bytes.Buffer{}
+	err = packet.WriteVarInt(newBuffer, bufferUtil, newId)
+	if err != nil {
+		return
+	}
+	buffer.WriteTo(newBuffer)
+	this.Bytes = newBuffer.Bytes()
 }
 
 func (this *PacketGeneric) Id() int {

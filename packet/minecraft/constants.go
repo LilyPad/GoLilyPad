@@ -188,7 +188,7 @@ var PlayPacketClientCodecs = []packet.PacketCodec {
 	PACKET_CLIENT_PLUGIN_MESSAGE: &PacketGenericCodec{PACKET_CLIENT_PLUGIN_MESSAGE},
 	PACKET_CLIENT_DISCONNECT: &PacketClientDisconnectCodec{},
 }
-var PlayPacketClientEntityPositions = [][]int {
+var PlayPacketClientEntityIntPositions = [][]int {
 	PACKET_CLIENT_ENTITY_EQUIPMENT: { 0 },
 	PACKET_CLIENT_USE_BED: { 0 },
 	PACKET_CLIENT_COLLECT_ITEM: { 0, 4 },
@@ -205,6 +205,16 @@ var PlayPacketClientEntityPositions = [][]int {
 	PACKET_CLIENT_ENTITY_EFFECT: { 0 },
 	PACKET_CLIENT_REMOVE_ENTITY_EFFECT: { 0 },
 	PACKET_CLIENT_ENTITY_PROPERTIES: { 0 },
+}
+var PlayPacketClientEntityVarIntPositions = []bool {
+	PACKET_CLIENT_ANIMATION: true,
+	PACKET_CLIENT_SPAWN_PLAYER: true,
+	PACKET_CLIENT_SPAWN_OBJECT: true,
+	PACKET_CLIENT_SPAWN_MOB: true,
+	PACKET_CLIENT_SPAWN_PAINTING: true,
+	PACKET_CLIENT_SPAWN_EXPERIENCE_ORB: true,
+	PACKET_CLIENT_BLOCK_BREAK_ANIMATION: true,
+	PACKET_CLIENT_SPAWN_GLOBAL_ENTITY: true,
 }
 var PlayPacketClientCodec = packet.NewPacketCodecVarIntLength(packet.NewPacketCodecRegistry(PlayPacketClientCodecs))
 
@@ -234,10 +244,13 @@ var PlayPacketServerCodecs = []packet.PacketCodec {
 	PACKET_SERVER_CLIENT_STATUS: &PacketGenericCodec{PACKET_SERVER_CLIENT_STATUS},
 	PACKET_SERVER_PLUGIN_MESSAGE: &PacketGenericCodec{PACKET_SERVER_PLUGIN_MESSAGE},
 }
-var PlayPacketServerEntityPositions = [][]int {
+var PlayPacketServerEntityIntPositions = [][]int {
 	PACKET_SERVER_USE_ENTITY: { 0 },
 	PACKET_SERVER_ANIMATION: { 0 },
 	PACKET_SERVER_ENTITY_ACTION: { 0 },
+}
+var PlayPacketServerEntityVarIntPositions = []bool {
+
 }
 var PlayPacketServerCodec = packet.NewPacketCodecVarIntLength(packet.NewPacketCodecRegistry(PlayPacketServerCodecs))
 
