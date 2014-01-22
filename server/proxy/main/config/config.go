@@ -1,6 +1,7 @@
 package config
 
 import "io/ioutil"
+import "strings"
 import "sync"
 import yaml "launchpad.net/goyaml"
 
@@ -14,11 +15,11 @@ func (this *Config) Route(domain string) []string {
 	if this.Proxy.routes == nil {
 		this.Proxy.routes = make(map[string]ConfigProxyRoute);
 		for _, route := range this.Proxy.Routes {
-			this.Proxy.routes[route.Domain] = route
+			this.Proxy.routes[strings.ToLower(route.Domain)] = route
 		}
 	}
 	this.Proxy.routesMutex.Unlock()
-	if route, ok := this.Proxy.routes[domain]; ok {
+	if route, ok := this.Proxy.routes[strings.ToLower(domain)]; ok {
 		if route.Servers == nil {
 			if len(route.Server) == 0 {
 				return []string{}
@@ -42,11 +43,11 @@ func (this *Config) RouteMotd(domain string) (motd string) {
 	if this.Proxy.routes == nil {
 		this.Proxy.routes = make(map[string]ConfigProxyRoute);
 		for _, route := range this.Proxy.Routes {
-			this.Proxy.routes[route.Domain] = route
+			this.Proxy.routes[strings.ToLower(route.Domain)] = route
 		}
 	}
 	this.Proxy.routesMutex.Unlock()
-	if route, ok := this.Proxy.routes[domain]; ok {
+	if route, ok := this.Proxy.routes[strings.ToLower(domain)]; ok {
 		if len(route.Motd) > 0 {
 			return route.Motd
 		}
