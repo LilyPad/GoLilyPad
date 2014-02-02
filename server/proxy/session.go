@@ -102,23 +102,18 @@ func (this *Session) SetAuthenticated(result bool) {
 		return
 	}
 	servers := this.server.Router().Route(this.serverAddress)
+	activeServers := []string{}
 	for _, serverName := range servers {
-		if this.server.Connect().HasServer(serverName) {
+		if !this.server.Connect().HasServer(serverName) {
 			continue
 		}
-		for i, otherServerName := range servers {
-			if otherServerName != serverName {
-				continue
-			}
-			servers = append(servers[:i], servers[i+1:]...)
-			break
-		}
+		activeServers = append(activeServers, serverName)
 	}
-	if len(servers) == 0 {
+	if len(availableServers) == 0 {
 		this.Disconnect(minecraft.Colorize(this.server.Localizer().LocaleOffline()))
 		return
 	}
-	serverName := servers[RandomInt(len(servers))]
+	serverName := activeServers[RandomInt(len(activeServers))]
 	server := this.server.Connect().Server(serverName)
 	if server == nil {
 		this.Disconnect("Error: Outbound Server Mismatch: " + serverName)
