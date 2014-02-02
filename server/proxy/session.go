@@ -118,7 +118,12 @@ func (this *Session) SetAuthenticated(result bool) {
 		this.Disconnect(minecraft.Colorize(this.server.Localizer().LocaleOffline()))
 		return
 	}
-	server := this.server.Connect().Server(servers[RandomInt(len(servers))])
+	serverName := servers[RandomInt(len(servers))]
+	server := this.server.Connect().Server(serverName)
+	if server == nil {
+		this.Disconnect("Error: Outbound Server Mismatch: " + serverName)
+		return
+	}
 	addResult := this.server.Connect().AddLocalPlayer(this.name)
 	if addResult == 0 {
 		this.Disconnect(minecraft.Colorize(this.server.Localizer().LocaleLoggedIn()))
