@@ -109,7 +109,7 @@ func (this *Session) SetAuthenticated(result bool) {
 		}
 		activeServers = append(activeServers, serverName)
 	}
-	if len(availableServers) == 0 {
+	if len(activeServers) == 0 {
 		this.Disconnect(minecraft.Colorize(this.server.Localizer().LocaleOffline()))
 		return
 	}
