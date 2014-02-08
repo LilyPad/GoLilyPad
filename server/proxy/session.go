@@ -184,7 +184,7 @@ func (this *Session) HandlePacket(packet packet.Packet) (err error) {
 			if faviconErr == nil {
 				faviconString = "data:image/png;base64," + base64.StdEncoding.EncodeToString(favicon)
 			}
-			sample := make(map[string]interface{})
+			sample := make([]map[string]interface{}, 0)
 			if sampleErr == nil {
 				lines := strings.Split(string(sampleTxt), "\n")
 				for _, line := range lines {
