@@ -14,6 +14,7 @@ import "io/ioutil"
 import "net"
 import "sync"
 import "time"
+import "strings"
 import "github.com/LilyPad/GoLilyPad/packet"
 import "github.com/LilyPad/GoLilyPad/packet/minecraft"
 import "github.com/LilyPad/GoLilyPad/server/proxy/connect"
@@ -178,9 +179,20 @@ func (this *Session) HandlePacket(packet packet.Packet) (err error) {
 	case STATE_STATUS:
 		if packet.Id() == minecraft.PACKET_SERVER_STATUS_REQUEST {
 			favicon, faviconErr := ioutil.ReadFile("server-icon.png")
+			sampleTxt, sampleErr := ioutil.ReadFile("sample.txt")
 			var faviconString string
 			if faviconErr == nil {
 				faviconString = "data:image/png;base64," + base64.StdEncoding.EncodeToString(favicon)
+			}
+			sample := make(map[string]interface{})
+			if sampleErr == nil {
+				lines := strings.Split(string(sampleTxt), "\n")
+				for _, line := range lines {
+					entry := make(map[string]interface{})
+					entry["name"] = minecraft.Colorize(strings.Replace(line, "\r", "", -1))
+					entry["id"] = ""
+					sample = append(sample, entry)
+				}
 			}
 			version := make(map[string]interface{})
 			version["name"] = minecraft.STRING_VERSION
@@ -188,6 +200,7 @@ func (this *Session) HandlePacket(packet packet.Packet) (err error) {
 			players := make(map[string]interface{})
 			players["max"] = this.server.Connect().MaxPlayers()
 			players["online"] = this.server.Connect().Players()
+			players["sample"] = sample
 			description := make(map[string]interface{})
 			description["text"] = minecraft.Colorize(this.server.Router().RouteMotd(this.serverAddress))
 			response := make(map[string]interface{})
