@@ -188,8 +188,12 @@ func (this *Session) HandlePacket(packet packet.Packet) (err error) {
 			if sampleErr == nil {
 				lines := strings.Split(string(sampleTxt), "\n")
 				for _, line := range lines {
+					line = strings.Replace(line, "\r", "", -1)
+					if(len(strings.TrimSpace(line)) == 0) {
+						continue
+					}
 					entry := make(map[string]interface{})
-					entry["name"] = minecraft.Colorize(strings.Replace(line, "\r", "", -1))
+					entry["name"] = minecraft.Colorize(line)
 					entry["id"] = ""
 					sample = append(sample, entry)
 				}
