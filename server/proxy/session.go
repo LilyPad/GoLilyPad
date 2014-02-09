@@ -179,18 +179,17 @@ func (this *Session) HandlePacket(packet packet.Packet) (err error) {
 	case STATE_STATUS:
 		if packet.Id() == minecraft.PACKET_SERVER_STATUS_REQUEST {
 			favicon, faviconErr := ioutil.ReadFile("server-icon.png")
-			sampletxt, sampleErr := ioutil.ReadFile("sample.txt")
+			sampleTxt, sampleErr := ioutil.ReadFile("sample.txt")
 			var faviconString string
 			if faviconErr == nil {
 				faviconString = "data:image/png;base64," + base64.StdEncoding.EncodeToString(favicon)
 			}
-			var sample []map[string]interface{}
+			sample := make(map[string]interface{})
 			if sampleErr == nil {
-				lines := strings.Split(string(sampletxt), "\n")
-				for _, l := range lines {
-					if len(l) == 0 { continue }
+				lines := strings.Split(string(sampleTxt), "\n")
+				for _, line := range lines {
 					entry := make(map[string]interface{})
-					entry["name"] = minecraft.Colorize(strings.Replace(l, "\r", "", -1))
+					entry["name"] = minecraft.Colorize(strings.Replace(line, "\r", "", -1))
 					entry["id"] = ""
 					sample = append(sample, entry)
 				}
@@ -201,9 +200,7 @@ func (this *Session) HandlePacket(packet packet.Packet) (err error) {
 			players := make(map[string]interface{})
 			players["max"] = this.server.Connect().MaxPlayers()
 			players["online"] = this.server.Connect().Players()
-			if sampleErr == nil && len(sample) > 0 {
-				players["sample"] = sample
-			}
+			players["sample"] = sample
 			description := make(map[string]interface{})
 			description["text"] = minecraft.Colorize(this.server.Router().RouteMotd(this.serverAddress))
 			response := make(map[string]interface{})
