@@ -20,7 +20,7 @@ type PacketConnCodec struct {
 func NewPacketConnCodec(conn net.Conn, packetCodec PacketCodec, timeout time.Duration) *PacketConnCodec {
 	return &PacketConnCodec{
 		conn: conn,
-		reader: &FullReader{conn},
+		reader: NewFullReader(conn),
 		writer: conn,
 		packetCodec: packetCodec,
 		timeout: timeout,
