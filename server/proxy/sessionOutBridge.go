@@ -71,10 +71,6 @@ func (this *SessionOutBridge) HandlePacket(packet packet.Packet) (err error) {
 		}
 	case STATE_INIT:
 		if packet.Id() == 0x08 {
-			oldOutBridge := this.session.outBridge
-			if oldOutBridge != nil {
-				oldOutBridge.conn.Close()
-			}
 			this.session.outBridge = this
 			this.session.redirecting = false
 			this.session.state = STATE_CONNECTED
@@ -86,9 +82,10 @@ func (this *SessionOutBridge) HandlePacket(packet packet.Packet) (err error) {
 		if packet.Id() == minecraft.PACKET_CLIENT_DISCONNECT {
 			this.state = STATE_DISCONNECTED
 		}
-		if this.session.outBridge == this {
+		if this.state == STATE_CONNECTED {
 			this.session.redirectMutex.Lock()
 			if this.session.outBridge != this {
+				this.conn.Close()
 				break
 			}
 			this.session.redirectMutex.Unlock()
