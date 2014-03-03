@@ -26,7 +26,6 @@ type Session struct {
 	connCodec *packet.PacketConnCodec
 	codec *packet.PacketCodecVariable
 	outBridge *SessionOutBridge
-	outMutex *sync.Mutex
 	active bool
 
 	redirectMutex *sync.Mutex
@@ -56,7 +55,6 @@ func NewSession(server *Server, conn net.Conn) *Session {
 	return &Session{
 		server: server,
 		conn: conn,
-		outMutex: &sync.Mutex{},
 		active: true,
 		redirectMutex: &sync.Mutex{},
 		redirecting: false,
