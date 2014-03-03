@@ -86,9 +86,11 @@ func (this *SessionOutBridge) HandlePacket(packet packet.Packet) (err error) {
 		if packet.Id() == minecraft.PACKET_CLIENT_DISCONNECT {
 			this.state = STATE_DISCONNECTED
 		}
-		if this.session.outBridge == this && this.session.redirecting {
+		this.session.redirectMutex.Lock()
+		if this.session.outBridge != this {
 			break
 		}
+		this.session.redirectMutex.Unlock()
 		switch packet.Id() {
 		case minecraft.PACKET_CLIENT_JOIN_GAME:
 			joinGamePacket := packet.(*minecraft.PacketClientJoinGame)
