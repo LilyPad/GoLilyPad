@@ -86,6 +86,7 @@ func (this *SessionOutBridge) HandlePacket(packet packet.Packet) (err error) {
 			this.session.redirectMutex.Lock()
 			if this.session.outBridge != this {
 				this.conn.Close()
+				this.session.redirectMutex.Unlock()
 				break
 			}
 			this.session.redirectMutex.Unlock()
