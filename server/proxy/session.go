@@ -69,7 +69,7 @@ func NewSession(server *Server, conn net.Conn) *Session {
 
 func (this *Session) Serve() {
 	this.codec = packet.NewPacketCodecVariable(minecraft.HandshakePacketClientCodec, minecraft.HandshakePacketServerCodec)
-	this.connCodec = packet.NewPacketConnCodec(this.conn, this.codec, 10 * time.Second)
+	this.connCodec = packet.NewPacketConnCodec(this.conn, this.codec, 30 * time.Second)
 	go this.connCodec.ReadConn(this)
 }
 
