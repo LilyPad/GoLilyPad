@@ -1,6 +1,7 @@
 package auth
 
 import "crypto/tls"
+import "crypto/x509"
 import "encoding/json"
 import "errors"
 import "fmt"
@@ -11,12 +12,12 @@ type authenticateJson struct {
 }
 
 func Authenticate(name string, serverId string, sharedSecret []byte, publicKey []byte) (uuid string, err error) {
+	rootCAs := x509.NewCertPool()
+	rootCAs.AppendCertsFromPEM([]byte(Certificate))
 	client := &http.Client{
 		Transport:  &http.Transport{
 			TLSClientConfig: &tls.Config{
-				NameToCertificate: map[string]*tls.Certificate{
-					CertificateName: &tls.Certificate{Certificate: [][]byte{[]byte(Certificate)}},
-				},
+				RootCAs: rootCAs,
 			},
 		},
 	}
