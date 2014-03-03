@@ -28,6 +28,8 @@ type Session struct {
 	outBridge *SessionOutBridge
 	outMutex *sync.Mutex
 	active bool
+
+	redirectMutex *sync.Mutex
 	redirecting bool
 
 	serverAddress string
@@ -56,6 +58,7 @@ func NewSession(server *Server, conn net.Conn) *Session {
 		conn: conn,
 		outMutex: &sync.Mutex{},
 		active: true,
+		redirectMutex: &sync.Mutex{},
 		redirecting: false,
 		playerList: make(map[string]bool),
 		scoreboards: make(map[string]bool),

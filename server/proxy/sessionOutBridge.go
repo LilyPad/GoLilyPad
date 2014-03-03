@@ -58,6 +58,7 @@ func (this *SessionOutBridge) HandlePacket(packet packet.Packet) (err error) {
 	case STATE_LOGIN:
 		if packet.Id() == minecraft.PACKET_CLIENT_LOGIN_SUCCESS {
 			this.state = STATE_INIT
+			this.session.redirectMutex.Lock()
 			this.session.redirecting = true
 			this.codec.SetEncodeCodec(minecraft.PlayPacketServerCodec)
 			this.codec.SetDecodeCodec(minecraft.PlayPacketClientCodec)
@@ -78,6 +79,7 @@ func (this *SessionOutBridge) HandlePacket(packet packet.Packet) (err error) {
 			}
 			this.session.outBridge = this
 			this.session.redirecting = false
+			this.session.redirectMutex.Unlock()
 			this.session.state = STATE_CONNECTED
 			this.state = STATE_CONNECTED
 		}
@@ -158,6 +160,7 @@ func (this *SessionOutBridge) HandlePacket(packet packet.Packet) (err error) {
 func (this *SessionOutBridge) ErrorCaught(err error) {
 	if this.state == STATE_INIT {
 		this.session.redirecting = false
+		this.session.redirectMutex.Unlock()
 	}
 	if this.state != STATE_DISCONNECTED && this.session.outBridge == this {
 		this.session.Disconnect(minecraft.Colorize(this.session.server.Localizer().LocaleLostConn()))
