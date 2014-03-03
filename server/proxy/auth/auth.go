@@ -1,5 +1,6 @@
 package auth
 
+import "crypto/tls"
 import "encoding/json"
 import "errors"
 import "fmt"
@@ -10,7 +11,16 @@ type authenticateJson struct {
 }
 
 func Authenticate(name string, serverId string, sharedSecret []byte, publicKey []byte) (uuid string, err error) {
-	response, err := http.Get(fmt.Sprintf(URL, name, MojangSha1Hex([]byte(serverId), sharedSecret, publicKey)))
+	client := &http.Client{
+		Transport:  &http.Transport{
+			TLSClientConfig: &tls.Config{
+				NameToCertificate: map[string]*tls.Certificate{
+					CertificateName: &tls.Certificate{Certificate: [][]byte{[]byte(Certificate)}},
+				},
+			},
+		},
+	}
+	response, err := client.Get(fmt.Sprintf(URL, name, MojangSha1Hex([]byte(serverId), sharedSecret, publicKey)))
 	if err != nil {
 		return
 	}
