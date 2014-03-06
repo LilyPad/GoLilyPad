@@ -80,13 +80,13 @@ func (this *Session) Write(packet packet.Packet) (err error) {
 func (this *Session) Redirect(server *connect.Server) {
 	conn, err := net.Dial("tcp", server.Addr)
 	if err != nil {
-		fmt.Println("Proxy server, name:", this.name, "ip:", this.RemoteIp(), "failed to redirect:", server.Name, "err:", err)
+		fmt.Println("Proxy server, name:", this.name, "ip:", this.remoteHost, "failed to redirect:", server.Name, "err:", err)
 		if this.Initializing() {
 			this.Disconnect("Error: Outbound Connection Mismatch")
 		}
 		return
 	}
-	fmt.Println("Proxy server, name:", this.name, "ip:", this.RemoteIp(), "redirected:", server.Name)
+	fmt.Println("Proxy server, name:", this.name, "ip:", this.remoteHost, "redirected:", server.Name)
 	NewSessionOutBridge(this, server, conn).Serve()
 }
 
@@ -303,10 +303,10 @@ func (this *Session) HandlePacket(packet packet.Packet) (err error) {
 			this.uuid, authErr = auth.Authenticate(this.name, this.serverId, sharedSecret, this.publicKey)
 			if authErr != nil {
 				this.SetAuthenticated(false)
-				fmt.Println("Proxy server, failed to authorize:", this.name, "ip:", this.RemoteIp(), "err:", authErr)
+				fmt.Println("Proxy server, failed to authorize:", this.name, "ip:", this.remoteHost, "err:", authErr)
 			} else {
 				this.SetAuthenticated(true)
-				fmt.Println("Proxy server, authorized:", this.name, "ip:", this.RemoteIp())
+				fmt.Println("Proxy server, authorized:", this.name, "ip:", this.remoteHost)
 			}
 		} else {
 			err = errors.New("Unexpected packet")
@@ -331,7 +331,7 @@ func (this *Session) ErrorCaught(err error) {
 	if this.Authenticated() {
 		this.server.Connect().RemoveLocalPlayer(this.name)
 		this.server.SessionRegistry().Unregister(this)
-		fmt.Println("Proxy server, name:", this.name, "ip:", this.RemoteIp(), "disconnected:", err)
+		fmt.Println("Proxy server, name:", this.name, "ip:", this.remoteHost, "disconnected:", err)
 	}
 	this.state = STATE_DISCONNECTED
 	this.conn.Close()
@@ -340,15 +340,6 @@ func (this *Session) ErrorCaught(err error) {
 
 func (this *Session) Name() string {
 	return this.name
-}
-
-func (this *Session) RemoteAddr() (addr net.Addr) {
-	return this.conn.RemoteAddr()
-}
-
-func (this *Session) RemoteIp() (ip string) {
-	ip, _, _ = net.SplitHostPort(this.RemoteAddr().String())
-	return
 }
 
 func (this *Session) Authenticated() bool {
