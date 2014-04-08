@@ -22,6 +22,13 @@ func RandomInt(max int) int {
 	return rand.Intn(max)
 }
 
+func FormatUUID(uuid string) string {
+	if len(uuid) != 32 {
+		return ""
+	}
+	return uuid[:8] + "-" + uuid[8:12] + "-" + uuid[12:16] + "-" + uuid[16:20] + "-" + uuid[20:]
+}
+
 func GenNameUUID(name string) string {
 	md5 := md5.New()
 	md5.Write([]byte(name))

@@ -130,7 +130,7 @@ func (this *Session) SetAuthenticated(result bool) {
 		return
 	}
 	this.state = STATE_INIT
-	this.Write(&minecraft.PacketClientLoginSuccess{this.uuid, this.name})
+	this.Write(&minecraft.PacketClientLoginSuccess{FormatUUID(this.uuid), this.name})
 	this.codec.SetEncodeCodec(minecraft.PlayPacketClientCodec)
 	this.codec.SetDecodeCodec(minecraft.PlayPacketServerCodec)
 	this.server.SessionRegistry().Register(this)
