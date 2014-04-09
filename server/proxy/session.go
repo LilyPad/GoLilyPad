@@ -207,7 +207,9 @@ func (this *Session) HandlePacket(packet packet.Packet) (err error) {
 			players["online"] = this.server.Connect().Players()
 			players["sample"] = sample
 			description := make(map[string]interface{})
-			description["text"] = minecraft.Colorize(this.server.Router().RouteMotd(this.serverAddress))
+			motds := this.server.Router().RouteMotds(this.serverAddress)
+			motd := motds[RandomInt(len(motds))]
+			description["text"] = minecraft.Colorize(motd)
 			response := make(map[string]interface{})
 			response["version"] = version
 			response["players"] = players
