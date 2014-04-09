@@ -195,7 +195,7 @@ func (this *Session) HandlePacket(packet packet.Packet) (err error) {
 					}
 					entry := make(map[string]interface{})
 					entry["name"] = minecraft.Colorize(line)
-					entry["id"] = ""
+					entry["id"] = "00000000-0000-0000-0000-000000000000"
 					sample = append(sample, entry)
 				}
 			}
