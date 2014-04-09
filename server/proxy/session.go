@@ -31,6 +31,7 @@ type Session struct {
 	redirectMutex *sync.Mutex
 	redirecting bool
 
+	protocolVersion int
 	serverAddress string
 	name string
 	uuid string
@@ -130,7 +131,11 @@ func (this *Session) SetAuthenticated(result bool) {
 		return
 	}
 	this.state = STATE_INIT
-	this.Write(&minecraft.PacketClientLoginSuccess{FormatUUID(this.uuid), this.name})
+	if this.protocolVersion >= 5 {
+		this.Write(&minecraft.PacketClientLoginSuccess{FormatUUID(this.uuid), this.name})
+	} else {
+		this.Write(&minecraft.PacketClientLoginSuccess{this.uuid, this.name})
+	}
 	this.codec.SetEncodeCodec(minecraft.PlayPacketClientCodec)
 	this.codec.SetDecodeCodec(minecraft.PlayPacketServerCodec)
 	this.server.SessionRegistry().Register(this)
@@ -156,13 +161,23 @@ func (this *Session) HandlePacket(packet packet.Packet) (err error) {
 	case STATE_DISCONNECTED:
 		if packet.Id() == minecraft.PACKET_SERVER_HANDSHAKE {
 			handshakePacket := packet.(*minecraft.PacketServerHandshake)
+			this.protocolVersion = handshakePacket.ProtocolVersion
 			this.serverAddress = handshakePacket.ServerAddress
+			supportedVersion := false
+			for _, version := range minecraft.Versions {
+				if version != this.protocolVersion {
+					continue
+				}
+				supportedVersion = true
+				return
+			}
 			if handshakePacket.State == 1 {
+				this.protocolVersion = minecraft.Versions[0]
 				this.codec.SetEncodeCodec(minecraft.StatusPacketClientCodec)
 				this.codec.SetDecodeCodec(minecraft.StatusPacketServerCodec)
 				this.state = STATE_STATUS
 			} else if handshakePacket.State ==  2 {
-				if handshakePacket.ProtocolVersion != minecraft.VERSION {
+				if !supportedVersion {
 					err = errors.New("Protocol version does not match")
 					return
 				}
@@ -201,7 +216,7 @@ func (this *Session) HandlePacket(packet packet.Packet) (err error) {
 			}
 			version := make(map[string]interface{})
 			version["name"] = minecraft.STRING_VERSION
-			version["protocol"] = minecraft.VERSION
+			version["protocol"] = this.protocolVersion
 			players := make(map[string]interface{})
 			players["max"] = this.server.Connect().MaxPlayers()
 			players["online"] = this.server.Connect().Players()

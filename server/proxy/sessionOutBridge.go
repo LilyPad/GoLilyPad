@@ -35,7 +35,7 @@ func (this *SessionOutBridge) Serve() {
 	this.codec = packet.NewPacketCodecVariable(minecraft.HandshakePacketServerCodec, minecraft.HandshakePacketClientCodec)
 	this.connCodec = packet.NewPacketConnCodec(this.conn, this.codec, 30 * time.Second)
 	remotePort, _ := strconv.ParseUint(this.remotePort, 10, 8)
-	this.Write(&minecraft.PacketServerHandshake{minecraft.VERSION, this.server.SecurityKey + ";" + this.session.remoteHost + ";" + this.session.remotePort + ";" + this.session.uuid, uint16(remotePort), 2})
+	this.Write(&minecraft.PacketServerHandshake{this.session.protocolVersion, this.server.SecurityKey + ";" + this.session.remoteHost + ";" + this.session.remotePort + ";" + this.session.uuid, uint16(remotePort), 2})
 	this.codec.SetEncodeCodec(minecraft.LoginPacketServerCodec)
 	this.codec.SetDecodeCodec(minecraft.LoginPacketClientCodec)
 	this.Write(&minecraft.PacketServerLoginStart{this.session.name})

@@ -3,7 +3,6 @@ package minecraft
 import "github.com/LilyPad/GoLilyPad/packet"
 
 const (
-	VERSION = 5
 	STRING_VERSION = string("1.7.6")
 	MAGIC = string("§")
 
@@ -279,3 +278,5 @@ var LoginPacketServerCodecs = []packet.PacketCodec {
 	PACKET_SERVER_LOGIN_ENCRYPT_RESPONSE: &PacketServerLoginEncryptResponseCodec{},
 }
 var LoginPacketServerCodec = packet.NewPacketCodecVarIntLength(packet.NewPacketCodecRegistry(LoginPacketServerCodecs))
+
+var Versions = []int { 5, 4 }
