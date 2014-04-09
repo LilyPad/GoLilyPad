@@ -169,10 +169,12 @@ func (this *Session) HandlePacket(packet packet.Packet) (err error) {
 					continue
 				}
 				supportedVersion = true
-				return
+				break
 			}
 			if handshakePacket.State == 1 {
-				this.protocolVersion = minecraft.Versions[0]
+				if !supportedVersion {
+					this.protocolVersion = minecraft.Versions[0]
+				}
 				this.codec.SetEncodeCodec(minecraft.StatusPacketClientCodec)
 				this.codec.SetDecodeCodec(minecraft.StatusPacketServerCodec)
 				this.state = STATE_STATUS
