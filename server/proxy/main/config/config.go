@@ -38,7 +38,7 @@ func (this *Config) Route(domain string) []string {
 	return []string{}
 }
 
-func (this *Config) RouteMotd(domain string) (motd string) {
+func (this *Config) RouteMotds(domain string) []string {
 	this.Proxy.routesMutex.Lock()
 	if this.Proxy.routes == nil {
 		this.Proxy.routes = make(map[string]ConfigProxyRoute);
@@ -48,14 +48,18 @@ func (this *Config) RouteMotd(domain string) (motd string) {
 	}
 	this.Proxy.routesMutex.Unlock()
 	if route, ok := this.Proxy.routes[strings.ToLower(domain)]; ok {
-		if len(route.Motd) > 0 {
-			return route.Motd
+		if route.Motds != nil {
+			motds := make([]string, len(route.Motds))
+			copy(motds, route.Motds)
+			return motds
+		} else if len(route.Motd) > 0 {
+			return []string{route.Motd}
 		}
 	}
 	if domain != "" {
-		return this.RouteMotd("")
+		return this.RouteMotds("")
 	}
-	return this.Proxy.Motd
+	return []string{this.Proxy.Motd}
 }
 
 func (this *Config) LocaleFull() string {
@@ -112,6 +116,7 @@ type ConfigProxyRoute struct {
 	Server string `yaml:"server,omitempty"`
 	Servers []string `yaml:"servers,omitempty"`
 	Motd string `yaml:"motd,omitempty"`
+	Motds []string `yaml:"motds,omitempty"`
 }
 
 func DefaultConfig() (config *Config) {
@@ -126,8 +131,9 @@ func DefaultConfig() (config *Config) {
 		Proxy: ConfigProxy{
 			Bind: ":25565",
 			Routes: []ConfigProxyRoute{
-				ConfigProxyRoute{"", "example", nil, ""},
-				ConfigProxyRoute{"example.com", "", []string{"hub1", "hub2"}, "Example Custom MOTD"},
+				ConfigProxyRoute{"", "example", nil, "", nil},
+				ConfigProxyRoute{"example.com", "", []string{"hub1", "hub2"}, "Example Custom MOTD", nil},
+				ConfigProxyRoute{"hub.exmaple.com", "hub", nil, "", []string{"Example MOTD 1", "Example MOTD 2"}},
 			},
 			Locale: ConfigProxyLocale{
 				Full: "The server seems to be currently full. Try again later!",
