@@ -1,5 +1,6 @@
 package proxy
 
+import "bytes"
 import "net"
 import "time"
 import "strconv"
@@ -35,7 +36,7 @@ func (this *SessionOutBridge) Serve() {
 	this.codec = packet.NewPacketCodecVariable(minecraft.HandshakePacketServerCodec, minecraft.HandshakePacketClientCodec)
 	this.connCodec = packet.NewPacketConnCodec(this.conn, this.codec, 30 * time.Second)
 	remotePort, _ := strconv.ParseUint(this.remotePort, 10, 8)
-	this.Write(&minecraft.PacketServerHandshake{this.session.protocolVersion, this.server.SecurityKey + ";" + this.session.remoteHost + ";" + this.session.remotePort + ";" + this.session.uuid, uint16(remotePort), 2})
+	this.Write(&minecraft.PacketServerHandshake{this.session.protocolVersion, this.server.SecurityKey + ";" + this.session.remoteHost + ";" + this.session.remotePort + ";" + this.session.profile.Id, uint16(remotePort), 2})
 	this.codec.SetEncodeCodec(minecraft.LoginPacketServerCodec)
 	this.codec.SetDecodeCodec(minecraft.LoginPacketClientCodec)
 	this.Write(&minecraft.PacketServerLoginStart{this.session.name})
@@ -70,7 +71,9 @@ func (this *SessionOutBridge) HandlePacket(packet packet.Packet) (err error) {
 			this.conn.Close()
 		}
 	case STATE_INIT:
-		if packet.Id() == 0x08 {
+		if packet.Id() == minecraft.PACKET_CLIENT_JOIN_GAME {
+			this.Write(this.buildPluginMessage())
+		} else if packet.Id() == minecraft.PACKET_CLIENT_PLAYER_POSITION_AND_LOOK {
 			this.session.outBridge = this
 			this.session.redirecting = false
 			this.session.state = STATE_CONNECTED
@@ -169,4 +172,17 @@ func (this *SessionOutBridge) ErrorCaught(err error) {
 	this.server = nil
 	this.state = STATE_DISCONNECTED
 	this.conn.Close()
+}
+
+func (this *SessionOutBridge) buildPluginMessage() *minecraft.PacketServerPluginMessage {
+	buffer := &bytes.Buffer{}
+	util := make([]byte, packet.UTIL_BUFFER_LENGTH)
+
+	packet.WriteVarInt(buffer, util, len(this.session.profile.Properties))
+	for _, property := range this.session.profile.Properties {
+		packet.WriteString(buffer, util, property.Name)
+		packet.WriteString(buffer, util, property.Value)
+		packet.WriteString(buffer, util, property.Signature)
+	}
+	return &minecraft.PacketServerPluginMessage{"LilyPad", buffer.Bytes()}
 }

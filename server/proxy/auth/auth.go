@@ -7,11 +7,18 @@ import "errors"
 import "fmt"
 import "net/http"
 
-type authenticateJson struct {
+type GameProfile struct {
 	Id string `json:"id"`
+	Properties []GameProfileProperty `json:"properties"`
 }
 
-func Authenticate(name string, serverId string, sharedSecret []byte, publicKey []byte) (uuid string, err error) {
+type GameProfileProperty struct {
+	Name string `json:"name"`
+	Value string `json:"value"`
+	Signature string `json:"signature"`
+}
+
+func Authenticate(name string, serverId string, sharedSecret []byte, publicKey []byte) (profile GameProfile, err error) {
 	rootCAs := x509.NewCertPool()
 	rootCAs.AppendCertsFromPEM([]byte(Certificate))
 	client := &http.Client{
@@ -26,16 +33,14 @@ func Authenticate(name string, serverId string, sharedSecret []byte, publicKey [
 		return
 	}
 	defer response.Body.Close()
-	decoder := json.NewDecoder(response.Body)
-	responseJson := &authenticateJson{}
-	err = decoder.Decode(responseJson)
+	jsonDecoder := json.NewDecoder(response.Body)
+	profile = GameProfile{}
+	err = jsonDecoder.Decode(&profile)
 	if err != nil {
 		return
 	}
-	if len(responseJson.Id) != 32 {
-		err = errors.New(fmt.Sprintf("Id is not 32 characters: %d", len(responseJson.Id)))
-		return
+	if len(profile.Id) != 32 {
+		err = errors.New(fmt.Sprintf("Id is not 32 characters: %d", len(profile.Id)))
 	}
-	uuid = responseJson.Id
 	return
 }

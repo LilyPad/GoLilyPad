@@ -34,7 +34,7 @@ type Session struct {
 	protocolVersion int
 	serverAddress string
 	name string
-	uuid string
+	profile auth.GameProfile
 	serverId string
 	publicKey []byte
 	verifyToken []byte
@@ -132,9 +132,9 @@ func (this *Session) SetAuthenticated(result bool) {
 	}
 	this.state = STATE_INIT
 	if this.protocolVersion >= 5 {
-		this.Write(&minecraft.PacketClientLoginSuccess{FormatUUID(this.uuid), this.name})
+		this.Write(&minecraft.PacketClientLoginSuccess{FormatUUID(this.profile.Id), this.name})
 	} else {
-		this.Write(&minecraft.PacketClientLoginSuccess{this.uuid, this.name})
+		this.Write(&minecraft.PacketClientLoginSuccess{this.profile.Id, this.name})
 	}
 	this.codec.SetEncodeCodec(minecraft.PlayPacketClientCodec)
 	this.codec.SetDecodeCodec(minecraft.PlayPacketServerCodec)
@@ -281,7 +281,9 @@ func (this *Session) HandlePacket(packet packet.Packet) (err error) {
 				}
 				this.state = STATE_LOGIN_ENCRYPT
 			} else {
-				this.uuid = GenNameUUID("OfflinePlayer:" + this.name)
+				this.profile = auth.GameProfile{
+					Id: GenNameUUID("OfflinePlayer:" + this.name),
+				}
 				this.SetAuthenticated(true)
 			}
 		} else {
@@ -319,7 +321,7 @@ func (this *Session) HandlePacket(packet packet.Packet) (err error) {
 				S: minecraft.NewCFB8Encrypter(block, sharedSecret),
 			})
 			var authErr error
-			this.uuid, authErr = auth.Authenticate(this.name, this.serverId, sharedSecret, this.publicKey)
+			this.profile, authErr = auth.Authenticate(this.name, this.serverId, sharedSecret, this.publicKey)
 			if authErr != nil {
 				this.SetAuthenticated(false)
 				fmt.Println("Proxy server, failed to authorize:", this.name, "ip:", this.remoteHost, "err:", authErr)
@@ -334,6 +336,12 @@ func (this *Session) HandlePacket(packet packet.Packet) (err error) {
 	case STATE_CONNECTED:
 		if packet.Id() == minecraft.PACKET_SERVER_CLIENT_SETTINGS {
 			this.clientSettings = packet
+		}
+		if packet.Id() == minecraft.PACKET_SERVER_PLUGIN_MESSAGE {
+			pluginMessagePacket := packet.(*minecraft.PacketServerPluginMessage)
+			if pluginMessagePacket.Channel == "LilyPad" {
+				break
+			}
 		}
 		if this.redirecting {
 			break

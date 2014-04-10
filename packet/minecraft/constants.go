@@ -241,7 +241,7 @@ var PlayPacketServerCodecs = []packet.PacketCodec {
 	PACKET_SERVER_TAB_COMPLETE: &PacketGenericCodec{PACKET_SERVER_TAB_COMPLETE},
 	PACKET_SERVER_CLIENT_SETTINGS: &PacketServerClientSettingsCodec{},
 	PACKET_SERVER_CLIENT_STATUS: &PacketGenericCodec{PACKET_SERVER_CLIENT_STATUS},
-	PACKET_SERVER_PLUGIN_MESSAGE: &PacketGenericCodec{PACKET_SERVER_PLUGIN_MESSAGE},
+	PACKET_SERVER_PLUGIN_MESSAGE: &PacketServerPluginMessageCodec{},
 }
 var PlayPacketServerEntityIntPositions = [][]int {
 	PACKET_SERVER_USE_ENTITY: { 0 },
