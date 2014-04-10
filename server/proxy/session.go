@@ -283,6 +283,7 @@ func (this *Session) HandlePacket(packet packet.Packet) (err error) {
 			} else {
 				this.profile = auth.GameProfile{
 					Id: GenNameUUID("OfflinePlayer:" + this.name),
+					Properties: make([]auth.GameProfileProperty, 0),
 				}
 				this.SetAuthenticated(true)
 			}
