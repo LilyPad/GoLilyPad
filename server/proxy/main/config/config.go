@@ -63,7 +63,7 @@ func (this *Config) RouteMotds(domain string) []string {
 }
 
 func (this *Config) RouteIcons(domain string) []string {
-this.Proxy.routesMutex.Lock()
+	this.Proxy.routesMutex.Lock()
 	if this.Proxy.routes == nil {
 		this.Proxy.routes = make(map[string]ConfigProxyRoute);
 		for _, route := range this.Proxy.Routes {
