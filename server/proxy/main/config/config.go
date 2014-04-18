@@ -159,7 +159,7 @@ func DefaultConfig() (config *Config) {
 			Routes: []ConfigProxyRoute{
 				ConfigProxyRoute{"", "example", nil, "", nil, "", nil},
 				ConfigProxyRoute{"example.com", "", []string{"hub1", "hub2"}, "Example Custom MOTD", nil, "", nil},
-				ConfigProxyRoute{"hub.exmaple.com", "hub", nil, "", []string{"Example MOTD 1", "Example MOTD 2"}, "", nil},
+				ConfigProxyRoute{"hub.example.com", "hub", nil, "", []string{"Example MOTD 1", "Example MOTD 2"}, "", nil},
 				ConfigProxyRoute{"icon.exmaple.com", "hub", nil, "", nil, "icon.png", []string{"icon1.png", "icon2.png", "icons/icon3.png"}},
 			},
 			Locale: ConfigProxyLocale{
