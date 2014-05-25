@@ -73,7 +73,6 @@ func (this *SessionOutBridge) HandlePacket(packet packet.Packet) (err error) {
 	case STATE_INIT:
 		if packet.Id() == minecraft.PACKET_CLIENT_JOIN_GAME {
 			this.Write(this.buildPluginMessage())
-		} else if packet.Id() == minecraft.PACKET_CLIENT_PLAYER_POSITION_AND_LOOK {
 			this.session.outBridge = this
 			this.session.redirecting = false
 			this.session.state = STATE_CONNECTED
