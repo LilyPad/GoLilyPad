@@ -196,10 +196,11 @@ func (this *Session) HandlePacket(packet packet.Packet) (err error) {
 		}
 	case STATE_STATUS:
 		if packet.Id() == minecraft.PACKET_SERVER_STATUS_REQUEST {
+			samplePath := this.server.Router().RouteSample(this.serverAddress)
+			sampleTxt, sampleErr := ioutil.ReadFile(samplePath)
 			icons := this.server.Router().RouteIcons(this.serverAddress)
 			iconPath := icons[RandomInt(len(icons))]
 			favicon, faviconErr := ioutil.ReadFile(iconPath)
-			sampleTxt, sampleErr := ioutil.ReadFile("sample.txt")
 			var faviconString string
 			if faviconErr == nil {
 				faviconString = "data:image/png;base64," + base64.StdEncoding.EncodeToString(favicon)

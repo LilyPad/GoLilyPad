@@ -86,6 +86,26 @@ func (this *Config) RouteIcons(domain string) []string {
 	return []string{"server-icon.png"};
 }
 
+func (this *Config) RouteSample(domain string) string {
+	this.Proxy.routesMutex.Lock()
+	if this.Proxy.routes == nil {
+		this.Proxy.routes = make(map[string]ConfigProxyRoute);
+		for _, route := range this.Proxy.Routes {
+			this.Proxy.routes[strings.ToLower(route.Domain)] = route
+		}
+	}
+	this.Proxy.routesMutex.Unlock()
+	if route, ok := this.Proxy.routes[strings.ToLower(domain)]; ok {
+		if route.Sample != "" {
+			return route.Sample
+		}
+	}
+	if domain != "" {
+		return this.RouteSample("")
+	}
+	return "sample.txt";
+}
+
 func (this *Config) LocaleFull() string {
 	return this.Proxy.Locale.Full
 }
@@ -143,6 +163,7 @@ type ConfigProxyRoute struct {
 	Motds []string `yaml:"motds,omitempty"`
 	Icon string `yaml:"icon,omitempty"`
 	Icons []string `yaml:"icons,omitempty"`
+	Sample string `yaml:"sample,omitempty"`
 }
 
 func DefaultConfig() (config *Config) {
@@ -157,10 +178,10 @@ func DefaultConfig() (config *Config) {
 		Proxy: ConfigProxy{
 			Bind: ":25565",
 			Routes: []ConfigProxyRoute{
-				ConfigProxyRoute{"", "example", nil, "", nil, "", nil},
-				ConfigProxyRoute{"example.com", "", []string{"hub1", "hub2"}, "Example Custom MOTD", nil, "", nil},
-				ConfigProxyRoute{"hub.example.com", "hub", nil, "", []string{"Example MOTD 1", "Example MOTD 2"}, "", nil},
-				ConfigProxyRoute{"icon.example.com", "hub", nil, "", nil, "icon.png", []string{"icon1.png", "icon2.png", "icons/icon3.png"}},
+				ConfigProxyRoute{"", "example", nil, "", nil, "", nil, ""},
+				ConfigProxyRoute{"example.com", "", []string{"hub1", "hub2"}, "Example Custom MOTD", nil, "", nil, ""},
+				ConfigProxyRoute{"hub.exmaple.com", "hub", nil, "", []string{"Example MOTD 1", "Example MOTD 2"}, "", nil, ""},
+				ConfigProxyRoute{"icon.exmaple.com", "hub", nil, "", nil, "icon.png", []string{"icon1.png", "icon2.png", "icons/icon3.png"}, ""},
 			},
 			Locale: ConfigProxyLocale{
 				Full: "The server seems to be currently full. Try again later!",
