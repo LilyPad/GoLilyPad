@@ -246,18 +246,11 @@ func (this *Session) HandlePacket(packet packet.Packet) (err error) {
 			if err != nil {
 				return
 			}
-			this.state = STATE_STATUS_PING
-		} else {
-			err = errors.New("Unexpected packet")
-			return
-		}
-	case STATE_STATUS_PING:
-		if packet.Id() == minecraft.PACKET_SERVER_STATUS_PING {
+		} else if packet.Id() == minecraft.PACKET_SERVER_STATUS_PING {
 			err = this.Write(&minecraft.PacketClientStatusPing{packet.(*minecraft.PacketServerStatusPing).Time})
 			if err != nil {
 				return
 			}
-			this.conn.Close()
 		} else {
 			err = errors.New("Unexpected packet")
 			return
