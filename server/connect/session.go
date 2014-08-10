@@ -122,8 +122,14 @@ func (this *Session) RegisterServer(address string, port uint16) (ok bool) {
 	this.roleAddress = address
 	this.rolePort = port
 	this.serverSecurityKey = securityKey
+	// Send packet before registering so we don't send it to the server we're registering
+	for _, session := range this.server.SessionRegistry(ROLE_SERVER).GetAll() {
+		session.Write(&connect.PacketServerEvent{true, this.username, this.serverSecurityKey, this.roleAddress, this.rolePort})
+	}
+
 	this.server.SessionRegistry(ROLE_AUTHORIZED).Register(this)
 	this.server.SessionRegistry(ROLE_SERVER).Register(this)
+
 	for _, session := range this.server.SessionRegistry(ROLE_PROXY).GetAll() {
 		session.Write(connect.NewPacketServerEventAdd(this.username, this.serverSecurityKey, this.roleAddress, this.rolePort))
 	}
@@ -144,6 +150,13 @@ func (this *Session) Unregister() {
 		}
 		this.server.SessionRegistry(ROLE_AUTHORIZED).Unregister(this)
 		this.server.SessionRegistry(ROLE_SERVER).Unregister(this)
+		// Send after unregistering so we don't send to the server we just unregistered
+		for _, session := range this.server.SessionRegistry(ROLE_SERVER).GetAll() {
+			session.Write(&connect.PacketServerEvent{
+				Add: false,
+				Server: this.username,
+			})
+		}
 	}
 	this.role = ROLE_UNAUTHORIZED
 }
