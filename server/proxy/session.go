@@ -46,13 +46,13 @@ type Session struct {
 	scoreboards map[string]bool
 	teams map[string]bool
 
-	remoteHost string
+	remoteIp string
 	remotePort string
 	state SessionState
 }
 
 func NewSession(server *Server, conn net.Conn) *Session {
-	host, port, _ := net.SplitHostPort(conn.RemoteAddr().String())
+	ip, port, _ := net.SplitHostPort(conn.RemoteAddr().String())
 	return &Session{
 		server: server,
 		conn: conn,
@@ -62,7 +62,7 @@ func NewSession(server *Server, conn net.Conn) *Session {
 		playerList: make(map[string]bool),
 		scoreboards: make(map[string]bool),
 		teams: make(map[string]bool),
-		remoteHost: host,
+		remoteIp: ip,
 		remotePort: port,
 		state: STATE_DISCONNECTED,
 	}
@@ -81,13 +81,13 @@ func (this *Session) Write(packet packet.Packet) (err error) {
 func (this *Session) Redirect(server *connect.Server) {
 	conn, err := net.Dial("tcp", server.Addr)
 	if err != nil {
-		fmt.Println("Proxy server, name:", this.name, "ip:", this.remoteHost, "failed to redirect:", server.Name, "err:", err)
+		fmt.Println("Proxy server, name:", this.name, "ip:", this.remoteIp, "failed to redirect:", server.Name, "err:", err)
 		if this.Initializing() {
 			this.Disconnect("Error: Outbound Connection Mismatch")
 		}
 		return
 	}
-	fmt.Println("Proxy server, name:", this.name, "ip:", this.remoteHost, "redirected:", server.Name)
+	fmt.Println("Proxy server, name:", this.name, "ip:", this.remoteIp, "redirected:", server.Name)
 	NewSessionOutBridge(this, server, conn).Serve()
 }
 
@@ -328,10 +328,10 @@ func (this *Session) HandlePacket(packet packet.Packet) (err error) {
 			this.profile, authErr = auth.Authenticate(this.name, this.serverId, sharedSecret, this.publicKey)
 			if authErr != nil {
 				this.SetAuthenticated(false)
-				fmt.Println("Proxy server, failed to authorize:", this.name, "ip:", this.remoteHost, "err:", authErr)
+				fmt.Println("Proxy server, failed to authorize:", this.name, "ip:", this.remoteIp, "err:", authErr)
 			} else {
 				this.SetAuthenticated(true)
-				fmt.Println("Proxy server, authorized:", this.name, "ip:", this.remoteHost)
+				fmt.Println("Proxy server, authorized:", this.name, "ip:", this.remoteIp)
 			}
 		} else {
 			err = errors.New("Unexpected packet")
@@ -362,7 +362,7 @@ func (this *Session) ErrorCaught(err error) {
 	if this.Authenticated() {
 		this.server.Connect().RemoveLocalPlayer(this.name)
 		this.server.SessionRegistry().Unregister(this)
-		fmt.Println("Proxy server, name:", this.name, "ip:", this.remoteHost, "disconnected:", err)
+		fmt.Println("Proxy server, name:", this.name, "ip:", this.remoteIp, "disconnected:", err)
 	}
 	this.state = STATE_DISCONNECTED
 	this.conn.Close()

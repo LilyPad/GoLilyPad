@@ -1,6 +1,5 @@
 package proxy
 
-import "bytes"
 import "net"
 import "time"
 import "strconv"
@@ -15,18 +14,18 @@ type SessionOutBridge struct {
 	connCodec *packet.PacketConnCodec
 	codec *packet.PacketCodecVariable
 
-	remoteHost string
+	remoteIp string
 	remotePort string
 	state SessionState
 }
 
 func NewSessionOutBridge(session *Session, server *connect.Server, conn net.Conn) *SessionOutBridge {
-	host, port, _ := net.SplitHostPort(server.Addr)
+	ip, port, _ := net.SplitHostPort(server.Addr)
 	return &SessionOutBridge{
 		session: session,
 		server: server,
 		conn: conn,
-		remoteHost: host,
+		remoteIp: ip,
 		remotePort: port,
 		state: STATE_DISCONNECTED,
 	}
@@ -35,11 +34,27 @@ func NewSessionOutBridge(session *Session, server *connect.Server, conn net.Conn
 func (this *SessionOutBridge) Serve() {
 	this.codec = packet.NewPacketCodecVariable(minecraft.HandshakePacketServerCodec, minecraft.HandshakePacketClientCodec)
 	this.connCodec = packet.NewPacketConnCodec(this.conn, this.codec, 30 * time.Second)
-	remotePort, _ := strconv.ParseUint(this.remotePort, 10, 8)
-	this.Write(&minecraft.PacketServerHandshake{this.session.protocolVersion, this.server.SecurityKey + ";" + this.session.remoteHost + ";" + this.session.remotePort + ";" + this.session.profile.Id, uint16(remotePort), 2})
+
+	inRemotePort, _ := strconv.ParseUint(this.session.remotePort, 10, 16)
+	outRemotePort, _ := strconv.ParseUint(this.remotePort, 10, 16)
+	loginPayload := LoginPayload{
+		SecurityKey: this.server.SecurityKey,
+		Host: this.session.serverAddress,
+		RealIp: this.session.remoteIp,
+		RealPort: int(inRemotePort),
+		Name: this.session.name,
+		UUID: this.session.profile.Id,
+		Properties: make([]LoginPayloadProperty, 0),
+	}
+	for _, property := range this.session.profile.Properties {
+		loginPayload.Properties = append(loginPayload.Properties, LoginPayloadProperty{property.Name, property.Value, property.Signature})
+	}	
+	this.Write(&minecraft.PacketServerHandshake{this.session.protocolVersion, EncodeLoginPayload(loginPayload), uint16(outRemotePort), 2})
+
 	this.codec.SetEncodeCodec(minecraft.LoginPacketServerCodec)
 	this.codec.SetDecodeCodec(minecraft.LoginPacketClientCodec)
 	this.Write(&minecraft.PacketServerLoginStart{this.session.name})
+
 	this.state = STATE_LOGIN
 	go this.connCodec.ReadConn(this)
 }
@@ -71,9 +86,7 @@ func (this *SessionOutBridge) HandlePacket(packet packet.Packet) (err error) {
 			this.conn.Close()
 		}
 	case STATE_INIT:
-		if packet.Id() == minecraft.PACKET_CLIENT_JOIN_GAME {
-			this.Write(this.buildPluginMessage())
-		} else if packet.Id() == minecraft.PACKET_CLIENT_PLAYER_POSITION_AND_LOOK {
+		if packet.Id() == minecraft.PACKET_CLIENT_PLAYER_POSITION_AND_LOOK {
 			this.session.outBridge = this
 			this.session.redirecting = false
 			this.session.state = STATE_CONNECTED
@@ -172,17 +185,4 @@ func (this *SessionOutBridge) ErrorCaught(err error) {
 	this.server = nil
 	this.state = STATE_DISCONNECTED
 	this.conn.Close()
-}
-
-func (this *SessionOutBridge) buildPluginMessage() *minecraft.PacketServerPluginMessage {
-	buffer := &bytes.Buffer{}
-	util := make([]byte, packet.UTIL_BUFFER_LENGTH)
-
-	packet.WriteVarInt(buffer, util, len(this.session.profile.Properties))
-	for _, property := range this.session.profile.Properties {
-		packet.WriteString(buffer, util, property.Name)
-		packet.WriteString(buffer, util, property.Value)
-		packet.WriteString(buffer, util, property.Signature)
-	}
-	return &minecraft.PacketServerPluginMessage{"LilyPad", buffer.Bytes()}
 }
