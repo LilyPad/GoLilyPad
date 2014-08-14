@@ -92,6 +92,7 @@ func (this *SessionOutBridge) HandlePacket(packet packet.Packet) (err error) {
 			this.session.state = STATE_CONNECTED
 			this.state = STATE_CONNECTED
 			this.session.redirectMutex.Unlock()
+			this.Write(&minecraft.PacketServerPluginMessage{"REGISTER", bytes.Join(this.session.registeredChannels, []byte{0})})
 		}
 		fallthrough
 	case STATE_CONNECTED:

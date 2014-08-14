@@ -40,6 +40,7 @@ type Session struct {
 	verifyToken []byte
 
 	clientSettings packet.Packet
+	registeredChannels [][]byte
 	clientEntityId int32
 	serverEntityId int32
 	playerList map[string]bool
@@ -345,6 +346,28 @@ func (this *Session) HandlePacket(packet packet.Packet) (err error) {
 			pluginMessagePacket := packet.(*minecraft.PacketServerPluginMessage)
 			if pluginMessagePacket.Channel == "LilyPad" {
 				break
+			}
+
+			if pluginMessagePacket.Channel == "REGISTER" {
+				for _, channel := range bytes.Split(pluginMessagePacket.Data[:], []byte{0}) {
+					for _, existing := range this.registeredChannels {
+						if bytes.Equal(channel, existing) {
+							break
+						}
+					}
+					this.registeredChannels = append(this.registeredChannels, channel)
+				}
+			}
+
+			if  pluginMessagePacket.Channel == "UNREGISTER" {
+				for _, channel := range bytes.Split(pluginMessagePacket.Data[:], []byte{0}) {
+					for idx, existing := range this.registeredChannels {
+						if bytes.Equal(channel, existing) {
+							this.registeredChannels = append(this.registeredChannels[:idx], this.registeredChannels[idx+1:]...)
+							break
+						}
+					}
+				}
 			}
 		}
 		if this.redirecting {
