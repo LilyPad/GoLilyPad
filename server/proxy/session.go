@@ -40,9 +40,10 @@ type Session struct {
 	verifyToken []byte
 
 	clientSettings packet.Packet
-	registeredChannels [][]byte
 	clientEntityId int32
 	serverEntityId int32
+	channelsExceeded bool
+	registeredChannels map[string]bool
 	playerList map[string]bool
 	scoreboards map[string]bool
 	teams map[string]bool
@@ -60,6 +61,8 @@ func NewSession(server *Server, conn net.Conn) *Session {
 		active: true,
 		redirectMutex: &sync.Mutex{},
 		redirecting: false,
+		channelsExceeded: false,
+		registeredChannels: make(map[string]bool),
 		playerList: make(map[string]bool),
 		scoreboards: make(map[string]bool),
 		teams: make(map[string]bool),
@@ -349,24 +352,26 @@ func (this *Session) HandlePacket(packet packet.Packet) (err error) {
 			}
 
 			if pluginMessagePacket.Channel == "REGISTER" {
-				for _, channel := range bytes.Split(pluginMessagePacket.Data[:], []byte{0}) {
-					for _, existing := range this.registeredChannels {
-						if bytes.Equal(channel, existing) {
-							break
-						}
+				for _, channelBytes := range bytes.Split(pluginMessagePacket.Data[:], []byte{0}) {
+					channel := string(channelBytes)
+					if this.registeredChannels[channel] || this.channelsExceeded {
+						continue
 					}
-					this.registeredChannels = append(this.registeredChannels, channel)
+
+					if len(this.registeredChannels) >= 127 {
+						fmt.Println("Player:", this.name, "has exceeded their channel registration limit.")
+						this.channelsExceeded = true
+					}
+
+					this.registeredChannels[channel] = true
 				}
 			}
 
 			if  pluginMessagePacket.Channel == "UNREGISTER" {
-				for _, channel := range bytes.Split(pluginMessagePacket.Data[:], []byte{0}) {
-					for idx, existing := range this.registeredChannels {
-						if bytes.Equal(channel, existing) {
-							this.registeredChannels = append(this.registeredChannels[:idx], this.registeredChannels[idx+1:]...)
-							break
-						}
-					}
+				for _, channelBytes := range bytes.Split(pluginMessagePacket.Data[:], []byte{0}) {
+					channel := string(channelBytes)
+					delete(this.registeredChannels, channel)
+					this.channelsExceeded = false
 				}
 			}
 		}
