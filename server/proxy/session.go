@@ -42,7 +42,6 @@ type Session struct {
 	clientSettings packet.Packet
 	clientEntityId int32
 	serverEntityId int32
-	channelsExceeded bool
 	registeredChannels map[string]bool
 	playerList map[string]bool
 	scoreboards map[string]bool
@@ -61,7 +60,6 @@ func NewSession(server *Server, conn net.Conn) *Session {
 		active: true,
 		redirectMutex: &sync.Mutex{},
 		redirecting: false,
-		channelsExceeded: false,
 		registeredChannels: make(map[string]bool),
 		playerList: make(map[string]bool),
 		scoreboards: make(map[string]bool),
@@ -354,13 +352,12 @@ func (this *Session) HandlePacket(packet packet.Packet) (err error) {
 			if pluginMessagePacket.Channel == "REGISTER" {
 				for _, channelBytes := range bytes.Split(pluginMessagePacket.Data[:], []byte{0}) {
 					channel := string(channelBytes)
-					if this.registeredChannels[channel] || this.channelsExceeded {
+					if this.registeredChannels[channel] {
 						continue
 					}
 
-					if len(this.registeredChannels) >= 127 {
-						fmt.Println("Player:", this.name, "has exceeded their channel registration limit.")
-						this.channelsExceeded = true
+					if len(this.registeredChannels) >= 128 {
+						break
 					}
 
 					this.registeredChannels[channel] = true
@@ -371,7 +368,6 @@ func (this *Session) HandlePacket(packet packet.Packet) (err error) {
 				for _, channelBytes := range bytes.Split(pluginMessagePacket.Data[:], []byte{0}) {
 					channel := string(channelBytes)
 					delete(this.registeredChannels, channel)
-					this.channelsExceeded = false
 				}
 			}
 		}
