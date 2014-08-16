@@ -93,12 +93,6 @@ func (this *SessionOutBridge) HandlePacket(packet packet.Packet) (err error) {
 			this.session.state = STATE_CONNECTED
 			this.state = STATE_CONNECTED
 			this.session.redirectMutex.Unlock()
-			channels := make([][]byte, len(this.session.registeredChannels))
-			for channel, _ := range this.session.registeredChannels {
-				channelBytes := []byte(channel)
-				channels = append(channels, channelBytes)
-			}
-			this.Write(&minecraft.PacketServerPluginMessage{"REGISTER", bytes.Join(channels, []byte{0})})
 		}
 		fallthrough
 	case STATE_CONNECTED:
@@ -144,6 +138,13 @@ func (this *SessionOutBridge) HandlePacket(packet packet.Packet) (err error) {
 					this.session.Write(&minecraft.PacketClientTeams{team, 1, "", "", "", 0, nil})
 				}
 				this.session.teams = make(map[string]bool)
+				channels := make([][]byte, len(this.session.registeredChannels))
+				for _, channel := range this.session.registeredChannels {
+					channels = append(channels, []byte(channel))
+				}
+				if len(channels) > 0 {
+					this.Write(&minecraft.PacketServerPluginMessage{"REGISTER", bytes.Join(channels, []byte{0})})
+				}
 				return
 			}
 		case minecraft.PACKET_CLIENT_PLAYER_LIST_ITEM:
