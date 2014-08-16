@@ -139,7 +139,7 @@ func (this *SessionOutBridge) HandlePacket(packet packet.Packet) (err error) {
 				}
 				this.session.teams = make(map[string]bool)
 				channels := make([][]byte, len(this.session.registeredChannels))
-				for _, channel := range this.session.registeredChannels {
+				for channel, _ := range this.session.registeredChannels {
 					channels = append(channels, []byte(channel))
 				}
 				if len(channels) > 0 {
