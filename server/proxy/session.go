@@ -42,6 +42,7 @@ type Session struct {
 	clientSettings packet.Packet
 	clientEntityId int32
 	serverEntityId int32
+	registeredChannels map[string]bool
 	playerList map[string]bool
 	scoreboards map[string]bool
 	teams map[string]bool
@@ -59,6 +60,7 @@ func NewSession(server *Server, conn net.Conn) *Session {
 		active: true,
 		redirectMutex: &sync.Mutex{},
 		redirecting: false,
+		registeredChannels: make(map[string]bool),
 		playerList: make(map[string]bool),
 		scoreboards: make(map[string]bool),
 		teams: make(map[string]bool),
@@ -345,6 +347,28 @@ func (this *Session) HandlePacket(packet packet.Packet) (err error) {
 			pluginMessagePacket := packet.(*minecraft.PacketServerPluginMessage)
 			if pluginMessagePacket.Channel == "LilyPad" {
 				break
+			}
+
+			if pluginMessagePacket.Channel == "REGISTER" {
+				for _, channelBytes := range bytes.Split(pluginMessagePacket.Data[:], []byte{0}) {
+					channel := string(channelBytes)
+					if this.registeredChannels[channel] {
+						continue
+					}
+
+					if len(this.registeredChannels) >= 128 {
+						break
+					}
+
+					this.registeredChannels[channel] = true
+				}
+			}
+
+			if  pluginMessagePacket.Channel == "UNREGISTER" {
+				for _, channelBytes := range bytes.Split(pluginMessagePacket.Data[:], []byte{0}) {
+					channel := string(channelBytes)
+					delete(this.registeredChannels, channel)
+				}
 			}
 		}
 		if this.redirecting {
