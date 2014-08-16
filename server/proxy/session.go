@@ -345,26 +345,18 @@ func (this *Session) HandlePacket(packet packet.Packet) (err error) {
 		}
 		if packet.Id() == minecraft.PACKET_SERVER_PLUGIN_MESSAGE {
 			pluginMessagePacket := packet.(*minecraft.PacketServerPluginMessage)
-			if pluginMessagePacket.Channel == "LilyPad" {
-				break
-			}
-
 			if pluginMessagePacket.Channel == "REGISTER" {
 				for _, channelBytes := range bytes.Split(pluginMessagePacket.Data[:], []byte{0}) {
 					channel := string(channelBytes)
 					if this.registeredChannels[channel] {
 						continue
 					}
-
 					if len(this.registeredChannels) >= 128 {
 						break
 					}
-
 					this.registeredChannels[channel] = true
 				}
-			}
-
-			if  pluginMessagePacket.Channel == "UNREGISTER" {
+			} else if pluginMessagePacket.Channel == "UNREGISTER" {
 				for _, channelBytes := range bytes.Split(pluginMessagePacket.Data[:], []byte{0}) {
 					channel := string(channelBytes)
 					delete(this.registeredChannels, channel)
