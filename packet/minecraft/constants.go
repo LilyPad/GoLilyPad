@@ -3,7 +3,7 @@ package minecraft
 import "github.com/LilyPad/GoLilyPad/packet"
 
 const (
-	STRING_VERSION = string("1.7.6")
+	STRING_VERSION = string("1.7.10")
 	MAGIC = string("§")
 
 	PACKET_SERVER_HANDSHAKE = 0x00
