@@ -25,12 +25,12 @@ func (this *Config) Route(domain string) (val []string) {
 		if route.Servers != nil {
 			val = make([]string, len(route.Servers))
 			copy(val, route.Servers)
-		} else if len(route.Server) == 0 {
-			val = []string{}
-		} else {
+		} else if len(route.Server) > 0 {
 			val = []string{route.Server}
 		}
-	} else if domain != "" {
+		return
+	}
+	if domain != "" {
 		val = this.Route("")
 	} else {
 		val = []string{}
