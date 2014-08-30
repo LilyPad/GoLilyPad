@@ -38,7 +38,7 @@ func (this *cfb8) XORKeyStream(dst, src []byte) {
 		copy(this.Tmp, this.Iv)
 		this.Block.Encrypt(this.Iv, this.Iv)
 		val = val ^ this.Iv[0]
-		copy(this.Iv, this.Tmp[1:]);
+		copy(this.Iv, this.Tmp[1:])
 		if this.Decrypt {
 			this.Iv[15] = src[i]
 		} else {

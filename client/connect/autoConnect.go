@@ -46,6 +46,6 @@ func AutoAuthenticate(connectClient Connect, user *string, pass *string) {
 				connectClient.DispatchEvent("authenticate", nil)
 				fmt.Println("Connect client, authenticated to remote host")
 			})
-		});
-	});
+		})
+	})
 }

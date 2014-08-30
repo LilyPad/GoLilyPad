@@ -15,7 +15,7 @@ type Config struct {
 func (this *Config) Route(domain string) (val []string) {
 	this.Proxy.routesMutex.Lock()
 	if this.Proxy.routes == nil {
-		this.Proxy.routes = make(map[string]ConfigProxyRoute);
+		this.Proxy.routes = make(map[string]ConfigProxyRoute)
 		for _, route := range this.Proxy.Routes {
 			this.Proxy.routes[strings.ToLower(route.Domain)] = route
 		}
@@ -41,7 +41,7 @@ func (this *Config) Route(domain string) (val []string) {
 func (this *Config) RouteMotds(domain string) (val []string) {
 	this.Proxy.routesMutex.Lock()
 	if this.Proxy.routes == nil {
-		this.Proxy.routes = make(map[string]ConfigProxyRoute);
+		this.Proxy.routes = make(map[string]ConfigProxyRoute)
 		for _, route := range this.Proxy.Routes {
 			this.Proxy.routes[strings.ToLower(route.Domain)] = route
 		}
@@ -65,7 +65,7 @@ func (this *Config) RouteMotds(domain string) (val []string) {
 func (this *Config) RouteIcons(domain string) (val []string) {
 	this.Proxy.routesMutex.Lock()
 	if this.Proxy.routes == nil {
-		this.Proxy.routes = make(map[string]ConfigProxyRoute);
+		this.Proxy.routes = make(map[string]ConfigProxyRoute)
 		for _, route := range this.Proxy.Routes {
 			this.Proxy.routes[strings.ToLower(route.Domain)] = route
 		}
@@ -89,7 +89,7 @@ func (this *Config) RouteIcons(domain string) (val []string) {
 func (this *Config) RouteSample(domain string) (val string) {
 	this.Proxy.routesMutex.Lock()
 	if this.Proxy.routes == nil {
-		this.Proxy.routes = make(map[string]ConfigProxyRoute);
+		this.Proxy.routes = make(map[string]ConfigProxyRoute)
 		for _, route := range this.Proxy.Routes {
 			this.Proxy.routes[strings.ToLower(route.Domain)] = route
 		}

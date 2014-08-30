@@ -145,7 +145,7 @@ func (this *Session) SetAuthenticated(result bool) {
 }
 
 func (this *Session) Disconnect(reason string) {
-	reasonJson, _ := json.Marshal(reason);
+	reasonJson, _ := json.Marshal(reason)
 	this.DisconnectJson("{\"text\":" + string(reasonJson) + "}")
 }
 
