@@ -25,10 +25,11 @@ func (this *Config) Route(domain string) (val []string) {
 		if route.Servers != nil {
 			val = make([]string, len(route.Servers))
 			copy(val, route.Servers)
+			return
 		} else if len(route.Server) > 0 {
 			val = []string{route.Server}
+			return
 		}
-		return
 	}
 	if domain != "" {
 		val = this.Route("")
@@ -51,10 +52,11 @@ func (this *Config) RouteMotds(domain string) (val []string) {
 		if route.Motds != nil {
 			val = make([]string, len(route.Motds))
 			copy(val, route.Motds)
+			return
 		} else if len(route.Motd) > 0 {
 			val = []string{route.Motd}
+			return
 		}
-		return
 	}
 	if domain != "" {
 		val = this.RouteMotds("")
@@ -77,10 +79,11 @@ func (this *Config) RouteIcons(domain string) (val []string) {
 		if route.Icons != nil {
 			val = make([]string, len(route.Icons))
 			copy(val, route.Icons)
+			return
 		} else if len(route.Icon) > 0 {
 			val = []string{route.Icon}
+			return
 		}
-		return
 	}
 	if domain != "" {
 		val = this.RouteIcons("")
