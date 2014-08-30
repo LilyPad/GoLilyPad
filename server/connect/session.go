@@ -25,7 +25,7 @@ type Session struct {
 	serverSecurityKey string
 	proxyMotd string
 	proxyVersion string
-	proxyPlayers map[string]bool
+	proxyPlayers map[string]struct{}
 	proxyMaxPlayers uint16
 
 	remoteIp string
@@ -90,7 +90,7 @@ func (this *Session) RegisterProxy(address string, port uint16, motd string, ver
 	this.rolePort = port
 	this.proxyMotd = motd
 	this.proxyVersion = version
-	this.proxyPlayers = make(map[string]bool)
+	this.proxyPlayers = make(map[string]struct{})
 	this.proxyMaxPlayers = maxPlayers
 	this.server.SessionRegistry(ROLE_AUTHORIZED).Register(this)
 	this.server.SessionRegistry(ROLE_PROXY).Register(this)
@@ -275,7 +275,7 @@ func (this *Session) HandlePacket(packet packet.Packet) (err error) {
 						statusCode = connect.STATUS_ERROR_GENERIC
 						break
 					}
-					this.proxyPlayers[player] = true
+					this.proxyPlayers[player] = struct{}{}
 				} else {
 					if _, ok := this.proxyPlayers[player]; ok {
 						this.server.networkCache.RemovePlayer(player)
