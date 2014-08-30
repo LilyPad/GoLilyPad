@@ -1,26 +1,38 @@
 package connect
 
-import "io"
-import "github.com/LilyPad/GoLilyPad/packet"
+import (
+	"io"
+	"github.com/LilyPad/GoLilyPad/packet"
+)
 
 type RequestAsProxy struct {
 	Address string
 	Port uint16
 	Motd string
 	Version string
-	Maxplayers uint16
+	MaxPlayers uint16
+}
+
+func NewRequestAsProxy(address string, port uint16, motd string, version string, maxPlayers uint16) (this *RequestAsProxy) {
+	this = new(RequestAsProxy)
+	this.Address = address
+	this.Port = port
+	this.Motd = motd
+	this.Version = version
+	this.MaxPlayers = maxPlayers
+	return
 }
 
 func (this *RequestAsProxy) Id() int {
 	return REQUEST_AS_PROXY
 }
 
-type RequestAsProxyCodec struct {
+type requestAsProxyCodec struct {
 
 }
 
-func (this *RequestAsProxyCodec) Decode(reader io.Reader, util []byte) (request Request, err error) {
-	requestAsProxy := &RequestAsProxy{}
+func (this *requestAsProxyCodec) Decode(reader io.Reader, util []byte) (request Request, err error) {
+	requestAsProxy := new(RequestAsProxy)
 	requestAsProxy.Address, err = packet.ReadString(reader, util)
 	if err != nil {
 		return
@@ -37,14 +49,15 @@ func (this *RequestAsProxyCodec) Decode(reader io.Reader, util []byte) (request 
 	if err != nil {
 		return
 	}
-	requestAsProxy.Maxplayers, err = packet.ReadUint16(reader, util)
+	requestAsProxy.MaxPlayers, err = packet.ReadUint16(reader, util)
 	if err != nil {
 		return
 	}
-	return requestAsProxy, nil
+	request = requestAsProxy
+	return
 }
 
-func (this *RequestAsProxyCodec) Encode(writer io.Writer, util []byte, request Request) (err error) {
+func (this *requestAsProxyCodec) Encode(writer io.Writer, util []byte, request Request) (err error) {
 	requestAsProxy := request.(*RequestAsProxy)
 	err = packet.WriteString(writer, util, requestAsProxy.Address)
 	if err != nil {
@@ -62,7 +75,7 @@ func (this *RequestAsProxyCodec) Encode(writer io.Writer, util []byte, request R
 	if err != nil {
 		return
 	}
-	err = packet.WriteUint16(writer, util, requestAsProxy.Maxplayers)
+	err = packet.WriteUint16(writer, util, requestAsProxy.MaxPlayers)
 	return
 }
 
@@ -70,18 +83,24 @@ type ResultAsProxy struct {
 
 }
 
+func NewResultAsProxy() (this *ResultAsProxy) {
+	this = new(ResultAsProxy)
+	return
+}
+
 func (this *ResultAsProxy) Id() int {
 	return REQUEST_AS_PROXY
 }
 
-type ResultAsProxyCodec struct {
+type resultAsProxyCodec struct {
 
 }
 
-func (this *ResultAsProxyCodec) Decode(reader io.Reader, util []byte) (result Result, err error) {
-	return &ResultAsProxy{}, nil
+func (this *resultAsProxyCodec) Decode(reader io.Reader, util []byte) (result Result, err error) {
+	result = new(ResultAsProxy)
+	return
 }
 
-func (this *ResultAsProxyCodec) Encode(writer io.Writer, util []byte, result Result) (err error) {
+func (this *resultAsProxyCodec) Encode(writer io.Writer, util []byte, result Result) (err error) {
 	return
 }

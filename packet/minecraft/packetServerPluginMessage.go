@@ -1,23 +1,32 @@
 package minecraft
 
-import "io"
-import "github.com/LilyPad/GoLilyPad/packet"
+import (
+	"io"
+	"github.com/LilyPad/GoLilyPad/packet"
+)
 
 type PacketServerPluginMessage struct {
 	Channel string
 	Data []byte
 }
 
+func NewPacketServerPluginMessage(channel string, data []byte) (this *PacketServerPluginMessage) {
+	this = new(PacketServerPluginMessage)
+	this.Channel = channel
+	this.Data = data
+	return
+}
+
 func (this *PacketServerPluginMessage) Id() int {
 	return PACKET_SERVER_PLUGIN_MESSAGE
 }
 
-type PacketServerPluginMessageCodec struct {
-	
+type packetServerPluginMessageCodec struct {
+
 }
 
-func (this *PacketServerPluginMessageCodec) Decode(reader io.Reader, util []byte) (decode packet.Packet, err error) {
-	packetServerPluginMessage := &PacketServerPluginMessage{}
+func (this *packetServerPluginMessageCodec) Decode(reader io.Reader, util []byte) (decode packet.Packet, err error) {
+	packetServerPluginMessage := new(PacketServerPluginMessage)
 	packetServerPluginMessage.Channel, err = packet.ReadString(reader, util)
 	if err != nil {
 		return
@@ -31,10 +40,11 @@ func (this *PacketServerPluginMessageCodec) Decode(reader io.Reader, util []byte
 	if err != nil {
 		return
 	}
-	return packetServerPluginMessage, nil
+	decode = packetServerPluginMessage
+	return
 }
 
-func (this *PacketServerPluginMessageCodec) Encode(writer io.Writer, util []byte, encode packet.Packet) (err error) {
+func (this *packetServerPluginMessageCodec) Encode(writer io.Writer, util []byte, encode packet.Packet) (err error) {
 	packetServerPluginMessage := encode.(*PacketServerPluginMessage)
 	err = packet.WriteString(writer, util, packetServerPluginMessage.Channel)
 	if err != nil {

@@ -1,10 +1,12 @@
 package auth
 
-import "crypto/sha1"
-import "encoding/hex"
-import "strings"
+import (
+	"crypto/sha1"
+	"encoding/hex"
+	"strings"
+)
 
-func MojangSha1Hex(arrBytes ...[]byte) string {
+func MojangSha1Hex(arrBytes ...[]byte) (val string) {
 	sha1 := sha1.New()
 	for _, bytes := range arrBytes {
 		sha1.Write(bytes)
@@ -14,12 +16,12 @@ func MojangSha1Hex(arrBytes ...[]byte) string {
 	if negative {
 		twosCompliment(hash)
 	}
-	hexString := hex.EncodeToString(hash)
-	hexString = strings.TrimLeft(hexString, "0")
+	val = hex.EncodeToString(hash)
+	val = strings.TrimLeft(val, "0")
 	if negative {
-		hexString = "-" + hexString
+		val = "-" + val
 	}
-	return hexString
+	return
 }
 
 func twosCompliment(p []byte) {

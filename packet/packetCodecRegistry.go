@@ -1,15 +1,19 @@
 package packet
 
-import "errors"
-import "fmt"
-import "io"
+import (
+	"errors"
+	"fmt"
+	"io"
+)
 
 type PacketCodecRegistry struct {
-	packetCodecs []PacketCodec	
+	packetCodecs []PacketCodec
 }
 
-func NewPacketCodecRegistry(packetCodecs []PacketCodec) *PacketCodecRegistry {
-	return &PacketCodecRegistry{packetCodecs}
+func NewPacketCodecRegistry(packetCodecs []PacketCodec) (this *PacketCodecRegistry) {
+	this = new(PacketCodecRegistry)
+	this.packetCodecs = packetCodecs
+	return
 }
 
 func (this *PacketCodecRegistry) Decode(reader io.Reader, util []byte) (packet Packet, err error) {
@@ -24,13 +28,14 @@ func (this *PacketCodecRegistry) Decode(reader io.Reader, util []byte) (packet P
 	if id >= len(this.packetCodecs) {
 		err = errors.New(fmt.Sprintf("Decode, Packet Id is above maximum: %d", id))
 		return
-	} 
+	}
 	codec := this.packetCodecs[id]
 	if codec == nil {
 		err = errors.New(fmt.Sprintf("Decode, Packet Id does not have a codec: %d", id))
 		return
 	}
-	return codec.Decode(reader, util)
+	packet, err = codec.Decode(reader, util)
+	return
 }
 
 func (this *PacketCodecRegistry) Encode(writer io.Writer, util []byte, packet Packet) (err error) {
@@ -52,5 +57,6 @@ func (this *PacketCodecRegistry) Encode(writer io.Writer, util []byte, packet Pa
 		err = errors.New(fmt.Sprintf("Encode, Packet Id does not have a codec: %d", id))
 		return
 	}
-	return codec.Encode(writer, util, packet)
+	err = codec.Encode(writer, util, packet)
+	return
 }

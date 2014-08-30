@@ -1,16 +1,18 @@
 package config
 
-import "io/ioutil"
-import "strings"
-import "sync"
-import yaml "launchpad.net/goyaml"
+import (
+	"io/ioutil"
+	"strings"
+	"sync"
+	yaml "launchpad.net/goyaml"
+)
 
 type Config struct {
 	Connect ConfigConnect `yaml:"connect"`
 	Proxy ConfigProxy `yaml:"proxy"`
 }
 
-func (this *Config) Route(domain string) []string {
+func (this *Config) Route(domain string) (val []string) {
 	this.Proxy.routesMutex.Lock()
 	if this.Proxy.routes == nil {
 		this.Proxy.routes = make(map[string]ConfigProxyRoute);
@@ -20,25 +22,23 @@ func (this *Config) Route(domain string) []string {
 	}
 	this.Proxy.routesMutex.Unlock()
 	if route, ok := this.Proxy.routes[strings.ToLower(domain)]; ok {
-		if route.Servers == nil {
-			if len(route.Server) == 0 {
-				return []string{}
-			} else {
-				return []string{route.Server}
-			}
+		if route.Servers != nil {
+			val = make([]string, len(route.Servers))
+			copy(val, route.Servers)
+		} else if len(route.Server) == 0 {
+			val = []string{}
 		} else {
-			servers := make([]string, len(route.Servers))
-			copy(servers, route.Servers)
-			return servers
+			val = []string{route.Server}
 		}
+	} else if domain != "" {
+		val = this.Route("")
+	} else {
+		val = []string{}
 	}
-	if domain != "" {
-		return this.Route("")
-	}
-	return []string{}
+	return
 }
 
-func (this *Config) RouteMotds(domain string) []string {
+func (this *Config) RouteMotds(domain string) (val []string) {
 	this.Proxy.routesMutex.Lock()
 	if this.Proxy.routes == nil {
 		this.Proxy.routes = make(map[string]ConfigProxyRoute);
@@ -49,20 +49,20 @@ func (this *Config) RouteMotds(domain string) []string {
 	this.Proxy.routesMutex.Unlock()
 	if route, ok := this.Proxy.routes[strings.ToLower(domain)]; ok {
 		if route.Motds != nil {
-			motds := make([]string, len(route.Motds))
-			copy(motds, route.Motds)
-			return motds
+			val = make([]string, len(route.Motds))
+			copy(val, route.Motds)
 		} else if len(route.Motd) > 0 {
-			return []string{route.Motd}
+			val = []string{route.Motd}
 		}
+	} else if domain != "" {
+		val = this.RouteMotds("")
+	} else {
+		val = []string{this.Proxy.Motd}
 	}
-	if domain != "" {
-		return this.RouteMotds("")
-	}
-	return []string{this.Proxy.Motd}
+	return
 }
 
-func (this *Config) RouteIcons(domain string) []string {
+func (this *Config) RouteIcons(domain string) (val []string) {
 	this.Proxy.routesMutex.Lock()
 	if this.Proxy.routes == nil {
 		this.Proxy.routes = make(map[string]ConfigProxyRoute);
@@ -73,20 +73,20 @@ func (this *Config) RouteIcons(domain string) []string {
 	this.Proxy.routesMutex.Unlock()
 	if route, ok := this.Proxy.routes[strings.ToLower(domain)]; ok {
 		if route.Icons != nil {
-			icons := make([]string, len(route.Icons))
-			copy(icons, route.Icons)
-			return icons
+			val = make([]string, len(route.Icons))
+			copy(val, route.Icons)
 		} else if len(route.Icon) > 0 {
-			return []string{route.Icon}
+			val = []string{route.Icon}
 		}
+	} else if domain != "" {
+		val = this.RouteIcons("")
+	} else {
+		val = []string{"server-icon.png"}
 	}
-	if domain != "" {
-		return this.RouteIcons("")
-	}
-	return []string{"server-icon.png"};
+	return
 }
 
-func (this *Config) RouteSample(domain string) string {
+func (this *Config) RouteSample(domain string) (val string) {
 	this.Proxy.routesMutex.Lock()
 	if this.Proxy.routes == nil {
 		this.Proxy.routes = make(map[string]ConfigProxyRoute);
@@ -95,35 +95,39 @@ func (this *Config) RouteSample(domain string) string {
 		}
 	}
 	this.Proxy.routesMutex.Unlock()
-	if route, ok := this.Proxy.routes[strings.ToLower(domain)]; ok {
-		if route.Sample != "" {
-			return route.Sample
-		}
+	if route, ok := this.Proxy.routes[strings.ToLower(domain)]; ok && route.Sample != "" {
+		val = route.Sample
+	} else if domain != "" {
+		val = this.RouteSample("")
+	} else {
+		val = "sample.txt"
 	}
-	if domain != "" {
-		return this.RouteSample("")
-	}
-	return "sample.txt";
+	return
 }
 
-func (this *Config) LocaleFull() string {
-	return this.Proxy.Locale.Full
+func (this *Config) LocaleFull() (val string) {
+	val = this.Proxy.Locale.Full
+	return
 }
 
-func (this *Config) LocaleOffline() string {
-	return this.Proxy.Locale.Offline
+func (this *Config) LocaleOffline() (val string) {
+	val = this.Proxy.Locale.Offline
+	return
 }
 
-func (this *Config) LocaleLoggedIn() string {
-	return this.Proxy.Locale.LoggedIn
+func (this *Config) LocaleLoggedIn() (val string) {
+	val = this.Proxy.Locale.LoggedIn
+	return
 }
 
-func (this *Config) LocaleLostConn() string {
-	return this.Proxy.Locale.LostConn
+func (this *Config) LocaleLostConn() (val string) {
+	val = this.Proxy.Locale.LostConn
+	return
 }
 
-func (this *Config) LocaleShutdown() string {
-	return this.Proxy.Locale.Shutdown
+func (this *Config) LocaleShutdown() (val string) {
+	val = this.Proxy.Locale.Shutdown
+	return
 }
 
 type ConfigConnect struct {
@@ -167,34 +171,34 @@ type ConfigProxyRoute struct {
 }
 
 func DefaultConfig() (config *Config) {
-	return &Config{
-		Connect: ConfigConnect {
-			Address: "127.0.0.1:5091",
-			Credentials: ConfigConnectCredentials{
-				Username: "example",
-				Password: "example",
-			},
-		},
-		Proxy: ConfigProxy{
-			Bind: ":25565",
-			Routes: []ConfigProxyRoute{
-				ConfigProxyRoute{"", "example", nil, "", nil, "", nil, ""},
-				ConfigProxyRoute{"example.com", "", []string{"hub1", "hub2"}, "Example Custom MOTD", nil, "", nil, ""},
-				ConfigProxyRoute{"hub.exmaple.com", "hub", nil, "", []string{"Example MOTD 1", "Example MOTD 2"}, "", nil, ""},
-				ConfigProxyRoute{"icon.exmaple.com", "hub", nil, "", nil, "icon.png", []string{"icon1.png", "icon2.png", "icons/icon3.png"}, ""},
-			},
-			Locale: ConfigProxyLocale{
-				Full: "The server seems to be currently full. Try again later!",
-				Offline: "The requested server is currently offline. Try again later!",
-				LoggedIn: "You seem to be logged in already. Try again later!",
-				LostConn: "Lost connection... Please try to reconnect",
-				Shutdown: "The server is being restarted. Please try to reconnect",
-			},
-			Motd: "A LilyPad Server",
-			MaxPlayers: 1,
-			Authenticate: true,
+	config = new(Config)
+	config.Connect = ConfigConnect{
+		Address: "127.0.0.1:5091",
+		Credentials: ConfigConnectCredentials{
+			Username: "example",
+			Password: "example",
 		},
 	}
+	config.Proxy = ConfigProxy{
+		Bind: ":25565",
+		Routes: []ConfigProxyRoute{
+			ConfigProxyRoute{"", "example", nil, "", nil, "", nil, ""},
+			ConfigProxyRoute{"example.com", "", []string{"hub1", "hub2"}, "Example Custom MOTD", nil, "", nil, ""},
+			ConfigProxyRoute{"hub.exmaple.com", "hub", nil, "", []string{"Example MOTD 1", "Example MOTD 2"}, "", nil, ""},
+			ConfigProxyRoute{"icon.exmaple.com", "hub", nil, "", nil, "icon.png", []string{"icon1.png", "icon2.png", "icons/icon3.png"}, ""},
+		},
+		Locale: ConfigProxyLocale{
+			Full: "The server seems to be currently full. Try again later!",
+			Offline: "The requested server is currently offline. Try again later!",
+			LoggedIn: "You seem to be logged in already. Try again later!",
+			LostConn: "Lost connection... Please try to reconnect",
+			Shutdown: "The server is being restarted. Please try to reconnect",
+		},
+		Motd: "A LilyPad Server",
+		MaxPlayers: 1,
+		Authenticate: true,
+	}
+	return
 }
 
 func LoadConfig(file string) (config *Config, err error) {
@@ -202,8 +206,7 @@ func LoadConfig(file string) (config *Config, err error) {
 	if err != nil {
 		return
 	}
-	var cfg Config
-	config = &cfg
+	config = new(Config)
 	err = yaml.Unmarshal(data, config)
 	return
 }

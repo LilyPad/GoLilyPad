@@ -1,7 +1,9 @@
 package connect
 
-import "io"
-import "github.com/LilyPad/GoLilyPad/packet"
+import (
+	"io"
+	"github.com/LilyPad/GoLilyPad/packet"
+)
 
 type RequestMessage struct {
 	Recipients []string
@@ -9,16 +11,24 @@ type RequestMessage struct {
 	Message []byte
 }
 
+func NewRequestMessage(recipients []string, channel string, message []byte) (this *RequestMessage) {
+	this = new(RequestMessage)
+	this.Recipients = recipients
+	this.Channel = channel
+	this.Message = message
+	return
+}
+
 func (this *RequestMessage) Id() int {
 	return REQUEST_MESSAGE
 }
 
-type RequestMessageCodec struct {
+type requestMessageCodec struct {
 
 }
 
-func (this *RequestMessageCodec) Decode(reader io.Reader, util []byte) (request Request, err error) {
-	requestMessage := &RequestMessage{}
+func (this *requestMessageCodec) Decode(reader io.Reader, util []byte) (request Request, err error) {
+	requestMessage := new(RequestMessage)
 	recipientsSize, err := packet.ReadUint16(reader, util)
 	if err != nil {
 		return
@@ -44,10 +54,11 @@ func (this *RequestMessageCodec) Decode(reader io.Reader, util []byte) (request 
 	if err != nil {
 		return
 	}
-	return requestMessage, nil
+	request = requestMessage
+	return
 }
 
-func (this *RequestMessageCodec) Encode(writer io.Writer, util []byte, request Request) (err error) {
+func (this *requestMessageCodec) Encode(writer io.Writer, util []byte, request Request) (err error) {
 	requestMessage := request.(*RequestMessage)
 	err = packet.WriteUint16(writer, util, uint16(len(requestMessage.Recipients)))
 	for i := 0; i < len(requestMessage.Recipients); i++ {
@@ -75,18 +86,24 @@ type ResultMessage struct {
 
 }
 
+func NewResultMessage() (this *ResultMessage) {
+	this = new(ResultMessage)
+	return
+}
+
 func (this *ResultMessage) Id() int {
 	return REQUEST_MESSAGE
 }
 
-type ResultMessageCodec struct {
+type resultMessageCodec struct {
 
 }
 
-func (this *ResultMessageCodec) Decode(reader io.Reader, util []byte) (result Result, err error) {
-	return &ResultMessage{}, nil
+func (this *resultMessageCodec) Decode(reader io.Reader, util []byte) (result Result, err error) {
+	result = new(ResultMessage)
+	return
 }
 
-func (this *ResultMessageCodec) Encode(writer io.Writer, util []byte, result Result) (err error) {
+func (this *resultMessageCodec) Encode(writer io.Writer, util []byte, result Result) (err error) {
 	return
 }

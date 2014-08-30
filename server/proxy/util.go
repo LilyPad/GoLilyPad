@@ -1,12 +1,14 @@
 package proxy
 
-import cryptoRand "crypto/rand"
-import "math/rand"
-import "crypto/md5"
-import "crypto/sha1"
-import "encoding/hex"
-import "io"
-import "github.com/LilyPad/GoLilyPad/packet/minecraft"
+import (
+	cryptoRand "crypto/rand"
+	"math/rand"
+	"crypto/md5"
+	"crypto/sha1"
+	"encoding/hex"
+	"io"
+	"github.com/LilyPad/GoLilyPad/packet/minecraft"
+)
 
 func MinecraftVersion() string {
 	return minecraft.STRING_VERSION
@@ -18,26 +20,28 @@ func RandomBytes(size int) (bytes []byte, err error) {
 	return
 }
 
-func RandomInt(max int) int {
-	return rand.Intn(max)
+func RandomInt(max int) (val int) {
+	val = rand.Intn(max)
+	return
 }
 
-func FormatUUID(uuid string) string {
-	if len(uuid) != 32 {
-		return ""
+func FormatUUID(uuid string) (val string) {
+	if len(uuid) == 32 {
+		val = uuid[:8] + "-" + uuid[8:12] + "-" + uuid[12:16] + "-" + uuid[16:20] + "-" + uuid[20:]
 	}
-	return uuid[:8] + "-" + uuid[8:12] + "-" + uuid[12:16] + "-" + uuid[16:20] + "-" + uuid[20:]
+	return
 }
 
-func GenNameUUID(name string) string {
+func GenNameUUID(name string) (val string) {
 	md5 := md5.New()
 	md5.Write([]byte(name))
 	md5Sum := md5.Sum(nil)
-	md5Sum[6] &= 0x0F;
-	md5Sum[6] |= 0x30;
-	md5Sum[8] &= 0x3F;
-	md5Sum[8] |= 0x80;
-	return hex.EncodeToString(md5Sum);
+	md5Sum[6] &= 0x0F
+	md5Sum[6] |= 0x30
+	md5Sum[8] &= 0x3F
+	md5Sum[8] |= 0x80
+	val = hex.EncodeToString(md5Sum)
+	return
 }
 
 func GenSalt() (str string, err error) {
@@ -50,8 +54,9 @@ func GenSalt() (str string, err error) {
 	return
 }
 
-func Sha1Hex(str string) string {
+func Sha1Hex(str string) (val string) {
 	sha1 := sha1.New()
 	sha1.Write([]byte(str))
-	return hex.EncodeToString(sha1.Sum(nil))
+	val = hex.EncodeToString(sha1.Sum(nil))
+	return
 }

@@ -1,16 +1,20 @@
 package packet
 
-import "bytes"
-import "errors"
-import "fmt"
-import "io"
+import (
+	"bytes"
+	"errors"
+	"fmt"
+	"io"
+)
 
 type PacketCodecVarIntLength struct {
 	packetCodec PacketCodec
 }
 
-func NewPacketCodecVarIntLength(packetCodec PacketCodec) *PacketCodecVarIntLength {
-	return &PacketCodecVarIntLength{packetCodec}
+func NewPacketCodecVarIntLength(packetCodec PacketCodec) (this *PacketCodecVarIntLength) {
+	this = new(PacketCodecVarIntLength)
+	this.packetCodec = packetCodec
+	return
 }
 
 func (this *PacketCodecVarIntLength) Decode(reader io.Reader, util []byte) (packet Packet, err error) {
@@ -31,11 +35,12 @@ func (this *PacketCodecVarIntLength) Decode(reader io.Reader, util []byte) (pack
 	if err != nil {
 		return
 	}
-	return this.packetCodec.Decode(bytes.NewReader(payload), util)
+	packet, err = this.packetCodec.Decode(bytes.NewReader(payload), util)
+	return
 }
 
 func (this *PacketCodecVarIntLength) Encode(writer io.Writer, util []byte, packet Packet) (err error) {
-	buffer := &bytes.Buffer{}
+	buffer := new(bytes.Buffer)
 	err = this.packetCodec.Encode(buffer, util, packet)
 	if err != nil {
 		return

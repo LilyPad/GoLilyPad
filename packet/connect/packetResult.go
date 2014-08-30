@@ -1,10 +1,12 @@
 package connect
 
-import "bytes"
-import "errors"
-import "fmt"
-import "io"
-import "github.com/LilyPad/GoLilyPad/packet"
+import (
+	"bytes"
+	"errors"
+	"fmt"
+	"io"
+	"github.com/LilyPad/GoLilyPad/packet"
+)
 
 type PacketResult struct {
 	SequenceId int32
@@ -12,24 +14,34 @@ type PacketResult struct {
 	Result Result
 }
 
+func NewPacketResult(sequenceId int32, statusCode uint8, result Result) (this *PacketResult) {
+	this = new(PacketResult)
+	this.SequenceId = sequenceId
+	this.StatusCode = statusCode
+	this.Result = result
+	return
+}
+
 func (this *PacketResult) Id() int {
 	return PACKET_RESULT
 }
 
-type PacketResultCodec struct {
-	sequencer PacketResultSequencer
+type packetResultCodec struct {
+	Sequencer PacketResultSequencer
 }
 
-func NewPacketResultCodec(sequencer PacketResultSequencer) *PacketResultCodec {
-	return &PacketResultCodec{sequencer}
+func NewPacketResultCodec(sequencer PacketResultSequencer) (this *packetResultCodec) {
+	this = new(packetResultCodec)
+	this.Sequencer = sequencer
+	return
 }
 
-func (this *PacketResultCodec) Decode(reader io.Reader, util []byte) (decode packet.Packet, err error) {
-	if this.sequencer == nil {
+func (this *packetResultCodec) Decode(reader io.Reader, util []byte) (decode packet.Packet, err error) {
+	if this.Sequencer == nil {
 		err = errors.New("No sequencer to decode PacketResult")
 		return
 	}
-	packetResult := &PacketResult{}
+	packetResult := new(PacketResult)
 	packetResult.SequenceId, err = packet.ReadInt32(reader, util)
 	if err != nil {
 		return
@@ -42,7 +54,7 @@ func (this *PacketResultCodec) Decode(reader io.Reader, util []byte) (decode pac
 		var payloadSize uint16
 		payloadSize, err = packet.ReadUint16(reader, util)
 		if err != nil {
-			return nil, err
+			return
 		}
 		payload := make([]byte, payloadSize)
 		_, err = reader.Read(payload)
@@ -50,7 +62,7 @@ func (this *PacketResultCodec) Decode(reader io.Reader, util []byte) (decode pac
 			return
 		}
 		buffer := bytes.NewBuffer(payload)
-		requestId := this.sequencer.RequestIdBySequenceId(packetResult.SequenceId)
+		requestId := this.Sequencer.RequestIdBySequenceId(packetResult.SequenceId)
 		if requestId < 0 {
 			err = errors.New(fmt.Sprintf("Decode, Request Id is below zero: %d", requestId))
 			return
@@ -69,10 +81,11 @@ func (this *PacketResultCodec) Decode(reader io.Reader, util []byte) (decode pac
 			return
 		}
 	}
-	return packetResult, nil
+	decode = packetResult
+	return
 }
 
-func (this *PacketResultCodec) Encode(writer io.Writer, util []byte, encode packet.Packet) (err error) {
+func (this *packetResultCodec) Encode(writer io.Writer, util []byte, encode packet.Packet) (err error) {
 	packetResult := encode.(*PacketResult)
 	err = packet.WriteInt32(writer, util, packetResult.SequenceId)
 	if err != nil {
@@ -88,7 +101,7 @@ func (this *PacketResultCodec) Encode(writer io.Writer, util []byte, encode pack
 			err = errors.New(fmt.Sprintf("Encode, Request Id is above maximum: %d", packetResult.Result.Id()))
 			return
 		}
-		buffer := &bytes.Buffer{}
+		buffer := new(bytes.Buffer)
 		codec := resultCodecs[packetResult.Result.Id()]
 		if codec == nil {
 			err = errors.New(fmt.Sprintf("Encode, Request Id does not have a codec: %d", packetResult.Result.Id()))

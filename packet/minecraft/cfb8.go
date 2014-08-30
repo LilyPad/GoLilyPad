@@ -1,45 +1,48 @@
 package minecraft
 
-import "crypto/cipher"
+import (
+	"crypto/cipher"
+)
 
 type cfb8 struct {
-	block			cipher.Block
-	iv				[]byte
-	tmp				[]byte
-	decrypt			bool
+	Block cipher.Block
+	Iv []byte
+	Tmp []byte
+	Decrypt bool
 }
-
-func NewCFB8Decrypter(block cipher.Block, iv []byte) (stream cipher.Stream) {
-	return newCFB8(block, iv, true)
-}
-
-func NewCFB8Encrypter(block cipher.Block, iv []byte) (stream cipher.Stream){
-	return newCFB8(block, iv, false)
-}
-
 func newCFB8(block cipher.Block, iv []byte, decrypt bool) (stream cipher.Stream) {
-	bytes := make([]byte, len(iv))
-	copy(bytes, iv)
-	return &cfb8{
-		block:		block,
-		iv:			bytes,
-		tmp:		make([]byte, block.BlockSize()),
-		decrypt:	decrypt,
-	}
+	cfb8 := new(cfb8)
+	cfb8.Block = block
+	cfb8.Iv = make([]byte, len(iv))
+	cfb8.Tmp = make([]byte, block.BlockSize())
+	cfb8.Decrypt = decrypt
+	copy(cfb8.Iv, iv)
+	stream = cfb8
+	return
+}
+
+func NewCFB8Encrypt(block cipher.Block, iv []byte) (stream cipher.Stream) {
+	stream = newCFB8(block, iv, false)
+	return
+}
+
+func NewCFB8Decrypt(block cipher.Block, iv []byte) (stream cipher.Stream) {
+	stream = newCFB8(block, iv, true)
+	return
 }
 
 func (this *cfb8) XORKeyStream(dst, src []byte) {
 	var val byte
 	for i := 0; i < len(src); i++ {
 		val = src[i]
-		copy(this.tmp, this.iv)
-		this.block.Encrypt(this.iv, this.iv)
-		val = val ^ this.iv[0]
-		copy(this.iv, this.tmp[1:]);
-		if this.decrypt {
-			this.iv[15] = src[i]
+		copy(this.Tmp, this.Iv)
+		this.Block.Encrypt(this.Iv, this.Iv)
+		val = val ^ this.Iv[0]
+		copy(this.Iv, this.Tmp[1:]);
+		if this.Decrypt {
+			this.Iv[15] = src[i]
 		} else {
-			this.iv[15] = val
+			this.Iv[15] = val
 		}
 		dst[i] = val
 	}

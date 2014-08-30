@@ -1,11 +1,13 @@
 package auth
 
-import "crypto/tls"
-import "crypto/x509"
-import "encoding/json"
-import "errors"
-import "fmt"
-import "net/http"
+import (
+	"crypto/tls"
+	"crypto/x509"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"net/http"
+)
 
 type GameProfile struct {
 	Id string `json:"id"`
@@ -19,15 +21,12 @@ type GameProfileProperty struct {
 }
 
 func Authenticate(name string, serverId string, sharedSecret []byte, publicKey []byte) (profile GameProfile, err error) {
-	rootCAs := x509.NewCertPool()
-	rootCAs.AppendCertsFromPEM([]byte(Certificate))
-	client := &http.Client{
-		Transport:  &http.Transport{
-			TLSClientConfig: &tls.Config{
-				RootCAs: rootCAs,
-			},
-		},
-	}
+	transport := new(http.Transport)
+	transport.TLSClientConfig = new(tls.Config)
+	transport.TLSClientConfig.RootCAs = x509.NewCertPool()
+	transport.TLSClientConfig.RootCAs.AppendCertsFromPEM([]byte(Certificate))
+	client := new(http.Client)
+	client.Transport = transport
 	response, err := client.Get(fmt.Sprintf(URL, name, MojangSha1Hex([]byte(serverId), sharedSecret, publicKey)))
 	if err != nil {
 		return

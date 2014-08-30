@@ -8,16 +8,23 @@ type RequestAuthenticate struct {
 	Password string
 }
 
+func NewRequestAuthenticate(username string, password string) (this *RequestAuthenticate) {
+	this = new(RequestAuthenticate)
+	this.Username = username
+	this.Password = password
+	return
+}
+
 func (this *RequestAuthenticate) Id() int {
 	return REQUEST_AUTHENTICATE
 }
 
-type RequestAuthenticateCodec struct {
-	
+type requestAuthenticateCodec struct {
+
 }
 
-func (this *RequestAuthenticateCodec) Decode(reader io.Reader, util []byte) (request Request, err error) {
-	requestAuthenticate := &RequestAuthenticate{}
+func (this *requestAuthenticateCodec) Decode(reader io.Reader, util []byte) (request Request, err error) {
+	requestAuthenticate := new(RequestAuthenticate)
 	requestAuthenticate.Username, err = packet.ReadString(reader, util)
 	if err != nil {
 		return
@@ -26,10 +33,11 @@ func (this *RequestAuthenticateCodec) Decode(reader io.Reader, util []byte) (req
 	if err != nil {
 		return
 	}
-	return requestAuthenticate, nil
+	request = requestAuthenticate
+	return
 }
 
-func (this *RequestAuthenticateCodec) Encode(writer io.Writer, util []byte, request Request) (err error) {
+func (this *requestAuthenticateCodec) Encode(writer io.Writer, util []byte, request Request) (err error) {
 	requestAuthenticate := request.(*RequestAuthenticate)
 	err = packet.WriteString(writer, util, requestAuthenticate.Username)
 	if err != nil {
@@ -43,18 +51,24 @@ type ResultAuthenticate struct {
 
 }
 
+func NewResultAuthenticate() (this *ResultAuthenticate) {
+	this = new(ResultAuthenticate)
+	return
+}
+
 func (this *ResultAuthenticate) Id() int {
 	return REQUEST_AUTHENTICATE
 }
 
-type ResultAuthenticateCodec struct {
+type resultAuthenticateCodec struct {
 
 }
 
-func (this *ResultAuthenticateCodec) Decode(reader io.Reader, util []byte) (result Result, err error) {
-	return &ResultAuthenticate{}, nil
+func (this *resultAuthenticateCodec) Decode(reader io.Reader, util []byte) (result Result, err error) {
+	result = new(ResultAuthenticate)
+	return
 }
 
-func (this *ResultAuthenticateCodec) Encode(writer io.Writer, util []byte, result Result) (err error) {
+func (this *resultAuthenticateCodec) Encode(writer io.Writer, util []byte, result Result) (err error) {
 	return
 }

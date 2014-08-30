@@ -1,7 +1,9 @@
 package connect
 
-import "io"
-import "github.com/LilyPad/GoLilyPad/packet"
+import (
+	"io"
+	"github.com/LilyPad/GoLilyPad/packet"
+)
 
 type PacketServerEvent struct {
 	Add bool
@@ -11,16 +13,33 @@ type PacketServerEvent struct {
 	Port uint16
 }
 
+func NewPacketServerEventAdd(server string, securityKey string, address string, port uint16) (this *PacketServerEvent) {
+	this = new(PacketServerEvent)
+	this.Add = true
+	this.Server = server
+	this.SecurityKey = securityKey
+	this.Address = address
+	this.Port = port
+	return
+}
+
+func NewPacketServerEventRemove(server string) (this *PacketServerEvent) {
+	this = new(PacketServerEvent)
+	this.Add = false
+	this.Server = server
+	return
+}
+
 func (this *PacketServerEvent) Id() int {
 	return PACKET_SERVER_EVENT
 }
 
-type PacketServerEventCodec struct {
-	
+type packetServerEventCodec struct {
+
 }
 
-func (this *PacketServerEventCodec) Decode(reader io.Reader, util []byte) (decode packet.Packet, err error) {
-	packetServerEvent := &PacketServerEvent{}
+func (this *packetServerEventCodec) Decode(reader io.Reader, util []byte) (decode packet.Packet, err error) {
+	packetServerEvent := new(PacketServerEvent)
 	packetServerEvent.Add, err = packet.ReadBool(reader, util)
 	if err != nil {
 		return
@@ -43,10 +62,11 @@ func (this *PacketServerEventCodec) Decode(reader io.Reader, util []byte) (decod
 			return
 		}
 	}
-	return packetServerEvent, nil
+	decode = packetServerEvent
+	return
 }
 
-func (this *PacketServerEventCodec) Encode(writer io.Writer, util []byte, encode packet.Packet) (err error) {
+func (this *packetServerEventCodec) Encode(writer io.Writer, util []byte, encode packet.Packet) (err error) {
 	packetServerEvent := encode.(*PacketServerEvent)
 	err = packet.WriteBool(writer, util, packetServerEvent.Add)
 	if err != nil {

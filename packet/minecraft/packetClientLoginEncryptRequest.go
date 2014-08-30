@@ -1,7 +1,9 @@
 package minecraft
 
-import "io"
-import "github.com/LilyPad/GoLilyPad/packet"
+import (
+	"io"
+	"github.com/LilyPad/GoLilyPad/packet"
+)
 
 type PacketClientLoginEncryptRequest struct {
 	ServerId string
@@ -9,16 +11,24 @@ type PacketClientLoginEncryptRequest struct {
 	VerifyToken []byte
 }
 
+func NewPacketClientLoginEncryptRequest(serverId string, publicKey []byte, verifyToken []byte) (this *PacketClientLoginEncryptRequest) {
+	this = new(PacketClientLoginEncryptRequest)
+	this.ServerId = serverId
+	this.PublicKey = publicKey
+	this.VerifyToken = verifyToken
+	return
+}
+
 func (this *PacketClientLoginEncryptRequest) Id() int {
 	return PACKET_CLIENT_LOGIN_ENCRYPT_REQUEST
 }
 
-type PacketClientLoginEncryptRequestCodec struct {
-	
+type packetClientLoginEncryptRequestCodec struct {
+
 }
 
-func (this *PacketClientLoginEncryptRequestCodec) Decode(reader io.Reader, util []byte) (decode packet.Packet, err error) {
-	packetClientLoginEncryptRequest := &PacketClientLoginEncryptRequest{}
+func (this *packetClientLoginEncryptRequestCodec) Decode(reader io.Reader, util []byte) (decode packet.Packet, err error) {
+	packetClientLoginEncryptRequest := new(PacketClientLoginEncryptRequest)
 	packetClientLoginEncryptRequest.ServerId, err = packet.ReadString(reader, util)
 	if err != nil {
 		return
@@ -41,10 +51,11 @@ func (this *PacketClientLoginEncryptRequestCodec) Decode(reader io.Reader, util 
 	if err != nil {
 		return
 	}
-	return packetClientLoginEncryptRequest, nil
+	decode = packetClientLoginEncryptRequest
+	return
 }
 
-func (this *PacketClientLoginEncryptRequestCodec) Encode(writer io.Writer, util []byte, encode packet.Packet) (err error) {
+func (this *packetClientLoginEncryptRequestCodec) Encode(writer io.Writer, util []byte, encode packet.Packet) (err error) {
 	packetClientLoginEncryptRequest := encode.(*PacketClientLoginEncryptRequest)
 	err = packet.WriteString(writer, util, packetClientLoginEncryptRequest.ServerId)
 	if err != nil {

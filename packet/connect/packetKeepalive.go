@@ -1,30 +1,39 @@
 package connect
 
-import "io"
-import "github.com/LilyPad/GoLilyPad/packet"
+import (
+	"io"
+	"github.com/LilyPad/GoLilyPad/packet"
+)
 
 type PacketKeepalive struct {
 	Random int32
+}
+
+func NewPacketKeepalive(random int32) (this *PacketKeepalive) {
+	this = new(PacketKeepalive)
+	this.Random = random
+	return
 }
 
 func (this *PacketKeepalive) Id() int {
 	return PACKET_KEEPALIVE
 }
 
-type PacketKeepaliveCodec struct {
-	
+type packetKeepaliveCodec struct {
+
 }
 
-func (this *PacketKeepaliveCodec) Decode(reader io.Reader, util []byte) (decode packet.Packet, err error) {
-	packetKeepalive := &PacketKeepalive{}
+func (this *packetKeepaliveCodec) Decode(reader io.Reader, util []byte) (decode packet.Packet, err error) {
+	packetKeepalive := new(PacketKeepalive)
 	packetKeepalive.Random, err = packet.ReadInt32(reader, util)
 	if err != nil {
 		return
 	}
-	return packetKeepalive, nil
+	decode = packetKeepalive
+	return
 }
 
-func (this *PacketKeepaliveCodec) Encode(writer io.Writer, util []byte, encode packet.Packet) (err error) {
+func (this *packetKeepaliveCodec) Encode(writer io.Writer, util []byte, encode packet.Packet) (err error) {
 	err = packet.WriteInt32(writer, util, encode.(*PacketKeepalive).Random)
 	return
 }

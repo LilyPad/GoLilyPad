@@ -1,7 +1,9 @@
 package minecraft
 
-import "io"
-import "github.com/LilyPad/GoLilyPad/packet"
+import (
+	"io"
+	"github.com/LilyPad/GoLilyPad/packet"
+)
 
 type PacketClientPlayerListItem struct {
 	Name string
@@ -9,16 +11,31 @@ type PacketClientPlayerListItem struct {
 	Ping int16
 }
 
+func NewPacketClientPlayerListItemAdd(name string, ping int16) (this *PacketClientPlayerListItem) {
+	this = new(PacketClientPlayerListItem)
+	this.Name = name
+	this.Online = true
+	this.Ping = ping
+	return
+}
+
+func NewPacketClientPlayerListItemRemove(name string) (this *PacketClientPlayerListItem) {
+	this = new(PacketClientPlayerListItem)
+	this.Name = name
+	this.Online = false
+	return
+}
+
 func (this *PacketClientPlayerListItem) Id() int {
 	return PACKET_CLIENT_PLAYER_LIST_ITEM
 }
 
-type PacketClientPlayerListItemCodec struct {
-	
+type packetClientPlayerListItemCodec struct {
+
 }
 
-func (this *PacketClientPlayerListItemCodec) Decode(reader io.Reader, util []byte) (decode packet.Packet, err error) {
-	packetClientPlayerListItem := &PacketClientPlayerListItem{}
+func (this *packetClientPlayerListItemCodec) Decode(reader io.Reader, util []byte) (decode packet.Packet, err error) {
+	packetClientPlayerListItem := new(PacketClientPlayerListItem)
 	packetClientPlayerListItem.Name, err = packet.ReadString(reader, util)
 	if err != nil {
 		return
@@ -31,10 +48,11 @@ func (this *PacketClientPlayerListItemCodec) Decode(reader io.Reader, util []byt
 	if err != nil {
 		return
 	}
-	return packetClientPlayerListItem, nil
+	decode = packetClientPlayerListItem
+	return
 }
 
-func (this *PacketClientPlayerListItemCodec) Encode(writer io.Writer, util []byte, encode packet.Packet) (err error) {
+func (this *packetClientPlayerListItemCodec) Encode(writer io.Writer, util []byte, encode packet.Packet) (err error) {
 	packetClientPlayerListItem := encode.(*PacketClientPlayerListItem)
 	err = packet.WriteString(writer, util, packetClientPlayerListItem.Name)
 	if err != nil {

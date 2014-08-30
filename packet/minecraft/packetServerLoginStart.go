@@ -1,30 +1,39 @@
 package minecraft
 
-import "io"
-import "github.com/LilyPad/GoLilyPad/packet"
+import (
+	"io"
+	"github.com/LilyPad/GoLilyPad/packet"
+)
 
 type PacketServerLoginStart struct {
 	Name string
+}
+
+func NewPacketServerLoginStart(name string) (this *PacketServerLoginStart) {
+	this = new(PacketServerLoginStart)
+	this.Name = name
+	return
 }
 
 func (this *PacketServerLoginStart) Id() int {
 	return PACKET_SERVER_LOGIN_START
 }
 
-type PacketServerLoginStartCodec struct {
-	
+type packetServerLoginStartCodec struct {
+
 }
 
-func (this *PacketServerLoginStartCodec) Decode(reader io.Reader, util []byte) (decode packet.Packet, err error) {
-	packetServerLoginStart := &PacketServerLoginStart{}
+func (this *packetServerLoginStartCodec) Decode(reader io.Reader, util []byte) (decode packet.Packet, err error) {
+	packetServerLoginStart := new(PacketServerLoginStart)
 	packetServerLoginStart.Name, err = packet.ReadString(reader, util)
 	if err != nil {
 		return
 	}
-	return packetServerLoginStart, nil
+	decode = packetServerLoginStart
+	return
 }
 
-func (this *PacketServerLoginStartCodec) Encode(writer io.Writer, util []byte, encode packet.Packet) (err error) {
+func (this *packetServerLoginStartCodec) Encode(writer io.Writer, util []byte, encode packet.Packet) (err error) {
 	packetServerLoginStart := encode.(*PacketServerLoginStart)
 	err = packet.WriteString(writer, util, packetServerLoginStart.Name)
 	return

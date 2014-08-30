@@ -1,6 +1,8 @@
 package connect
 
-import "net"
+import (
+	"net"
+)
 
 type Server struct {
 	listener net.Listener
@@ -11,12 +13,12 @@ type Server struct {
 	networkCache *NetworkCache
 }
 
-func NewServer(authenticator Authenticator) *Server {
-	return &Server{
-		authenticator: authenticator,
-		sessionRegistries: make(map[SessionRole]*SessionRegistry),
-		networkCache: NewNetworkCache(),
-	}
+func NewServer(authenticator Authenticator) (this *Server) {
+	this = new(Server)
+	this.authenticator = authenticator
+	this.sessionRegistries = make(map[SessionRole]*SessionRegistry)
+	this.networkCache = NewNetworkCache()
+	return
 }
 
 func (this *Server) ListenAndServe(addr string) (err error) {
@@ -26,7 +28,7 @@ func (this *Server) ListenAndServe(addr string) (err error) {
 		return
 	}
 	this.keepaliveDone = make(chan bool)
-	go Keepalive(this.SessionRegistry(AUTHORIZED), this.keepaliveDone)
+	go Keepalive(this.SessionRegistry(ROLE_AUTHORIZED), this.keepaliveDone)
 	var conn net.Conn
 	var session *Session
 	for {
@@ -52,10 +54,6 @@ func (this *Server) Close() {
 	}
 }
 
-func (this *Server) Authenticator() Authenticator {
-	return this.authenticator
-}
-
 func (this *Server) SessionRegistry(sessionRole SessionRole) (sessionRegistry *SessionRegistry) {
 	sessionRegistry = this.sessionRegistries[sessionRole]
 	if sessionRegistry == nil {
@@ -63,8 +61,4 @@ func (this *Server) SessionRegistry(sessionRole SessionRole) (sessionRegistry *S
 		sessionRegistry = this.sessionRegistries[sessionRole]
 	}
 	return
-}
-
-func (this *Server) NetworkCache() *NetworkCache {
-	return this.networkCache
 }

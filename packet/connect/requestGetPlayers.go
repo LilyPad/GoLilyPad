@@ -1,30 +1,45 @@
 package connect
 
-import "io"
-import "github.com/LilyPad/GoLilyPad/packet"
+import (
+	"io"
+	"github.com/LilyPad/GoLilyPad/packet"
+)
 
 type RequestGetPlayers struct {
 	List bool
+}
+
+func NewRequestGetPlayers() (this *RequestGetPlayers) {
+	this = new(RequestGetPlayers)
+	this.List = false
+	return
+}
+
+func NewRequestGetPlayersList() (this *RequestGetPlayers) {
+	this = new(RequestGetPlayers)
+	this.List = true
+	return
 }
 
 func (this *RequestGetPlayers) Id() int {
 	return REQUEST_GET_PLAYERS
 }
 
-type RequestGetPlayersCodec struct {
+type requestGetPlayersCodec struct {
 
 }
 
-func (this *RequestGetPlayersCodec) Decode(reader io.Reader, util []byte) (request Request, err error) {
-	requestGetPlayers := &RequestGetPlayers{}
+func (this *requestGetPlayersCodec) Decode(reader io.Reader, util []byte) (request Request, err error) {
+	requestGetPlayers := new(RequestGetPlayers)
 	requestGetPlayers.List, err = packet.ReadBool(reader, util)
 	if err != nil {
 		return
 	}
-	return requestGetPlayers, nil
+	request = requestGetPlayers
+	return
 }
 
-func (this *RequestGetPlayersCodec) Encode(writer io.Writer, util []byte, request Request) (err error) {
+func (this *requestGetPlayersCodec) Encode(writer io.Writer, util []byte, request Request) (err error) {
 	err = packet.WriteBool(writer, util, request.(*RequestGetPlayers).List)
 	return
 }
@@ -32,20 +47,37 @@ func (this *RequestGetPlayersCodec) Encode(writer io.Writer, util []byte, reques
 type ResultGetPlayers struct {
 	List bool
 	CurrentPlayers uint16
-	MaximumPlayers uint16
+	MaxPlayers uint16
 	Players []string
+}
+
+func NewResultGetPlayers(currentPlayers uint16, maxPlayers uint16) (this *ResultGetPlayers) {
+	this = new(ResultGetPlayers)
+	this.List = false
+	this.CurrentPlayers = currentPlayers
+	this.MaxPlayers = maxPlayers
+	return
+}
+
+func NewResultGetPlayersList(currentPlayers uint16, maxPlayers uint16, players []string) (this *ResultGetPlayers) {
+	this = new(ResultGetPlayers)
+	this.List = true
+	this.CurrentPlayers = currentPlayers
+	this.MaxPlayers = maxPlayers
+	this.Players = players
+	return
 }
 
 func (this *ResultGetPlayers) Id() int {
 	return REQUEST_GET_PLAYERS
 }
 
-type ResultGetPlayersCodec struct {
+type resultGetPlayersCodec struct {
 
 }
 
-func (this *ResultGetPlayersCodec) Decode(reader io.Reader, util []byte) (result Result, err error) {
-	resultGetPlayers := &ResultGetPlayers{}
+func (this *resultGetPlayersCodec) Decode(reader io.Reader, util []byte) (result Result, err error) {
+	resultGetPlayers := new(ResultGetPlayers)
 	resultGetPlayers.List, err = packet.ReadBool(reader, util)
 	if err != nil {
 		return
@@ -54,7 +86,7 @@ func (this *ResultGetPlayersCodec) Decode(reader io.Reader, util []byte) (result
 	if err != nil {
 		return
 	}
-	resultGetPlayers.MaximumPlayers, err = packet.ReadUint16(reader, util)
+	resultGetPlayers.MaxPlayers, err = packet.ReadUint16(reader, util)
 	if err != nil {
 		return
 	}
@@ -68,10 +100,11 @@ func (this *ResultGetPlayersCodec) Decode(reader io.Reader, util []byte) (result
 			resultGetPlayers.Players[i], err = packet.ReadString(reader, util)
 		}
 	}
-	return resultGetPlayers, nil
+	result = resultGetPlayers
+	return
 }
 
-func (this *ResultGetPlayersCodec) Encode(writer io.Writer, util []byte, result Result) (err error) {
+func (this *resultGetPlayersCodec) Encode(writer io.Writer, util []byte, result Result) (err error) {
 	resultGetPlayers := result.(*ResultGetPlayers)
 	err = packet.WriteBool(writer, util, resultGetPlayers.List)
 	if err != nil {
@@ -81,7 +114,7 @@ func (this *ResultGetPlayersCodec) Encode(writer io.Writer, util []byte, result 
 	if err != nil {
 		return
 	}
-	err = packet.WriteUint16(writer, util, resultGetPlayers.MaximumPlayers)
+	err = packet.WriteUint16(writer, util, resultGetPlayers.MaxPlayers)
 	if resultGetPlayers.List {
 		var i uint16
 		for i = 0; i < resultGetPlayers.CurrentPlayers; i++ {

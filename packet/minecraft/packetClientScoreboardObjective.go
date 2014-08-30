@@ -1,7 +1,9 @@
 package minecraft
 
-import "io"
-import "github.com/LilyPad/GoLilyPad/packet"
+import (
+	"io"
+	"github.com/LilyPad/GoLilyPad/packet"
+)
 
 type PacketClientScoreboardObjective struct {
 	Name string
@@ -9,16 +11,40 @@ type PacketClientScoreboardObjective struct {
 	Action int8
 }
 
+func NewPacketClientScoreboardObjectiveAdd(name string, value string) (this *PacketClientScoreboardObjective) {
+	this = new(PacketClientScoreboardObjective)
+	this.Name = name
+	this.Value = value
+	this.Action = 0
+	return
+}
+
+func NewPacketClientScoreboardObjectiveRemove(name string, value string) (this *PacketClientScoreboardObjective) {
+	this = new(PacketClientScoreboardObjective)
+	this.Name = name
+	this.Value = value
+	this.Action = 1
+	return
+}
+
+func NewPacketClientScoreboardObjectiveUpdate(name string, value string) (this *PacketClientScoreboardObjective) {
+	this = new(PacketClientScoreboardObjective)
+	this.Name = name
+	this.Value = value
+	this.Action = 2
+	return
+}
+
 func (this *PacketClientScoreboardObjective) Id() int {
 	return PACKET_CLIENT_SCOREBOARD_OBJECTIVE
 }
 
-type PacketClientScoreboardObjectiveCodec struct {
-	
+type packetClientScoreboardObjectiveCodec struct {
+
 }
 
-func (this *PacketClientScoreboardObjectiveCodec) Decode(reader io.Reader, util []byte) (decode packet.Packet, err error) {
-	packetClientScoreboardObjective := &PacketClientScoreboardObjective{}
+func (this *packetClientScoreboardObjectiveCodec) Decode(reader io.Reader, util []byte) (decode packet.Packet, err error) {
+	packetClientScoreboardObjective := new(PacketClientScoreboardObjective)
 	packetClientScoreboardObjective.Name, err = packet.ReadString(reader, util)
 	if err != nil {
 		return
@@ -31,10 +57,11 @@ func (this *PacketClientScoreboardObjectiveCodec) Decode(reader io.Reader, util 
 	if err != nil {
 		return
 	}
-	return packetClientScoreboardObjective, nil
+	decode = packetClientScoreboardObjective
+	return
 }
 
-func (this *PacketClientScoreboardObjectiveCodec) Encode(writer io.Writer, util []byte, encode packet.Packet) (err error) {
+func (this *packetClientScoreboardObjectiveCodec) Encode(writer io.Writer, util []byte, encode packet.Packet) (err error) {
 	packetClientScoreboardObjective := encode.(*PacketClientScoreboardObjective)
 	err = packet.WriteString(writer, util, packetClientScoreboardObjective.Name)
 	if err != nil {

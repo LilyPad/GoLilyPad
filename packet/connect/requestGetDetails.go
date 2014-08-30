@@ -1,25 +1,33 @@
 package connect
 
-import "io"
-import "github.com/LilyPad/GoLilyPad/packet"
+import (
+	"io"
+	"github.com/LilyPad/GoLilyPad/packet"
+)
 
 type RequestGetDetails struct {
 
+}
+
+func NewRequestGetDetails() (this *RequestGetDetails) {
+	this = new(RequestGetDetails)
+	return
 }
 
 func (this *RequestGetDetails) Id() int {
 	return REQUEST_GET_DETAILS
 }
 
-type RequestGetDetailsCodec struct {
+type requestGetDetailsCodec struct {
 
 }
 
-func (this *RequestGetDetailsCodec) Decode(reader io.Reader, util []byte) (request Request, err error) {
-	return &RequestGetDetails{}, nil
+func (this *requestGetDetailsCodec) Decode(reader io.Reader, util []byte) (request Request, err error) {
+	request = new(RequestGetDetails)
+	return
 }
 
-func (this *RequestGetDetailsCodec) Encode(writer io.Writer, util []byte, request Request) (err error) {
+func (this *requestGetDetailsCodec) Encode(writer io.Writer, util []byte, request Request) (err error) {
 	return
 }
 
@@ -30,16 +38,25 @@ type ResultGetDetails struct {
 	Version string
 }
 
+func NewResultGetDetails(ip string, port uint16, motd string, version string) (this *ResultGetDetails) {
+	this = new(ResultGetDetails)
+	this.Ip = ip
+	this.Port = port
+	this.Motd = motd
+	this.Version = version
+	return
+}
+
 func (this *ResultGetDetails) Id() int {
 	return REQUEST_GET_DETAILS
 }
 
-type ResultGetDetailsCodec struct {
+type resultGetDetailsCodec struct {
 
 }
 
-func (this *ResultGetDetailsCodec) Decode(reader io.Reader, util []byte) (result Result, err error) {
-	resultGetDetails := &ResultGetDetails{}
+func (this *resultGetDetailsCodec) Decode(reader io.Reader, util []byte) (result Result, err error) {
+	resultGetDetails := new(ResultGetDetails)
 	resultGetDetails.Ip, err = packet.ReadString(reader, util)
 	if err != nil {
 		return
@@ -56,10 +73,11 @@ func (this *ResultGetDetailsCodec) Decode(reader io.Reader, util []byte) (result
 	if err != nil {
 		return
 	}
-	return resultGetDetails, nil
+	result = resultGetDetails
+	return
 }
 
-func (this *ResultGetDetailsCodec) Encode(writer io.Writer, util []byte, result Result) (err error) {
+func (this *resultGetDetailsCodec) Encode(writer io.Writer, util []byte, result Result) (err error) {
 	resultGetDetails := result.(*ResultGetDetails)
 	err = packet.WriteString(writer, util, resultGetDetails.Ip)
 	if err != nil {

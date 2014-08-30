@@ -1,6 +1,8 @@
 package proxy
 
-import "encoding/json"
+import (
+	"encoding/json"
+)
 
 type LoginPayload struct {
 	SecurityKey string `json:"s"`
@@ -18,13 +20,13 @@ type LoginPayloadProperty struct {
 	Signature string `json:"s"`
 }
 
-func EncodeLoginPayload(payload LoginPayload) (s string) {
+func EncodeLoginPayload(payload LoginPayload) (val string) {
 	bytes, _ := json.Marshal(payload)
-	s = string(bytes)
+	val = string(bytes)
 	return
 }
 
-func DecodeLoginPayload(s string) (payload LoginPayload) {
-	json.Unmarshal([]byte(s), &payload)
+func DecodeLoginPayload(val string) (payload LoginPayload) {
+	json.Unmarshal([]byte(val), &payload)
 	return
 }

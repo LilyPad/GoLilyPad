@@ -1,23 +1,32 @@
 package minecraft
 
-import "io"
-import "github.com/LilyPad/GoLilyPad/packet"
+import (
+	"io"
+	"github.com/LilyPad/GoLilyPad/packet"
+)
 
 type PacketServerLoginEncryptResponse struct {
 	SharedSecret []byte
 	VerifyToken []byte
 }
 
+func NewPacketServerLoginEncryptResponse(sharedSecret []byte, verifyToken []byte) (this *PacketServerLoginEncryptResponse) {
+	this = new(PacketServerLoginEncryptResponse)
+	this.SharedSecret = sharedSecret
+	this.VerifyToken = verifyToken
+	return
+}
+
 func (this *PacketServerLoginEncryptResponse) Id() int {
 	return PACKET_SERVER_LOGIN_ENCRYPT_RESPONSE
 }
 
-type PacketServerLoginEncryptResponseCodec struct {
-	
+type packetServerLoginEncryptResponseCodec struct {
+
 }
 
-func (this *PacketServerLoginEncryptResponseCodec) Decode(reader io.Reader, util []byte) (decode packet.Packet, err error) {
-	packetServerLoginEncryptResponse := &PacketServerLoginEncryptResponse{}
+func (this *packetServerLoginEncryptResponseCodec) Decode(reader io.Reader, util []byte) (decode packet.Packet, err error) {
+	packetServerLoginEncryptResponse := new(PacketServerLoginEncryptResponse)
 	sharedSecretSize, err := packet.ReadUint16(reader, util)
 	if err != nil {
 		return
@@ -36,10 +45,11 @@ func (this *PacketServerLoginEncryptResponseCodec) Decode(reader io.Reader, util
 	if err != nil {
 		return
 	}
-	return packetServerLoginEncryptResponse, nil
+	decode = packetServerLoginEncryptResponse
+	return
 }
 
-func (this *PacketServerLoginEncryptResponseCodec) Encode(writer io.Writer, util []byte, encode packet.Packet) (err error) {
+func (this *packetServerLoginEncryptResponseCodec) Encode(writer io.Writer, util []byte, encode packet.Packet) (err error) {
 	packetServerLoginEncryptResponse := encode.(*PacketServerLoginEncryptResponse)
 	err = packet.WriteUint16(writer, util, uint16(len(packetServerLoginEncryptResponse.SharedSecret)))
 	if err != nil {

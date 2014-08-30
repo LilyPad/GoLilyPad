@@ -1,7 +1,9 @@
 package minecraft
 
-import "io"
-import "github.com/LilyPad/GoLilyPad/packet"
+import (
+	"io"
+	"github.com/LilyPad/GoLilyPad/packet"
+)
 
 type PacketClientRespawn struct {
 	Dimension int32
@@ -10,16 +12,25 @@ type PacketClientRespawn struct {
 	LevelType string
 }
 
+func NewPacketClientRespawn(dimension int32, difficulty int8, gamemode int8, levelType string) (this *PacketClientRespawn) {
+	this = new(PacketClientRespawn)
+	this.Dimension = dimension
+	this.Difficulty = difficulty
+	this.Gamemode = gamemode
+	this.LevelType = levelType
+	return
+}
+
 func (this *PacketClientRespawn) Id() int {
 	return PACKET_CLIENT_RESPAWN
 }
 
-type PacketClientRespawnCodec struct {
-	
+type packetClientRespawnCodec struct {
+
 }
 
-func (this *PacketClientRespawnCodec) Decode(reader io.Reader, util []byte) (decode packet.Packet, err error) {
-	packetClientRespawn := &PacketClientRespawn{}
+func (this *packetClientRespawnCodec) Decode(reader io.Reader, util []byte) (decode packet.Packet, err error) {
+	packetClientRespawn := new(PacketClientRespawn)
 	packetClientRespawn.Dimension, err = packet.ReadInt32(reader, util)
 	if err != nil {
 		return
@@ -36,10 +47,11 @@ func (this *PacketClientRespawnCodec) Decode(reader io.Reader, util []byte) (dec
 	if err != nil {
 		return
 	}
-	return packetClientRespawn, nil
+	decode = packetClientRespawn
+	return
 }
 
-func (this *PacketClientRespawnCodec) Encode(writer io.Writer, util []byte, encode packet.Packet) (err error) {
+func (this *packetClientRespawnCodec) Encode(writer io.Writer, util []byte, encode packet.Packet) (err error) {
 	packetClientRespawn := encode.(*PacketClientRespawn)
 	err = packet.WriteInt32(writer, util, packetClientRespawn.Dimension)
 	if err != nil {

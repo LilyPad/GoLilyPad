@@ -1,25 +1,33 @@
 package connect
 
-import "io"
-import "github.com/LilyPad/GoLilyPad/packet"
+import (
+	"io"
+	"github.com/LilyPad/GoLilyPad/packet"
+)
 
 type RequestGetSalt struct {
 
+}
+
+func NewRequestGetSalt() (this *RequestGetSalt) {
+	this = new(RequestGetSalt)
+	return
 }
 
 func (this *RequestGetSalt) Id() int {
 	return REQUEST_GET_SALT
 }
 
-type RequestGetSaltCodec struct {
+type requestGetSaltCodec struct {
 
 }
 
-func (this *RequestGetSaltCodec) Decode(reader io.Reader, util []byte) (request Request, err error) {
-	return &RequestGetSalt{}, nil
+func (this *requestGetSaltCodec) Decode(reader io.Reader, util []byte) (request Request, err error) {
+	request = new(RequestGetSalt)
+	return
 }
 
-func (this *RequestGetSaltCodec) Encode(writer io.Writer, util []byte, request Request) (err error) {
+func (this *requestGetSaltCodec) Encode(writer io.Writer, util []byte, request Request) (err error) {
 	return
 }
 
@@ -27,24 +35,31 @@ type ResultGetSalt struct {
 	Salt string
 }
 
+func NewResultGetSalt(salt string) (this *ResultGetSalt) {
+	this = new(ResultGetSalt)
+	this.Salt = salt
+	return
+}
+
 func (this *ResultGetSalt) Id() int {
 	return REQUEST_GET_SALT
 }
 
-type ResultGetSaltCodec struct {
-	
+type resultGetSaltCodec struct {
+
 }
 
-func (this *ResultGetSaltCodec) Decode(reader io.Reader, util []byte) (result Result, err error) {
-	resultGetSalt := &ResultGetSalt{}
+func (this *resultGetSaltCodec) Decode(reader io.Reader, util []byte) (result Result, err error) {
+	resultGetSalt := new(ResultGetSalt)
 	resultGetSalt.Salt, err = packet.ReadString(reader, util)
 	if err != nil {
 		return
 	}
-	return resultGetSalt, nil
+	result = resultGetSalt
+	return
 }
 
-func (this *ResultGetSaltCodec) Encode(writer io.Writer, util []byte, result Result) (err error) {
+func (this *resultGetSaltCodec) Encode(writer io.Writer, util []byte, result Result) (err error) {
 	err = packet.WriteString(writer, util, result.(*ResultGetSalt).Salt)
 	return
 }

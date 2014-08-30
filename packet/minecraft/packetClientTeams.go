@@ -1,7 +1,9 @@
 package minecraft
 
-import "io"
-import "github.com/LilyPad/GoLilyPad/packet"
+import (
+	"io"
+	"github.com/LilyPad/GoLilyPad/packet"
+)
 
 type PacketClientTeams struct {
 	Name string
@@ -13,16 +15,62 @@ type PacketClientTeams struct {
 	Players []string
 }
 
+func NewPacketClientTeamsAdd(name string, displayName string, prefix string, suffix string, friendlyFire int8, players []string) (this *PacketClientTeams) {
+	this = new(PacketClientTeams)
+	this.Name = name
+	this.Action = 0
+	this.DisplayName = displayName
+	this.Prefix = prefix
+	this.Suffix = suffix
+	this.FriendlyFire = friendlyFire
+	this.Players = players
+	return
+}
+
+func NewPacketClientTeamsRemove(name string) (this *PacketClientTeams) {
+	this = new(PacketClientTeams)
+	this.Name = name
+	this.Action = 1
+	return
+}
+
+func NewPacketClientTeamsInfoUpdate(name string, displayName string, prefix string, suffix string, friendlyFire int8) (this *PacketClientTeams) {
+	this = new(PacketClientTeams)
+	this.Name = name
+	this.Action = 2
+	this.DisplayName = displayName
+	this.Prefix = prefix
+	this.Suffix = suffix
+	this.FriendlyFire = friendlyFire
+	return
+}
+
+func NewPacketClientTeamsPlayersAdd(name string, players []string) (this *PacketClientTeams) {
+	this = new(PacketClientTeams)
+	this.Name = name
+	this.Action = 3
+	this.Players = players
+	return
+}
+
+func NewPacketClientTeamsPlayersRemove(name string, players []string) (this *PacketClientTeams) {
+	this = new(PacketClientTeams)
+	this.Name = name
+	this.Action = 4
+	this.Players = players
+	return
+}
+
 func (this *PacketClientTeams) Id() int {
 	return PACKET_CLIENT_TEAMS
 }
 
-type PacketClientTeamsCodec struct {
-	
+type packetClientTeamsCodec struct {
+
 }
 
-func (this *PacketClientTeamsCodec) Decode(reader io.Reader, util []byte) (decode packet.Packet, err error) {
-	packetClientTeams := &PacketClientTeams{}
+func (this *packetClientTeamsCodec) Decode(reader io.Reader, util []byte) (decode packet.Packet, err error) {
+	packetClientTeams := new(PacketClientTeams)
 	packetClientTeams.Name, err = packet.ReadString(reader, util)
 	if err != nil {
 		return
@@ -64,10 +112,11 @@ func (this *PacketClientTeamsCodec) Decode(reader io.Reader, util []byte) (decod
 			}
 		}
 	}
-	return packetClientTeams, nil
+	decode = packetClientTeams
+	return
 }
 
-func (this *PacketClientTeamsCodec) Encode(writer io.Writer, util []byte, encode packet.Packet) (err error) {
+func (this *packetClientTeamsCodec) Encode(writer io.Writer, util []byte, encode packet.Packet) (err error) {
 	packetClientTeams := encode.(*PacketClientTeams)
 	err = packet.WriteString(writer, util, packetClientTeams.Name)
 	if err != nil {

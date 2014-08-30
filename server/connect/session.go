@@ -1,11 +1,13 @@
 package connect
 
-import "errors"
-import "fmt"
-import "net"
-import "time"
-import "github.com/LilyPad/GoLilyPad/packet"
-import "github.com/LilyPad/GoLilyPad/packet/connect"
+import (
+	"errors"
+	"fmt"
+	"net"
+	"time"
+	"github.com/LilyPad/GoLilyPad/packet"
+	"github.com/LilyPad/GoLilyPad/packet/connect"
+)
 
 type Session struct {
 	server *Server
@@ -25,24 +27,22 @@ type Session struct {
 	proxyVersion string
 	proxyPlayers map[string]bool
 	proxyMaxPlayers uint16
+
+	remoteIp string
+	remotePort string
 }
 
-func NewSession(server *Server, conn net.Conn) (session *Session, err error) {
-	uuid, err := GenUUID()
+func NewSession(server *Server, conn net.Conn) (this *Session, err error) {
+	this = new(Session)
+	this.server = server
+	this.conn = conn
+	this.role = ROLE_UNAUTHORIZED
+	this.uuid, err = GenUUID()
 	if err != nil {
 		return
 	}
-	salt, err := GenSalt()
-	if err != nil {
-		return
-	}
-	session = &Session{
-		server: server,
-		conn: conn,
-		uuid: uuid,
-		salt: salt,
-		role: UNAUTHORIZED,
-	}
+	this.salt, err = GenSalt()
+	this.remoteIp, this.remotePort, _ = net.SplitHostPort(conn.RemoteAddr().String())
 	return
 }
 
@@ -52,11 +52,8 @@ func (this *Session) Serve() {
 }
 
 func (this *Session) Write(packet packet.Packet) (err error) {
-	return this.connCodec.Write(packet)
-}
-
-func (this *Session) Close() {
-	this.conn.Close()
+	err = this.connCodec.Write(packet)
+	return
 }
 
 func (this *Session) Keepalive() (err error) {
@@ -64,7 +61,7 @@ func (this *Session) Keepalive() (err error) {
 		return
 	}
 	keepalive := RandomInt()
-	err = this.Write(&connect.PacketKeepalive{keepalive})
+	err = this.Write(connect.NewPacketKeepalive(keepalive))
 	if err != nil {
 		return
 	}
@@ -74,17 +71,18 @@ func (this *Session) Keepalive() (err error) {
 
 func (this *Session) RegisterAuthorized(username string) {
 	this.username = username
-	this.role = AUTHORIZED
-	this.server.SessionRegistry(AUTHORIZED).Register(this)
+	this.role = ROLE_AUTHORIZED
+	this.server.SessionRegistry(ROLE_AUTHORIZED).Register(this)
 }
 
-func (this *Session) RegisterProxy(address string, port uint16, motd string, version string, maxPlayers uint16) bool {
-	sessionRegistry := this.server.SessionRegistry(AUTHORIZED)
+func (this *Session) RegisterProxy(address string, port uint16, motd string, version string, maxPlayers uint16) (ok bool) {
+	sessionRegistry := this.server.SessionRegistry(ROLE_AUTHORIZED)
 	if sessionRegistry.HasId(this.username) {
-		return false
+		ok = false
+		return
 	}
 	if len(address) == 0 {
-		address = this.RemoteIp()
+		address = this.remoteIp
 	}
 	this.Unregister()
 	this.role = ROLE_PROXY
@@ -94,69 +92,70 @@ func (this *Session) RegisterProxy(address string, port uint16, motd string, ver
 	this.proxyVersion = version
 	this.proxyPlayers = make(map[string]bool)
 	this.proxyMaxPlayers = maxPlayers
-	this.server.SessionRegistry(AUTHORIZED).Register(this)
+	this.server.SessionRegistry(ROLE_AUTHORIZED).Register(this)
 	this.server.SessionRegistry(ROLE_PROXY).Register(this)
-	this.server.NetworkCache().RegisterProxy(this)
+	this.server.networkCache.RegisterProxy(this)
 	for _, session := range this.server.SessionRegistry(ROLE_SERVER).GetAll() {
-		this.Write(&connect.PacketServerEvent{true, session.username, session.serverSecurityKey, session.roleAddress, session.rolePort})
+		this.Write(connect.NewPacketServerEventAdd(session.username, session.serverSecurityKey, session.roleAddress, session.rolePort))
 	}
-	return true
+	ok = true
+	return
 }
 
-func (this *Session) RegisterServer(address string, port uint16) bool {
-	sessionRegistry := this.server.SessionRegistry(AUTHORIZED)
+func (this *Session) RegisterServer(address string, port uint16) (ok bool) {
+	sessionRegistry := this.server.SessionRegistry(ROLE_AUTHORIZED)
 	if sessionRegistry.HasId(this.username) {
-		return false
+		ok = false
+		return
 	}
 	if len(address) == 0 {
-		address = this.RemoteIp()
+		address = this.remoteIp
 	}
 	securityKey, err := GenSalt()
 	if err != nil {
-		return false
+		ok = false
+		return
 	}
 	this.Unregister()
 	this.role = ROLE_SERVER
 	this.roleAddress = address
 	this.rolePort = port
 	this.serverSecurityKey = securityKey
-	this.server.SessionRegistry(AUTHORIZED).Register(this)
+	this.server.SessionRegistry(ROLE_AUTHORIZED).Register(this)
 	this.server.SessionRegistry(ROLE_SERVER).Register(this)
 	for _, session := range this.server.SessionRegistry(ROLE_PROXY).GetAll() {
-		session.Write(&connect.PacketServerEvent{true, this.username, this.serverSecurityKey, this.roleAddress, this.rolePort})
+		session.Write(connect.NewPacketServerEventAdd(this.username, this.serverSecurityKey, this.roleAddress, this.rolePort))
 	}
-	return true
+	ok = true
+	return
 }
 
 func (this *Session) Unregister() {
-	if this.role == AUTHORIZED {
-		this.server.SessionRegistry(AUTHORIZED).Unregister(this)
+	if this.role == ROLE_AUTHORIZED {
+		this.server.SessionRegistry(ROLE_AUTHORIZED).Unregister(this)
 	} else if this.role == ROLE_PROXY {
-		this.server.SessionRegistry(AUTHORIZED).Unregister(this)
+		this.server.SessionRegistry(ROLE_AUTHORIZED).Unregister(this)
 		this.server.SessionRegistry(ROLE_PROXY).Unregister(this)
-		this.server.NetworkCache().UnregisterProxy(this)
+		this.server.networkCache.UnregisterProxy(this)
 	} else if this.role == ROLE_SERVER {
 		for _, session := range this.server.SessionRegistry(ROLE_PROXY).GetAll() {
-			session.Write(&connect.PacketServerEvent{
-				Add: false, 
-				Server: this.username,
-			})
+			session.Write(connect.NewPacketServerEventRemove(this.username))
 		}
-		this.server.SessionRegistry(AUTHORIZED).Unregister(this)
+		this.server.SessionRegistry(ROLE_AUTHORIZED).Unregister(this)
 		this.server.SessionRegistry(ROLE_SERVER).Unregister(this)
 	}
-	this.role = UNAUTHORIZED
+	this.role = ROLE_UNAUTHORIZED
 }
 
 func (this *Session) HandlePacket(packet packet.Packet) (err error) {
 	switch packet.Id() {
 	case connect.PACKET_KEEPALIVE:
 		if this.keepalive == nil {
-			this.Close()
+			this.conn.Close()
 			return
 		}
 		if *this.keepalive != packet.(*connect.PacketKeepalive).Random {
-			this.Close()
+			this.conn.Close()
 			return
 		}
 		this.keepalive = nil
@@ -169,17 +168,17 @@ func (this *Session) HandlePacket(packet packet.Packet) (err error) {
 			if !this.Authorized() {
 				username := request.(*connect.RequestAuthenticate).Username
 				var ok bool
-				ok, err = this.server.Authenticator().Authenticate(username, request.(*connect.RequestAuthenticate).Password, this.salt)
+				ok, err = this.server.authenticator.Authenticate(username, request.(*connect.RequestAuthenticate).Password, this.salt)
 				if err != nil {
 					return
 				}
 				if ok {
 					this.RegisterAuthorized(username)
-					fmt.Println("Connect server, authorized:", this.Id(), "ip:", this.RemoteIp())
-					result = &connect.ResultAuthenticate{}
+					fmt.Println("Connect server, authorized:", this.Id(), "ip:", this.remoteIp)
+					result = connect.NewResultAuthenticate()
 					statusCode = connect.STATUS_SUCCESS
 				} else {
-					fmt.Println("Connect server, failure to authorize:", username, "ip:", this.RemoteIp())
+					fmt.Println("Connect server, failure to authorize:", username, "ip:", this.remoteIp)
 					statusCode = connect.STATUS_ERROR_GENERIC
 				}
 			} else {
@@ -187,9 +186,10 @@ func (this *Session) HandlePacket(packet packet.Packet) (err error) {
 			}
 		case connect.REQUEST_AS_PROXY:
 			if this.Authorized() {
-				if this.RegisterProxy(request.(*connect.RequestAsProxy).Address, request.(*connect.RequestAsProxy).Port, request.(*connect.RequestAsProxy).Motd, request.(*connect.RequestAsProxy).Version, request.(*connect.RequestAsProxy).Maxplayers) {
-					fmt.Println("Connect server, roled as proxy:", this.Id(), "ip:", this.RemoteIp())
-					result = &connect.ResultAsProxy{}
+				requestAsProxy := request.(*connect.RequestAsProxy)
+				if this.RegisterProxy(requestAsProxy.Address, requestAsProxy.Port, requestAsProxy.Motd, requestAsProxy.Version, requestAsProxy.MaxPlayers) {
+					fmt.Println("Connect server, roled as proxy:", this.Id(), "ip:", this.remoteIp)
+					result = connect.NewResultAsProxy()
 					statusCode = connect.STATUS_SUCCESS
 				} else {
 					statusCode = connect.STATUS_ERROR_GENERIC
@@ -199,9 +199,10 @@ func (this *Session) HandlePacket(packet packet.Packet) (err error) {
 			}
 		case connect.REQUEST_AS_SERVER:
 			if this.Authorized() {
-				if this.RegisterServer(request.(*connect.RequestAsServer).Address, request.(*connect.RequestAsServer).Port) {
-					fmt.Println("Connect server, roled as server:", this.Id(), "ip:", this.RemoteIp())
-					result = &connect.ResultAsServer{this.serverSecurityKey}
+				requestAsServer := request.(*connect.RequestAsServer)
+				if this.RegisterServer(requestAsServer.Address, requestAsServer.Port) {
+					fmt.Println("Connect server, roled as server:", this.Id(), "ip:", this.remoteIp)
+					result = connect.NewResultAsServer(this.serverSecurityKey)
 					statusCode = connect.STATUS_SUCCESS
 				} else {
 					statusCode = connect.STATUS_ERROR_GENERIC
@@ -211,36 +212,35 @@ func (this *Session) HandlePacket(packet packet.Packet) (err error) {
 			}
 		case connect.REQUEST_GET_DETAILS:
 			if this.Authorized() {
-				networkCache := this.server.NetworkCache()
-				result = &connect.ResultGetDetails{networkCache.Address(), networkCache.Port(), networkCache.Motd(), networkCache.Version()}
+				result = connect.NewResultGetDetails(this.server.networkCache.Address(), this.server.networkCache.Port(), this.server.networkCache.Motd(), this.server.networkCache.Version())
 				statusCode = connect.STATUS_SUCCESS
 			} else {
 				statusCode = connect.STATUS_ERROR_ROLE
 			}
 		case connect.REQUEST_GET_PLAYERS:
 			if this.Authorized() {
-				networkCache := this.server.NetworkCache()
-				players := networkCache.Players()
+				players := this.server.networkCache.Players()
 				if request.(*connect.RequestGetPlayers).List {
-					result = &connect.ResultGetPlayers{true, uint16(len(players)), networkCache.MaxPlayers(), players}
+					result = connect.NewResultGetPlayersList(uint16(len(players)), this.server.networkCache.MaxPlayers(), players)
 				} else {
-					result = &connect.ResultGetPlayers{false, uint16(len(players)), networkCache.MaxPlayers(), nil}
+					result = connect.NewResultGetPlayers(uint16(len(players)), this.server.networkCache.MaxPlayers())
 				}
 				statusCode = connect.STATUS_SUCCESS
 			} else {
 				statusCode = connect.STATUS_ERROR_ROLE
 			}
 		case connect.REQUEST_GET_SALT:
-			result = &connect.ResultGetSalt{this.salt}
+			result = connect.NewResultGetSalt(this.salt)
 			statusCode = connect.STATUS_SUCCESS
 		case connect.REQUEST_GET_WHOAMI:
-			result = &connect.ResultGetWhoami{this.Id()}
+			result = connect.NewResultGetWhoami(this.Id())
 			statusCode = connect.STATUS_SUCCESS
 		case connect.REQUEST_MESSAGE:
 			if this.Authorized() {
-				sessionRegistry := this.server.SessionRegistry(AUTHORIZED)
+				requestMessage := request.(*connect.RequestMessage)
+				sessionRegistry := this.server.SessionRegistry(ROLE_AUTHORIZED)
 				recipients := request.(*connect.RequestMessage).Recipients
-				messagePacket := &connect.PacketMessageEvent{this.Id(), request.(*connect.RequestMessage).Channel, request.(*connect.RequestMessage).Message}
+				messagePacket := connect.NewPacketMessageEvent(this.Id(), requestMessage.Channel, requestMessage.Message)
 				messageSent := false
 				if len(recipients) == 0 {
 					for _, recipient := range sessionRegistry.GetAll() {
@@ -258,7 +258,7 @@ func (this *Session) HandlePacket(packet packet.Packet) (err error) {
 					}
 				}
 				if messageSent {
-					result = &connect.ResultMessage{}
+					result = connect.NewResultMessage()
 					statusCode = connect.STATUS_SUCCESS
 				} else {
 					statusCode = connect.STATUS_ERROR_GENERIC
@@ -271,34 +271,32 @@ func (this *Session) HandlePacket(packet packet.Packet) (err error) {
 				add := request.(*connect.RequestNotifyPlayer).Add
 				player := request.(*connect.RequestNotifyPlayer).Player
 				if add {
-					if !this.server.NetworkCache().AddPlayer(player, this) {
+					if !this.server.networkCache.AddPlayer(player, this) {
 						statusCode = connect.STATUS_ERROR_GENERIC
 						break
 					}
 					this.proxyPlayers[player] = true
 				} else {
 					if _, ok := this.proxyPlayers[player]; ok {
-						this.server.NetworkCache().RemovePlayer(player)
+						this.server.networkCache.RemovePlayer(player)
 						delete(this.proxyPlayers, player)
 					}
 				}
-				result = &connect.ResultNotifyPlayer{}
-				statusCode = connect.STATUS_SUCCESS
+				result = connect.NewResultNotifyPlayer()
 			} else {
 				statusCode = connect.STATUS_ERROR_ROLE
 			}
 		case connect.REQUEST_REDIRECT:
 			if this.Authorized() {
-				server := request.(*connect.RequestRedirect).Server
-				player := request.(*connect.RequestRedirect).Player
-				session := this.server.NetworkCache().ProxyByPlayer(player)
-				if session == nil {
+				requestRedirect := request.(*connect.RequestRedirect)
+				session := this.server.networkCache.ProxyByPlayer(requestRedirect.Player)
+				if session != nil {
+					session.Write(connect.NewPacketRedirectEvent(requestRedirect.Server, requestRedirect.Player))
+					result = connect.NewResultRedirect()
+					statusCode = connect.STATUS_SUCCESS
+				} else {
 					statusCode = connect.STATUS_ERROR_GENERIC
-					break
 				}
-				session.Write(&connect.PacketRedirectEvent{server, player})
-				result = &connect.ResultRedirect{}
-				statusCode = connect.STATUS_SUCCESS
 			} else {
 				statusCode = connect.STATUS_ERROR_ROLE
 			}
@@ -306,7 +304,7 @@ func (this *Session) HandlePacket(packet packet.Packet) (err error) {
 			err = errors.New(fmt.Sprintf("Request Id is not handled by server: %d", request.Id()))
 			return
 		}
-		err = this.Write(&connect.PacketResult{packet.(*connect.PacketRequest).SequenceId, statusCode, result})
+		err = this.Write(connect.NewPacketResult(packet.(*connect.PacketRequest).SequenceId, statusCode, result))
 	default:
 		err = errors.New(fmt.Sprintf("Packet Id is not handled by server: %d", packet.Id()))
 	}
@@ -316,32 +314,25 @@ func (this *Session) HandlePacket(packet packet.Packet) (err error) {
 func (this *Session) ErrorCaught(err error) {
 	id := this.Id()
 	if len(id) > 0 {
-		fmt.Println("Connect server, id:", this.Id(), "ip:", this.RemoteIp(), "disconnected:", err)
+		fmt.Println("Connect server, id:", this.Id(), "ip:", this.remoteIp, "disconnected:", err)
 	}
 	this.conn.Close()
 	this.Unregister()
 	return
 }
 
-func (this *Session) Authorized() bool {
-	return this.role != UNAUTHORIZED
-}
-
-func (this *Session) RemoteAddr() (addr net.Addr) {
-	return this.conn.RemoteAddr()
-}
-
-func (this *Session) RemoteIp() (ip string) {
-	ip, _, _ = net.SplitHostPort(this.RemoteAddr().String())
+func (this *Session) Authorized() (val bool) {
+	val = this.role != ROLE_UNAUTHORIZED
 	return
 }
 
-func (this *Session) Id() string {
-	if this.role == UNAUTHORIZED {
-		return ""
+func (this *Session) Id() (id string) {
+	if this.role == ROLE_UNAUTHORIZED {
+		id = ""
+	} else if this.role == ROLE_AUTHORIZED {
+		id =  this.username + "." + this.uuid
+	} else {
+		id = this.username
 	}
-	if this.role == AUTHORIZED {
-		return this.username + "." + this.uuid
-	}
-	return this.username
+	return
 }

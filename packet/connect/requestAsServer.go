@@ -1,23 +1,32 @@
 package connect
 
-import "io"
-import "github.com/LilyPad/GoLilyPad/packet"
+import (
+	"io"
+	"github.com/LilyPad/GoLilyPad/packet"
+)
 
 type RequestAsServer struct {
 	Address string
 	Port uint16
 }
 
+func NewRequestAsServer(address string, port uint16) (this *RequestAsServer) {
+	this = new(RequestAsServer)
+	this.Address = address
+	this.Port = port
+	return
+}
+
 func (this *RequestAsServer) Id() int {
 	return REQUEST_AS_SERVER
 }
 
-type RequestAsServerCodec struct {
+type requestAsServerCodec struct {
 
 }
 
-func (this *RequestAsServerCodec) Decode(reader io.Reader, util []byte) (request Request, err error) {
-	requestAsServer := &RequestAsServer{}
+func (this *requestAsServerCodec) Decode(reader io.Reader, util []byte) (request Request, err error) {
+	requestAsServer := new(RequestAsServer)
 	requestAsServer.Address, err = packet.ReadString(reader, util)
 	if err != nil {
 		return
@@ -26,10 +35,11 @@ func (this *RequestAsServerCodec) Decode(reader io.Reader, util []byte) (request
 	if err != nil {
 		return
 	}
-	return requestAsServer, nil
+	request = requestAsServer
+	return
 }
 
-func (this *RequestAsServerCodec) Encode(writer io.Writer, util []byte, request Request) (err error) {
+func (this *requestAsServerCodec) Encode(writer io.Writer, util []byte, request Request) (err error) {
 	requestAsServer := request.(*RequestAsServer)
 	err = packet.WriteString(writer, util, requestAsServer.Address)
 	if err != nil {
@@ -43,24 +53,31 @@ type ResultAsServer struct {
 	SecurityKey string
 }
 
+func NewResultAsServer(securityKey string) (this *ResultAsServer) {
+	this = new(ResultAsServer)
+	this.SecurityKey = securityKey
+	return
+}
+
 func (this *ResultAsServer) Id() int {
 	return REQUEST_AS_SERVER
 }
 
-type ResultAsServerCodec struct {
+type resultAsServerCodec struct {
 
 }
 
-func (this *ResultAsServerCodec) Decode(reader io.Reader, util []byte) (result Result, err error) {
-	resultAsServer := &ResultAsServer{}
+func (this *resultAsServerCodec) Decode(reader io.Reader, util []byte) (result Result, err error) {
+	resultAsServer := new(ResultAsServer)
 	resultAsServer.SecurityKey, err = packet.ReadString(reader, util)
 	if err != nil {
 		return
 	}
-	return resultAsServer, nil
+	result = resultAsServer
+	return
 }
 
-func (this *ResultAsServerCodec) Encode(writer io.Writer, util []byte, result Result) (err error) {
+func (this *resultAsServerCodec) Encode(writer io.Writer, util []byte, result Result) (err error) {
 	err = packet.WriteString(writer, util, result.(*ResultAsServer).SecurityKey)
 	return
 }

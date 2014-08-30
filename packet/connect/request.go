@@ -1,6 +1,8 @@
 package connect
 
-import "io"
+import (
+	"io"
+)
 
 type Request interface {
 	Id() int

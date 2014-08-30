@@ -1,6 +1,8 @@
 package connect
 
-import "time"
+import (
+	"time"
+)
 
 func Keepalive(sessionRegistry *SessionRegistry, done chan bool) {
 	ticker := time.NewTicker(5 * time.Second)

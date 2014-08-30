@@ -1,7 +1,9 @@
 package connect
 
-import "io"
-import "github.com/LilyPad/GoLilyPad/packet"
+import (
+	"io"
+	"github.com/LilyPad/GoLilyPad/packet"
+)
 
 type PacketMessageEvent struct {
 	Sender string
@@ -9,16 +11,24 @@ type PacketMessageEvent struct {
 	Payload []byte
 }
 
+func NewPacketMessageEvent(sender string, channel string, payload []byte) (this *PacketMessageEvent) {
+	this = new(PacketMessageEvent)
+	this.Sender = sender
+	this.Channel = channel
+	this.Payload = payload
+	return
+}
+
 func (this *PacketMessageEvent) Id() int {
 	return PACKET_MESSAGE_EVENT
 }
 
-type PacketMessageEventCodec struct {
-	
+type packetMessageEventCodec struct {
+
 }
 
-func (this *PacketMessageEventCodec) Decode(reader io.Reader, util []byte) (decode packet.Packet, err error) {
-	packetMessageEvent := &PacketMessageEvent{}
+func (this *packetMessageEventCodec) Decode(reader io.Reader, util []byte) (decode packet.Packet, err error) {
+	packetMessageEvent := new(PacketMessageEvent)
 	packetMessageEvent.Sender, err = packet.ReadString(reader, util)
 	if err != nil {
 		return
@@ -36,10 +46,11 @@ func (this *PacketMessageEventCodec) Decode(reader io.Reader, util []byte) (deco
 	if err != nil {
 		return
 	}
-	return packetMessageEvent, nil
+	decode = packetMessageEvent
+	return
 }
 
-func (this *PacketMessageEventCodec) Encode(writer io.Writer, util []byte, encode packet.Packet) (err error) {
+func (this *packetMessageEventCodec) Encode(writer io.Writer, util []byte, encode packet.Packet) (err error) {
 	packetMessageEvent := encode.(*PacketMessageEvent)
 	err = packet.WriteString(writer, util, packetMessageEvent.Sender)
 	if err != nil {

@@ -1,23 +1,32 @@
 package connect
 
-import "io"
-import "github.com/LilyPad/GoLilyPad/packet"
+import (
+	"io"
+	"github.com/LilyPad/GoLilyPad/packet"
+)
 
 type RequestRedirect struct {
 	Server string
 	Player string
 }
 
+func NewRequestRedirect(server string, player string) (this *RequestRedirect) {
+	this = new(RequestRedirect)
+	this.Server = server
+	this.Player = player
+	return
+}
+
 func (this *RequestRedirect) Id() int {
 	return REQUEST_REDIRECT
 }
 
-type RequestRedirectCodec struct {
-	
+type requestRedirectCodec struct {
+
 }
 
-func (this *RequestRedirectCodec) Decode(reader io.Reader, util []byte) (request Request, err error) {
-	requestRedirect := &RequestRedirect{}
+func (this *requestRedirectCodec) Decode(reader io.Reader, util []byte) (request Request, err error) {
+	requestRedirect := new(RequestRedirect)
 	requestRedirect.Server, err = packet.ReadString(reader, util)
 	if err != nil {
 		return
@@ -26,10 +35,11 @@ func (this *RequestRedirectCodec) Decode(reader io.Reader, util []byte) (request
 	if err != nil {
 		return
 	}
-	return requestRedirect, nil
+	request = requestRedirect
+	return
 }
 
-func (this *RequestRedirectCodec) Encode(writer io.Writer, util []byte, request Request) (err error) {
+func (this *requestRedirectCodec) Encode(writer io.Writer, util []byte, request Request) (err error) {
 	requestRedirect := request.(*RequestRedirect)
 	err = packet.WriteString(writer, util, requestRedirect.Server)
 	if err != nil {
@@ -43,18 +53,24 @@ type ResultRedirect struct {
 
 }
 
+func NewResultRedirect() (this *ResultRedirect) {
+	this = new(ResultRedirect)
+	return
+}
+
 func (this *ResultRedirect) Id() int {
 	return REQUEST_REDIRECT
 }
 
-type ResultRedirectCodec struct {
+type resultRedirectCodec struct {
 
 }
 
-func (this *ResultRedirectCodec) Decode(reader io.Reader, util []byte) (result Result, err error) {
-	return &ResultRedirect{}, nil
+func (this *resultRedirectCodec) Decode(reader io.Reader, util []byte) (result Result, err error) {
+	result = new(ResultRedirect)
+	return
 }
 
-func (this *ResultRedirectCodec) Encode(writer io.Writer, util []byte, result Result) (err error) {
+func (this *resultRedirectCodec) Encode(writer io.Writer, util []byte, result Result) (err error) {
 	return
 }

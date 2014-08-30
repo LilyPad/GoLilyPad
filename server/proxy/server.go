@@ -1,13 +1,15 @@
 package proxy
 
-import "crypto/rand"
-import "crypto/rsa"
-import "net"
-import "github.com/LilyPad/GoLilyPad/server/proxy/connect"
+import (
+	"crypto/rand"
+	"crypto/rsa"
+	"net"
+	"github.com/LilyPad/GoLilyPad/server/proxy/connect"
+)
 
 type Server struct {
 	listener net.Listener
-	sessionRegistry *SessionRegistry
+	SessionRegistry *SessionRegistry
 
 	motd *string
 	maxPlayers *uint16
@@ -18,23 +20,21 @@ type Server struct {
 	privateKey *rsa.PrivateKey
 }
 
-func NewServer(motd *string, maxPlayers *uint16, authenticate *bool, router Router, localizer Localizer, connect *connect.ProxyConnect) (server *Server, err error) {
-	privateKey, err := rsa.GenerateKey(rand.Reader, 2048)
+func NewServer(motd *string, maxPlayers *uint16, authenticate *bool, router Router, localizer Localizer, connect *connect.ProxyConnect) (this *Server, err error) {
+	this = new(Server)
+	this.SessionRegistry = NewSessionRegistry()
+	this.motd = motd
+	this.maxPlayers = maxPlayers
+	this.authenticate = authenticate
+	this.router = router
+	this.localizer = localizer
+	this.connect = connect
+	this.privateKey, err = rsa.GenerateKey(rand.Reader, 2048)
 	if err != nil {
 		return
 	}
-	server = &Server {
-		sessionRegistry: NewSessionRegistry(),
-		motd: motd,
-		maxPlayers: maxPlayers,
-		authenticate: authenticate,
-		router: router,
-		localizer: localizer,
-		connect: connect,
-		privateKey: privateKey,
-	}
 	connect.OnRedirect(func(serverName string, player string) {
-		session := server.SessionRegistry().GetByName(player)
+		session := this.SessionRegistry.GetByName(player)
 		if session == nil {
 			return
 		}
@@ -70,34 +70,17 @@ func (this *Server) Close() {
 	}
 }
 
-func (this *Server) SessionRegistry() *SessionRegistry {
-	return this.sessionRegistry
+func (this *Server) Motd() (val string) {
+	val = *this.motd
+	return
 }
 
-func (this *Server) Motd() string {
-	return *this.motd
+func (this *Server) MaxPlayers() (val uint16) {
+	val = *this.maxPlayers
+	return
 }
 
-func (this *Server) MaxPlayers() uint16 {
-	return *this.maxPlayers
-}
-
-func (this *Server) Authenticate() bool {
-	return *this.authenticate
-}
-
-func (this *Server) Router() Router {
-	return this.router
-}
-
-func (this *Server) Localizer() Localizer {
-	return this.localizer
-}
-
-func (this *Server) Connect() *connect.ProxyConnect {
-	return this.connect
-}
-
-func (this *Server) PrivateKey() *rsa.PrivateKey {
-	return this.privateKey
+func (this *Server) Authenticate() (val bool) {
+	val = *this.authenticate
+	return
 }

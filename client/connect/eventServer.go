@@ -1,6 +1,8 @@
 package connect
 
-import "github.com/LilyPad/GoLilyPad/packet/connect"
+import (
+	"github.com/LilyPad/GoLilyPad/packet/connect"
+)
 
 type EventServer struct {
 	Add bool
@@ -10,12 +12,12 @@ type EventServer struct {
 	Port uint16
 }
 
-func WrapEventServer(packet *connect.PacketServerEvent) *EventServer {
-	return &EventServer{
-		Add: packet.Add,
-		Server: packet.Server,
-		SecurityKey: packet.SecurityKey,
-		Address: packet.Address,
-		Port: packet.Port,
-	}
+func WrapEventServer(packet *connect.PacketServerEvent) (this *EventServer) {
+	this = new(EventServer)
+	this.Add = packet.Add
+	this.Server = packet.Server
+	this.SecurityKey = packet.SecurityKey
+	this.Address = packet.Address
+	this.Port = packet.Port
+	return
 }

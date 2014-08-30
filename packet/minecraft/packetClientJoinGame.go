@@ -1,7 +1,9 @@
 package minecraft
 
-import "io"
-import "github.com/LilyPad/GoLilyPad/packet"
+import (
+	"io"
+	"github.com/LilyPad/GoLilyPad/packet"
+)
 
 type PacketClientJoinGame struct {
 	EntityId int32
@@ -12,16 +14,27 @@ type PacketClientJoinGame struct {
 	LevelType string
 }
 
+func NewPacketClientJoinGame(entityId int32, gamemode int8, dimension int8, difficulty int8, maxPlayers int8, levelType string) (this *PacketClientJoinGame) {
+	this = new(PacketClientJoinGame)
+	this.EntityId = entityId
+	this.Gamemode = gamemode
+	this.Dimension = dimension
+	this.Difficulty = difficulty
+	this.MaxPlayers = maxPlayers
+	this.LevelType = levelType
+	return
+}
+
 func (this *PacketClientJoinGame) Id() int {
 	return PACKET_CLIENT_JOIN_GAME
 }
 
-type PacketClientJoinGameCodec struct {
-	
+type packetClientJoinGameCodec struct {
+
 }
 
-func (this *PacketClientJoinGameCodec) Decode(reader io.Reader, util []byte) (decode packet.Packet, err error) {
-	packetClientJoinGame := &PacketClientJoinGame{}
+func (this *packetClientJoinGameCodec) Decode(reader io.Reader, util []byte) (decode packet.Packet, err error) {
+	packetClientJoinGame := new(PacketClientJoinGame)
 	packetClientJoinGame.EntityId, err = packet.ReadInt32(reader, util)
 	if err != nil {
 		return
@@ -46,10 +59,11 @@ func (this *PacketClientJoinGameCodec) Decode(reader io.Reader, util []byte) (de
 	if err != nil {
 		return
 	}
-	return packetClientJoinGame, nil
+	decode = packetClientJoinGame
+	return
 }
 
-func (this *PacketClientJoinGameCodec) Encode(writer io.Writer, util []byte, encode packet.Packet) (err error) {
+func (this *packetClientJoinGameCodec) Encode(writer io.Writer, util []byte, encode packet.Packet) (err error) {
 	packetClientJoinGame := encode.(*PacketClientJoinGame)
 	err = packet.WriteInt32(writer, util, packetClientJoinGame.EntityId)
 	if err != nil {

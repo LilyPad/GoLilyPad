@@ -1,14 +1,16 @@
 package main
 
-import "bufio"
-import "fmt"
-import "os"
-import "runtime"
-import "strconv"
-import "strings"
-import "github.com/LilyPad/GoLilyPad/server/proxy"
-import "github.com/LilyPad/GoLilyPad/server/proxy/connect"
-import "github.com/LilyPad/GoLilyPad/server/proxy/main/config"
+import (
+	"bufio"
+	"fmt"
+	"os"
+	"runtime"
+	"strconv"
+	"strings"
+	"github.com/LilyPad/GoLilyPad/server/proxy"
+	"github.com/LilyPad/GoLilyPad/server/proxy/connect"
+	"github.com/LilyPad/GoLilyPad/server/proxy/main/config"
+)
 
 var VERSION string
 
@@ -41,7 +43,7 @@ func main() {
 	connectDone := make(chan bool)
 	bindAddr := strings.Split(cfg.Proxy.Bind, ":")[0]
 	bindPort, _ := strconv.ParseInt(strings.Split(cfg.Proxy.Bind, ":")[1], 10, 8)
-	proxyConfig := &connect.ProxyConfig{bindAddr, uint16(bindPort), &cfg.Proxy.Motd, proxy.MinecraftVersion(), &cfg.Proxy.MaxPlayers}
+	proxyConfig := connect.NewProxyConfig(bindAddr, uint16(bindPort), &cfg.Proxy.Motd, proxy.MinecraftVersion(), &cfg.Proxy.MaxPlayers)
 	proxyConnect := connect.NewProxyConnect(&cfg.Connect.Address, &cfg.Connect.Credentials.Username, &cfg.Connect.Credentials.Password, proxyConfig, connectDone)
 
 	serverErr := make(chan error, 1)
@@ -65,7 +67,6 @@ func main() {
 	}
 
 	fmt.Println("Proxy server started, version:", VERSION)
-
 	for {
 		select {
 		case str := <-stdinString:
@@ -81,7 +82,7 @@ func main() {
 			} else if str == "debug" {
 				fmt.Println("runtime.NumCPU:", runtime.NumCPU())
 				fmt.Println("runtime.NumGoroutine:", runtime.NumGoroutine())
-				memStats := &runtime.MemStats{}
+				memStats := new(runtime.MemStats)
 				runtime.ReadMemStats(memStats)
 				fmt.Println("runtime.MemStats.Alloc:", memStats.Alloc, "bytes")
 				fmt.Println("runtime.MemStats.TotalAlloc:", memStats.TotalAlloc, "bytes")

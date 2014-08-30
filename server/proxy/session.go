@@ -1,24 +1,26 @@
 package proxy
 
-import "bytes"
-import "crypto/aes"
-import "crypto/cipher"
-import "crypto/rand"
-import "crypto/rsa"
-import "crypto/x509"
-import "encoding/base64"
-import "encoding/json"
-import "errors"
-import "fmt"
-import "io/ioutil"
-import "net"
-import "sync"
-import "time"
-import "strings"
-import "github.com/LilyPad/GoLilyPad/packet"
-import "github.com/LilyPad/GoLilyPad/packet/minecraft"
-import "github.com/LilyPad/GoLilyPad/server/proxy/connect"
-import "github.com/LilyPad/GoLilyPad/server/proxy/auth"
+import (
+	"bytes"
+	"crypto/aes"
+	"crypto/cipher"
+	"crypto/rand"
+	"crypto/rsa"
+	"crypto/x509"
+	"encoding/base64"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"io/ioutil"
+	"net"
+	"sync"
+	"time"
+	"strings"
+	"github.com/LilyPad/GoLilyPad/packet"
+	"github.com/LilyPad/GoLilyPad/packet/minecraft"
+	"github.com/LilyPad/GoLilyPad/server/proxy/connect"
+	"github.com/LilyPad/GoLilyPad/server/proxy/auth"
+)
 
 type Session struct {
 	server *Server
@@ -28,7 +30,7 @@ type Session struct {
 	outBridge *SessionOutBridge
 	active bool
 
-	redirectMutex *sync.Mutex
+	redirectMutex sync.Mutex
 	redirecting bool
 
 	protocolVersion int
@@ -42,32 +44,29 @@ type Session struct {
 	clientSettings packet.Packet
 	clientEntityId int32
 	serverEntityId int32
-	registeredChannels map[string]bool
-	playerList map[string]bool
-	scoreboards map[string]bool
-	teams map[string]bool
+	pluginChannels map[string]struct{}
+	playerList map[string]struct{}
+	scoreboards map[string]struct{}
+	teams map[string]struct{}
 
 	remoteIp string
 	remotePort string
 	state SessionState
 }
 
-func NewSession(server *Server, conn net.Conn) *Session {
-	ip, port, _ := net.SplitHostPort(conn.RemoteAddr().String())
-	return &Session{
-		server: server,
-		conn: conn,
-		active: true,
-		redirectMutex: &sync.Mutex{},
-		redirecting: false,
-		registeredChannels: make(map[string]bool),
-		playerList: make(map[string]bool),
-		scoreboards: make(map[string]bool),
-		teams: make(map[string]bool),
-		remoteIp: ip,
-		remotePort: port,
-		state: STATE_DISCONNECTED,
-	}
+func NewSession(server *Server, conn net.Conn) (this *Session) {
+	this = new(Session)
+	this.server = server
+	this.conn = conn
+	this.active = true
+	this.redirecting = false
+	this.pluginChannels = make(map[string]struct{})
+	this.playerList = make(map[string]struct{})
+	this.scoreboards = make(map[string]struct{})
+	this.teams = make(map[string]struct{})
+	this.remoteIp, this.remotePort, _ = net.SplitHostPort(conn.RemoteAddr().String())
+	this.state = STATE_DISCONNECTED
+	return
 }
 
 func (this *Session) Serve() {
@@ -77,7 +76,8 @@ func (this *Session) Serve() {
 }
 
 func (this *Session) Write(packet packet.Packet) (err error) {
-	return this.connCodec.Write(packet)
+	err = this.connCodec.Write(packet)
+	return
 }
 
 func (this *Session) Redirect(server *connect.Server) {
@@ -98,62 +98,62 @@ func (this *Session) SetAuthenticated(result bool) {
 		this.Disconnect("Error: Authentication to Minecraft.net Failed")
 		return
 	}
-	if this.server.SessionRegistry().HasName(this.name) {
-		this.Disconnect(minecraft.Colorize(this.server.Localizer().LocaleLoggedIn()))
+	if this.server.SessionRegistry.HasName(this.name) {
+		this.Disconnect(minecraft.Colorize(this.server.localizer.LocaleLoggedIn()))
 		return
 	}
-	if this.server.MaxPlayers() > 1 && this.server.SessionRegistry().Len() >= int(this.server.MaxPlayers()) {
-		this.Disconnect(minecraft.Colorize(this.server.Localizer().LocaleFull()))
+	if this.server.MaxPlayers() > 1 && this.server.SessionRegistry.Len() >= int(this.server.MaxPlayers()) {
+		this.Disconnect(minecraft.Colorize(this.server.localizer.LocaleFull()))
 		return
 	}
-	servers := this.server.Router().Route(this.serverAddress)
+	servers := this.server.router.Route(this.serverAddress)
 	activeServers := []string{}
 	for _, serverName := range servers {
-		if !this.server.Connect().HasServer(serverName) {
+		if !this.server.connect.HasServer(serverName) {
 			continue
 		}
 		activeServers = append(activeServers, serverName)
 	}
 	if len(activeServers) == 0 {
-		this.Disconnect(minecraft.Colorize(this.server.Localizer().LocaleOffline()))
+		this.Disconnect(minecraft.Colorize(this.server.localizer.LocaleOffline()))
 		return
 	}
 	serverName := activeServers[RandomInt(len(activeServers))]
-	server := this.server.Connect().Server(serverName)
+	server := this.server.connect.Server(serverName)
 	if server == nil {
 		this.Disconnect("Error: Outbound Server Mismatch: " + serverName)
 		return
 	}
-	addResult := this.server.Connect().AddLocalPlayer(this.name)
+	addResult := this.server.connect.AddLocalPlayer(this.name)
 	if addResult == 0 {
-		this.Disconnect(minecraft.Colorize(this.server.Localizer().LocaleLoggedIn()))
+		this.Disconnect(minecraft.Colorize(this.server.localizer.LocaleLoggedIn()))
 		return
 	} else if addResult == -1 {
-		this.Disconnect(minecraft.Colorize(this.server.Localizer().LocaleLoggedIn()))
+		this.Disconnect(minecraft.Colorize(this.server.localizer.LocaleLoggedIn()))
 		return
 	}
 	this.state = STATE_INIT
 	if this.protocolVersion >= 5 {
-		this.Write(&minecraft.PacketClientLoginSuccess{FormatUUID(this.profile.Id), this.name})
+		this.Write(minecraft.NewPacketClientLoginSuccess(FormatUUID(this.profile.Id), this.name))
 	} else {
-		this.Write(&minecraft.PacketClientLoginSuccess{this.profile.Id, this.name})
+		this.Write(minecraft.NewPacketClientLoginSuccess(this.profile.Id, this.name))
 	}
 	this.codec.SetEncodeCodec(minecraft.PlayPacketClientCodec)
 	this.codec.SetDecodeCodec(minecraft.PlayPacketServerCodec)
-	this.server.SessionRegistry().Register(this)
+	this.server.SessionRegistry.Register(this)
 	this.Redirect(server)
 }
 
 func (this *Session) Disconnect(reason string) {
 	reasonJson, _ := json.Marshal(reason);
-	this.DisconnectRaw("{\"text\":" + string(reasonJson) + "}")
+	this.DisconnectJson("{\"text\":" + string(reasonJson) + "}")
 }
 
-func (this *Session) DisconnectRaw(raw string) {
+func (this *Session) DisconnectJson(json string) {
 	if this.codec.EncodeCodec() == minecraft.LoginPacketClientCodec {
-		this.Write(&minecraft.PacketClientLoginDisconnect{raw})
+		this.Write(minecraft.NewPacketClientLoginDisconnect(json))
 	} else if this.codec.EncodeCodec() == minecraft.PlayPacketClientCodec {
-		this.Write(&minecraft.PacketClientDisconnect{raw})
+		this.Write(minecraft.NewPacketClientDisconnect(json))
 	}
 	this.conn.Close()
 }
@@ -198,9 +198,9 @@ func (this *Session) HandlePacket(packet packet.Packet) (err error) {
 		}
 	case STATE_STATUS:
 		if packet.Id() == minecraft.PACKET_SERVER_STATUS_REQUEST {
-			samplePath := this.server.Router().RouteSample(this.serverAddress)
+			samplePath := this.server.router.RouteSample(this.serverAddress)
 			sampleTxt, sampleErr := ioutil.ReadFile(samplePath)
-			icons := this.server.Router().RouteIcons(this.serverAddress)
+			icons := this.server.router.RouteIcons(this.serverAddress)
 			iconPath := icons[RandomInt(len(icons))]
 			favicon, faviconErr := ioutil.ReadFile(iconPath)
 			var faviconString string
@@ -225,11 +225,11 @@ func (this *Session) HandlePacket(packet packet.Packet) (err error) {
 			version["name"] = minecraft.STRING_VERSION
 			version["protocol"] = this.protocolVersion
 			players := make(map[string]interface{})
-			players["max"] = this.server.Connect().MaxPlayers()
-			players["online"] = this.server.Connect().Players()
+			players["max"] = this.server.connect.MaxPlayers()
+			players["online"] = this.server.connect.Players()
 			players["sample"] = sample
 			description := make(map[string]interface{})
-			motds := this.server.Router().RouteMotds(this.serverAddress)
+			motds := this.server.router.RouteMotds(this.serverAddress)
 			motd := motds[RandomInt(len(motds))]
 			description["text"] = minecraft.Colorize(motd)
 			response := make(map[string]interface{})
@@ -244,7 +244,7 @@ func (this *Session) HandlePacket(packet packet.Packet) (err error) {
 			if err != nil {
 				return
 			}
-			err = this.Write(&minecraft.PacketClientStatusResponse{string(marshalled)})
+			err = this.Write(minecraft.NewPacketClientStatusResponse(string(marshalled)))
 			if err != nil {
 				return
 			}
@@ -255,7 +255,7 @@ func (this *Session) HandlePacket(packet packet.Packet) (err error) {
 		}
 	case STATE_STATUS_PING:
 		if packet.Id() == minecraft.PACKET_SERVER_STATUS_PING {
-			err = this.Write(&minecraft.PacketClientStatusPing{packet.(*minecraft.PacketServerStatusPing).Time})
+			err = this.Write(minecraft.NewPacketClientStatusPing(packet.(*minecraft.PacketServerStatusPing).Time))
 			if err != nil {
 				return
 			}
@@ -272,7 +272,7 @@ func (this *Session) HandlePacket(packet packet.Packet) (err error) {
 				if err != nil {
 					return
 				}
-				this.publicKey, err = x509.MarshalPKIXPublicKey(&this.server.PrivateKey().PublicKey)
+				this.publicKey, err = x509.MarshalPKIXPublicKey(&this.server.privateKey.PublicKey)
 				if err != nil {
 					return
 				}
@@ -280,7 +280,7 @@ func (this *Session) HandlePacket(packet packet.Packet) (err error) {
 				if err != nil {
 					return
 				}
-				err = this.Write(&minecraft.PacketClientLoginEncryptRequest{this.serverId, this.publicKey, this.verifyToken})
+				err = this.Write(minecraft.NewPacketClientLoginEncryptRequest(this.serverId, this.publicKey, this.verifyToken))
 				if err != nil {
 					return
 				}
@@ -300,12 +300,12 @@ func (this *Session) HandlePacket(packet packet.Packet) (err error) {
 		if packet.Id() == minecraft.PACKET_SERVER_LOGIN_ENCRYPT_RESPONSE {
 			loginEncryptResponsePacket := packet.(*minecraft.PacketServerLoginEncryptResponse)
 			var sharedSecret []byte
-			sharedSecret, err = rsa.DecryptPKCS1v15(rand.Reader, this.server.PrivateKey(), loginEncryptResponsePacket.SharedSecret)
+			sharedSecret, err = rsa.DecryptPKCS1v15(rand.Reader, this.server.privateKey, loginEncryptResponsePacket.SharedSecret)
 			if err != nil {
 				return
 			}
 			var verifyToken []byte
-			verifyToken, err = rsa.DecryptPKCS1v15(rand.Reader, this.server.PrivateKey(), loginEncryptResponsePacket.VerifyToken)
+			verifyToken, err = rsa.DecryptPKCS1v15(rand.Reader, this.server.privateKey, loginEncryptResponsePacket.VerifyToken)
 			if err != nil {
 				return
 			}
@@ -318,14 +318,14 @@ func (this *Session) HandlePacket(packet packet.Packet) (err error) {
 			if err != nil {
 				return
 			}
-			this.connCodec.SetReader(&cipher.StreamReader{
-				R: this.connCodec.Reader(),
-				S: minecraft.NewCFB8Decrypter(block, sharedSecret),
-			})
-			this.connCodec.SetWriter(&cipher.StreamWriter{
-				W: this.connCodec.Writer(),
-				S: minecraft.NewCFB8Encrypter(block, sharedSecret),
-			})
+			streamReader := new(cipher.StreamReader)
+			streamReader.R = this.connCodec.Reader
+			streamReader.S = minecraft.NewCFB8Decrypt(block, sharedSecret)
+			streamWriter := new(cipher.StreamWriter)
+			streamWriter.W = this.connCodec.Writer
+			streamWriter.S = minecraft.NewCFB8Encrypt(block, sharedSecret)
+			this.connCodec.Reader = streamReader
+			this.connCodec.Writer = streamWriter
 			var authErr error
 			this.profile, authErr = auth.Authenticate(this.name, this.serverId, sharedSecret, this.publicKey)
 			if authErr != nil {
@@ -348,18 +348,18 @@ func (this *Session) HandlePacket(packet packet.Packet) (err error) {
 			if pluginMessagePacket.Channel == "REGISTER" {
 				for _, channelBytes := range bytes.Split(pluginMessagePacket.Data[:], []byte{0}) {
 					channel := string(channelBytes)
-					if this.registeredChannels[channel] {
+					if _, ok := this.pluginChannels[channel]; ok {
 						continue
 					}
-					if len(this.registeredChannels) >= 128 {
+					if len(this.pluginChannels) >= 128 {
 						break
 					}
-					this.registeredChannels[channel] = true
+					this.pluginChannels[channel] = struct{}{}
 				}
 			} else if pluginMessagePacket.Channel == "UNREGISTER" {
 				for _, channelBytes := range bytes.Split(pluginMessagePacket.Data[:], []byte{0}) {
 					channel := string(channelBytes)
-					delete(this.registeredChannels, channel)
+					delete(this.pluginChannels, channel)
 				}
 			}
 		}
@@ -376,8 +376,8 @@ func (this *Session) HandlePacket(packet packet.Packet) (err error) {
 
 func (this *Session) ErrorCaught(err error) {
 	if this.Authenticated() {
-		this.server.Connect().RemoveLocalPlayer(this.name)
-		this.server.SessionRegistry().Unregister(this)
+		this.server.connect.RemoveLocalPlayer(this.name)
+		this.server.SessionRegistry.Unregister(this)
 		fmt.Println("Proxy server, name:", this.name, "ip:", this.remoteIp, "disconnected:", err)
 	}
 	this.state = STATE_DISCONNECTED
@@ -385,14 +385,12 @@ func (this *Session) ErrorCaught(err error) {
 	return
 }
 
-func (this *Session) Name() string {
-	return this.name
+func (this *Session) Authenticated() (val bool) {
+	val = this.state == STATE_INIT || this.state == STATE_CONNECTED
+	return
 }
 
-func (this *Session) Authenticated() bool {
-	return this.state == STATE_INIT || this.state == STATE_CONNECTED
-}
-
-func (this *Session) Initializing() bool {
-	return this.state == STATE_INIT
+func (this *Session) Initializing() (val bool) {
+	val = this.state == STATE_INIT
+	return
 }

@@ -1,12 +1,14 @@
 package proxy
 
-import "bytes"
-import "net"
-import "time"
-import "strconv"
-import "github.com/LilyPad/GoLilyPad/packet"
-import "github.com/LilyPad/GoLilyPad/packet/minecraft"
-import "github.com/LilyPad/GoLilyPad/server/proxy/connect"
+import (
+	"bytes"
+	"net"
+	"time"
+	"strconv"
+	"github.com/LilyPad/GoLilyPad/packet"
+	"github.com/LilyPad/GoLilyPad/packet/minecraft"
+	"github.com/LilyPad/GoLilyPad/server/proxy/connect"
+)
 
 type SessionOutBridge struct {
 	session *Session
@@ -20,16 +22,14 @@ type SessionOutBridge struct {
 	state SessionState
 }
 
-func NewSessionOutBridge(session *Session, server *connect.Server, conn net.Conn) *SessionOutBridge {
-	ip, port, _ := net.SplitHostPort(server.Addr)
-	return &SessionOutBridge{
-		session: session,
-		server: server,
-		conn: conn,
-		remoteIp: ip,
-		remotePort: port,
-		state: STATE_DISCONNECTED,
-	}
+func NewSessionOutBridge(session *Session, server *connect.Server, conn net.Conn) (this *SessionOutBridge) {
+	this = new(SessionOutBridge)
+	this.session = session
+	this.server = server
+	this.conn = conn
+	this.remoteIp, this.remotePort, _ = net.SplitHostPort(conn.RemoteAddr().String())
+	this.state = STATE_DISCONNECTED
+	return
 }
 
 func (this *SessionOutBridge) Serve() {
@@ -49,19 +49,20 @@ func (this *SessionOutBridge) Serve() {
 	}
 	for _, property := range this.session.profile.Properties {
 		loginPayload.Properties = append(loginPayload.Properties, LoginPayloadProperty{property.Name, property.Value, property.Signature})
-	}	
-	this.Write(&minecraft.PacketServerHandshake{this.session.protocolVersion, EncodeLoginPayload(loginPayload), uint16(outRemotePort), 2})
+	}
+	this.Write(minecraft.NewPacketServerHandshake(this.session.protocolVersion, EncodeLoginPayload(loginPayload), uint16(outRemotePort), 2))
 
 	this.codec.SetEncodeCodec(minecraft.LoginPacketServerCodec)
 	this.codec.SetDecodeCodec(minecraft.LoginPacketClientCodec)
-	this.Write(&minecraft.PacketServerLoginStart{this.session.name})
+	this.Write(minecraft.NewPacketServerLoginStart(this.session.name))
 
 	this.state = STATE_LOGIN
 	go this.connCodec.ReadConn(this)
 }
 
 func (this *SessionOutBridge) Write(packet packet.Packet) (err error) {
-	return this.connCodec.Write(packet)
+	err = this.connCodec.Write(packet)
+	return
 }
 
 func (this *SessionOutBridge) HandlePacket(packet packet.Packet) (err error) {
@@ -78,7 +79,7 @@ func (this *SessionOutBridge) HandlePacket(packet packet.Packet) (err error) {
 			this.codec.SetEncodeCodec(minecraft.PlayPacketServerCodec)
 			this.codec.SetDecodeCodec(minecraft.PlayPacketClientCodec)
 		} else if packet.Id() == minecraft.PACKET_CLIENT_LOGIN_DISCONNECT {
-			this.session.DisconnectRaw(packet.(*minecraft.PacketClientLoginDisconnect).Json)
+			this.session.DisconnectJson(packet.(*minecraft.PacketClientLoginDisconnect).Json)
 			this.conn.Close()
 		} else {
 			if this.session.Initializing() {
@@ -124,52 +125,52 @@ func (this *SessionOutBridge) HandlePacket(packet packet.Packet) (err error) {
 				} else {
 					swapDimension = 0
 				}
-				this.session.Write(&minecraft.PacketClientRespawn{swapDimension, 2, 0, "DEFAULT"})
-				this.session.Write(&minecraft.PacketClientRespawn{int32(joinGamePacket.Dimension), joinGamePacket.Difficulty, joinGamePacket.Gamemode, joinGamePacket.LevelType})
+				this.session.Write(minecraft.NewPacketClientRespawn(swapDimension, 2, 0, "DEFAULT"))
+				this.session.Write(minecraft.NewPacketClientRespawn(int32(joinGamePacket.Dimension), joinGamePacket.Difficulty, joinGamePacket.Gamemode, joinGamePacket.LevelType))
 				for player, _ := range this.session.playerList {
-					this.session.Write(&minecraft.PacketClientPlayerListItem{player, false, 0})
+					this.session.Write(minecraft.NewPacketClientPlayerListItemRemove(player))
 				}
-				this.session.playerList = make(map[string]bool)
+				this.session.playerList = make(map[string]struct{})
 				for scoreboard, _ := range this.session.scoreboards {
-					this.session.Write(&minecraft.PacketClientScoreboardObjective{scoreboard, "", 1})
+					this.session.Write(minecraft.NewPacketClientScoreboardObjectiveRemove(scoreboard, ""))
 				}
-				this.session.scoreboards = make(map[string]bool)
+				this.session.scoreboards = make(map[string]struct{})
 				for team, _ := range this.session.teams {
-					this.session.Write(&minecraft.PacketClientTeams{team, 1, "", "", "", 0, nil})
+					this.session.Write(minecraft.NewPacketClientTeamsRemove(team))
 				}
-				this.session.teams = make(map[string]bool)
-				channels := make([][]byte, len(this.session.registeredChannels))
-				for channel, _ := range this.session.registeredChannels {
-					channels = append(channels, []byte(channel))
-				}
-				if len(channels) > 0 {
-					this.Write(&minecraft.PacketServerPluginMessage{"REGISTER", bytes.Join(channels, []byte{0})})
+				this.session.teams = make(map[string]struct{})
+				if len(this.session.pluginChannels) > 0 {
+					channels := make([][]byte, len(this.session.pluginChannels))
+					for channel, _ := range this.session.pluginChannels {
+						channels = append(channels, []byte(channel))
+					}
+					this.Write(minecraft.NewPacketServerPluginMessage("REGISTER", bytes.Join(channels, []byte{0})))
 				}
 				return
 			}
 		case minecraft.PACKET_CLIENT_PLAYER_LIST_ITEM:
 			playerListPacket := packet.(*minecraft.PacketClientPlayerListItem)
 			if playerListPacket.Online {
-				this.session.playerList[playerListPacket.Name] = true
+				this.session.playerList[playerListPacket.Name] = struct{}{}
 			} else {
 				delete(this.session.playerList, playerListPacket.Name)
 			}
 		case minecraft.PACKET_CLIENT_SCOREBOARD_OBJECTIVE:
 			scoreboardPacket := packet.(*minecraft.PacketClientScoreboardObjective)
 			if scoreboardPacket.Action == 0 {
-				this.session.scoreboards[scoreboardPacket.Name] = true
+				this.session.scoreboards[scoreboardPacket.Name] = struct{}{}
 			} else if scoreboardPacket.Action == 1 {
 				delete(this.session.scoreboards, scoreboardPacket.Name)
 			}
 		case minecraft.PACKET_CLIENT_TEAMS:
 			teamPacket := packet.(*minecraft.PacketClientTeams)
 			if teamPacket.Action == 0 {
-				this.session.teams[teamPacket.Name] = true
+				this.session.teams[teamPacket.Name] = struct{}{}
 			} else if teamPacket.Action == 1 {
 				delete(this.session.teams, teamPacket.Name)
 			}
 		case minecraft.PACKET_CLIENT_DISCONNECT:
-			this.session.DisconnectRaw(packet.(*minecraft.PacketClientDisconnect).Json)
+			this.session.DisconnectJson(packet.(*minecraft.PacketClientDisconnect).Json)
 			return
 		default:
 			if genericPacket, ok := packet.(*minecraft.PacketGeneric); ok {
@@ -187,7 +188,7 @@ func (this *SessionOutBridge) ErrorCaught(err error) {
 		this.session.redirectMutex.Unlock()
 	}
 	if this.state != STATE_DISCONNECTED && this.session.outBridge == this {
-		this.session.Disconnect(minecraft.Colorize(this.session.server.Localizer().LocaleLostConn()))
+		this.session.Disconnect(minecraft.Colorize(this.session.server.localizer.LocaleLostConn()))
 	}
 	this.session = nil
 	this.server = nil

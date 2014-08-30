@@ -1,6 +1,8 @@
 package connect
 
-import "github.com/LilyPad/GoLilyPad/packet/connect"
+import (
+	"github.com/LilyPad/GoLilyPad/packet/connect"
+)
 
 type EventMessage struct {
 	Sender string
@@ -8,10 +10,10 @@ type EventMessage struct {
 	Payload []byte
 }
 
-func WrapEventMessage(packet *connect.PacketMessageEvent) *EventMessage {
-	return &EventMessage{
-		Sender: packet.Sender,
-		Channel: packet.Channel,
-		Payload: packet.Payload,
-	}
+func WrapEventMessage(packet *connect.PacketMessageEvent) (this *EventMessage) {
+	this = new(EventMessage)
+	this.Sender = packet.Sender
+	this.Channel = packet.Channel
+	this.Payload = packet.Payload
+	return
 }

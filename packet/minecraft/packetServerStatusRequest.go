@@ -1,24 +1,32 @@
 package minecraft
 
-import "io"
-import "github.com/LilyPad/GoLilyPad/packet"
+import (
+	"io"
+	"github.com/LilyPad/GoLilyPad/packet"
+)
 
 type PacketServerStatusRequest struct {
 
+}
+
+func NewPacketServerStatusRequest() (this *PacketServerStatusRequest) {
+	this = new(PacketServerStatusRequest)
+	return
 }
 
 func (this *PacketServerStatusRequest) Id() int {
 	return PACKET_SERVER_STATUS_REQUEST
 }
 
-type PacketServerStatusRequestCodec struct {
-	
+type packetServerStatusRequestCodec struct {
+
 }
 
-func (this *PacketServerStatusRequestCodec) Decode(reader io.Reader, util []byte) (decode packet.Packet, err error) {
-	return &PacketServerStatusRequest{}, nil
+func (this *packetServerStatusRequestCodec) Decode(reader io.Reader, util []byte) (decode packet.Packet, err error) {
+	decode = new(PacketServerStatusRequest)
+	return
 }
 
-func (this *PacketServerStatusRequestCodec) Encode(writer io.Writer, util []byte, encode packet.Packet) (err error) {
+func (this *packetServerStatusRequestCodec) Encode(writer io.Writer, util []byte, encode packet.Packet) (err error) {
 	return
 }

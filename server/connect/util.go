@@ -1,15 +1,16 @@
 package connect
 
-import "crypto/rand"
-import "crypto/sha1"
-import "encoding/binary"
-import "encoding/hex"
-import "io"
+import (
+	"crypto/rand"
+	"crypto/sha1"
+	"encoding/binary"
+	"encoding/hex"
+	"io"
+)
 
-func RandomInt() int32 {
-	var n int32
+func RandomInt() (n int32) {
 	binary.Read(rand.Reader, binary.LittleEndian, &n)
-	return n
+	return
 }
 
 func GenSalt() (str string, err error) {
@@ -34,12 +35,14 @@ func GenUUID() (str string, err error) {
 	return
 }
 
-func Sha1Hex(str string) string {
+func Sha1Hex(str string) (val string) {
 	sha1 := sha1.New()
 	sha1.Write([]byte(str))
-	return hex.EncodeToString(sha1.Sum(nil))
+	val = hex.EncodeToString(sha1.Sum(nil))
+	return
 }
 
-func PasswordAndSaltHash(password string, passwordSalt string) string {
-	return Sha1Hex(Sha1Hex(passwordSalt) + Sha1Hex(password))
+func PasswordAndSaltHash(password string, passwordSalt string) (val string) {
+	val = Sha1Hex(Sha1Hex(passwordSalt) + Sha1Hex(password))
+	return
 }

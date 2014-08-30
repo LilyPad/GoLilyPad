@@ -1,7 +1,9 @@
 package minecraft
 
-import "io"
-import "github.com/LilyPad/GoLilyPad/packet"
+import (
+	"io"
+	"github.com/LilyPad/GoLilyPad/packet"
+)
 
 type PacketServerClientSettings struct {
 	Locale string
@@ -12,16 +14,27 @@ type PacketServerClientSettings struct {
 	ShowCape bool
 }
 
+func NewPacketServerClientSettings(locale string, viewDistance byte, chatFlags byte, unused bool, difficulty byte, showCape bool) (this *PacketServerClientSettings) {
+	this = new(PacketServerClientSettings)
+	this.Locale = locale
+	this.ViewDistance = viewDistance
+	this.ChatFlags = chatFlags
+	this.Unused = unused
+	this.Difficulty = difficulty
+	this.ShowCape = showCape
+	return
+}
+
 func (this *PacketServerClientSettings) Id() int {
 	return PACKET_SERVER_CLIENT_SETTINGS
 }
 
-type PacketServerClientSettingsCodec struct {
-	
+type packetServerClientSettingsCodec struct {
+
 }
 
-func (this *PacketServerClientSettingsCodec) Decode(reader io.Reader, util []byte) (decode packet.Packet, err error) {
-	packetServerClientSettings := &PacketServerClientSettings{}
+func (this *packetServerClientSettingsCodec) Decode(reader io.Reader, util []byte) (decode packet.Packet, err error) {
+	packetServerClientSettings := new(PacketServerClientSettings)
 	packetServerClientSettings.Locale, err = packet.ReadString(reader, util)
 	if err != nil {
 		return
@@ -46,10 +59,11 @@ func (this *PacketServerClientSettingsCodec) Decode(reader io.Reader, util []byt
 	if err != nil {
 		return
 	}
-	return packetServerClientSettings, nil
+	decode = packetServerClientSettings
+	return
 }
 
-func (this *PacketServerClientSettingsCodec) Encode(writer io.Writer, util []byte, encode packet.Packet) (err error) {
+func (this *packetServerClientSettingsCodec) Encode(writer io.Writer, util []byte, encode packet.Packet) (err error) {
 	packetServerClientSettings := encode.(*PacketServerClientSettings)
 	err = packet.WriteString(writer, util, packetServerClientSettings.Locale)
 	if err != nil {

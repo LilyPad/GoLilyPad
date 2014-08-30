@@ -1,12 +1,14 @@
 package packet
 
-import "encoding/binary"
-import "errors"
-import "fmt"
-import "io"
+import (
+	"encoding/binary"
+	"errors"
+	"fmt"
+	"io"
+)
 
-func WriteString(writer io.Writer, util []byte, s string) (err error) {
-	bytes := []byte(s)
+func WriteString(writer io.Writer, util []byte, val string) (err error) {
+	bytes := []byte(val)
 	err = WriteVarInt(writer, util, len(bytes))
 	if err != nil {
 		return
@@ -15,7 +17,7 @@ func WriteString(writer io.Writer, util []byte, s string) (err error) {
 	return
 }
 
-func ReadString(reader io.Reader, util []byte) (s string, err error) {
+func ReadString(reader io.Reader, util []byte) (val string, err error) {
 	length, err := ReadVarInt(reader, util)
 	if err != nil {
 		return
@@ -33,7 +35,8 @@ func ReadString(reader io.Reader, util []byte) (s string, err error) {
 	if err != nil {
 		return
 	}
-	return string(bytes), nil
+	val = string(bytes)
+	return
 }
 
 func WriteVarInt(writer io.Writer, util []byte, val int) (err error) {
@@ -44,7 +47,8 @@ func WriteVarInt(writer io.Writer, util []byte, val int) (err error) {
 		}
 		val >>= 7
 	}
-	return WriteUint8(writer, util, byte(val))
+	err = WriteUint8(writer, util, byte(val))
+	return
 }
 
 func ReadVarInt(reader io.Reader, util []byte) (result int, err error) {
@@ -58,14 +62,15 @@ func ReadVarInt(reader io.Reader, util []byte) (result int, err error) {
 		result |= int(uint(b & 0x7F) << uint(bytes * 7))
 		bytes++
 		if bytes > 5 {
-			return 0, errors.New("Decode, VarInt is too long")
+			err = errors.New("Decode, VarInt is too long")
+			return
 		}
 		if (b & 0x80) == 0x80 {
 			continue
 		}
 		break
 	}
-	return result, nil
+	return
 }
 
 func ReadBool(reader io.Reader, util []byte) (val bool, err error) {
@@ -73,7 +78,8 @@ func ReadBool(reader io.Reader, util []byte) (val bool, err error) {
 	if err != nil {
 		return
 	}
-	return uval != 0, nil
+	val = uval != 0
+	return
 }
 
 func WriteBool(writer io.Writer, util []byte, val bool) (err error) {
@@ -90,11 +96,13 @@ func ReadInt8(reader io.Reader, util []byte) (val int8, err error) {
 	if err != nil {
 		return
 	}
-	return int8(uval), nil
+	val = int8(uval)
+	return
 }
 
 func WriteInt8(writer io.Writer, util []byte, val int8) (err error) {
-	return WriteUint8(writer, util, uint8(val))
+	err = WriteUint8(writer, util, uint8(val))
+	return
 }
 
 func ReadUint8(reader io.Reader, util []byte) (val uint8, err error) {
@@ -102,7 +110,8 @@ func ReadUint8(reader io.Reader, util []byte) (val uint8, err error) {
 	if err != nil {
 		return
 	}
-	return util[0], nil
+	val = util[0]
+	return
 }
 
 func WriteUint8(writer io.Writer, util []byte, val uint8) (err error) {
@@ -116,11 +125,13 @@ func ReadInt16(reader io.Reader, util []byte) (val int16, err error) {
 	if err != nil {
 		return
 	}
-	return int16(uval), nil
+	val = int16(uval)
+	return
 }
 
 func WriteInt16(writer io.Writer, util []byte, val int16) (err error) {
-	return WriteUint16(writer, util, uint16(val))
+	err = WriteUint16(writer, util, uint16(val))
+	return
 }
 
 func ReadUint16(reader io.Reader, util []byte) (val uint16, err error) {
@@ -128,7 +139,8 @@ func ReadUint16(reader io.Reader, util []byte) (val uint16, err error) {
 	if err != nil {
 		return
 	}
-	return binary.BigEndian.Uint16(util[:2]), nil
+	val = binary.BigEndian.Uint16(util[:2])
+	return
 }
 
 func WriteUint16(writer io.Writer, util []byte, val uint16) (err error) {
@@ -142,11 +154,13 @@ func ReadInt32(reader io.Reader, util []byte) (val int32, err error) {
 	if err != nil {
 		return
 	}
-	return int32(uval), nil
+	val = int32(uval)
+	return
 }
 
 func WriteInt32(writer io.Writer, util []byte, val int32) (err error) {
-	return WriteUint32(writer, util, uint32(val))
+	err = WriteUint32(writer, util, uint32(val))
+	return
 }
 
 func ReadUint32(reader io.Reader, util []byte) (val uint32, err error) {
@@ -154,7 +168,8 @@ func ReadUint32(reader io.Reader, util []byte) (val uint32, err error) {
 	if err != nil {
 		return
 	}
-	return binary.BigEndian.Uint32(util[:4]), nil
+	val = binary.BigEndian.Uint32(util[:4])
+	return
 }
 
 func WriteUint32(writer io.Writer, util []byte, val uint32) (err error) {
@@ -168,11 +183,13 @@ func ReadInt64(reader io.Reader, util []byte) (val int64, err error) {
 	if err != nil {
 		return
 	}
-	return int64(uval), nil
+	val = int64(uval)
+	return
 }
 
 func WriteInt64(writer io.Writer, util []byte, val int64) (err error) {
-	return WriteUint64(writer, util, uint64(val))
+	err = WriteUint64(writer, util, uint64(val))
+	return
 }
 
 func ReadUint64(reader io.Reader, util []byte) (val uint64, err error) {
@@ -180,7 +197,8 @@ func ReadUint64(reader io.Reader, util []byte) (val uint64, err error) {
 	if err != nil {
 		return
 	}
-	return binary.BigEndian.Uint64(util[:8]), nil
+	val = binary.BigEndian.Uint64(util[:8])
+	return
 }
 
 func WriteUint64(writer io.Writer, util []byte, val uint64) (err error) {

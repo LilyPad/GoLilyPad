@@ -1,49 +1,47 @@
 package connect
 
-import "net"
-import "time"
-import "strconv"
-import "sync"
-import clientConnect "github.com/LilyPad/GoLilyPad/client/connect"
-import packetConnect "github.com/LilyPad/GoLilyPad/packet/connect"
+import (
+	"net"
+	"time"
+	"strconv"
+	"sync"
+	clientConnect "github.com/LilyPad/GoLilyPad/client/connect"
+	packetConnect "github.com/LilyPad/GoLilyPad/packet/connect"
+)
 
 type ProxyConnect struct {
 	client clientConnect.Connect
 	servers map[string]*Server
-	serversMutex *sync.RWMutex
-	localPlayers map[string]bool
-	localPlayersMutex *sync.RWMutex
+	serversMutex sync.RWMutex
+	localPlayers map[string]struct{}
+	localPlayersMutex sync.RWMutex
 	players uint16
 	maxPlayers uint16
 }
 
-func NewProxyConnect(addr *string, user *string, pass *string, proxy *ProxyConfig, done chan bool) (connect *ProxyConnect) {
-	client := clientConnect.NewConnect()
-	connect = &ProxyConnect{
-		client: client,
-		servers: make(map[string]*Server),
-		serversMutex: &sync.RWMutex{},
-		localPlayers: make(map[string]bool),
-		localPlayersMutex: &sync.RWMutex{},
-	}
-	client.RegisterEvent("preconnect", func(event clientConnect.Event) {
-		if len(connect.servers) > 0 {
-			connect.serversMutex.Lock()
-			connect.servers = make(map[string]*Server)
-			connect.serversMutex.Unlock()
+func NewProxyConnect(addr *string, user *string, pass *string, proxy *ProxyConfig, done chan bool) (this *ProxyConnect) {
+	this = new(ProxyConnect)
+	this.client = clientConnect.NewConnectImpl()
+	this.servers = make(map[string]*Server)
+	this.localPlayers = make(map[string]struct{})
+	this.client.RegisterEvent("preconnect", func(event clientConnect.Event) {
+		if len(this.servers) > 0 {
+			this.serversMutex.Lock()
+			this.servers = make(map[string]*Server)
+			this.serversMutex.Unlock()
 		}
-		connect.players = 0
-		connect.maxPlayers = 0
+		this.players = 0
+		this.maxPlayers = 0
 	})
-	client.RegisterEvent("authenticate", func(event clientConnect.Event) {
-		client.RequestLater(&packetConnect.RequestAsProxy{proxy.Address, proxy.Port, *proxy.Motd, proxy.Version, *proxy.Maxplayers}, func(statusCode uint8, result packetConnect.Result) {
+	this.client.RegisterEvent("authenticate", func(event clientConnect.Event) {
+		this.client.RequestLater(packetConnect.NewRequestAsProxy(proxy.Address, proxy.Port, *proxy.Motd, proxy.Version, *proxy.Maxplayers), func(statusCode uint8, result packetConnect.Result) {
 			if result == nil {
 				return
 			}
-			client.DispatchEvent("roled", nil)
+			this.ResendLocalPlayers()
 		})
 	})
-	client.RegisterEvent("server", func(event clientConnect.Event) {
+	this.client.RegisterEvent("server", func(event clientConnect.Event) {
 		serverEvent := event.(*clientConnect.EventServer)
 		if serverEvent.Add {
 			var address string
@@ -52,104 +50,102 @@ func NewProxyConnect(addr *string, user *string, pass *string, proxy *ProxyConfi
 			} else {
 				address = serverEvent.Address
 			}
-			connect.serversMutex.Lock()
-			defer connect.serversMutex.Unlock()
-			connect.servers[serverEvent.Server] = &Server{serverEvent.Server, address + ":" + strconv.FormatInt(int64(serverEvent.Port), 10), serverEvent.SecurityKey}
+			server := new(Server)
+			server.Name = serverEvent.Server
+			server.Addr = address + ":" + strconv.FormatInt(int64(serverEvent.Port), 10)
+			server.SecurityKey = serverEvent.SecurityKey
+			this.serversMutex.Lock()
+			defer this.serversMutex.Unlock()
+			this.servers[serverEvent.Server] = server
 		} else {
-			connect.serversMutex.Lock()
-			defer connect.serversMutex.Unlock()
-			delete(connect.servers, serverEvent.Server)
+			this.serversMutex.Lock()
+			defer this.serversMutex.Unlock()
+			delete(this.servers, serverEvent.Server)
 		}
 	})
-	client.RegisterEvent("roled", func(event clientConnect.Event) {
-		connect.ResendLocalPlayers()
-	})
-	clientConnect.AutoAuthenticate(client, user, pass)
-	go clientConnect.AutoConnect(client, addr, done)
+	clientConnect.AutoAuthenticate(this.client, user, pass)
+	go clientConnect.AutoConnect(this.client, addr, done)
 	go func() {
-		ticker := time.NewTicker(1 * time.Second)
+		ticker := time.NewTicker(time.Second)
 		for {
 			select {
 			case <-ticker.C:
-				if !client.Connected() {
+				if !this.client.Connected() {
 					break
 				}
-				connect.QueryRemotePlayers()
+				this.QueryRemotePlayers()
 			case <-done:
 				ticker.Stop()
 				return
 			}
 		}
 	}()
-	return connect
+	return
 }
 
-func (this *ProxyConnect) AddLocalPlayer(player string) int {
-	statusCode, _, err := this.client.Request(&packetConnect.RequestNotifyPlayer{true, player})
+func (this *ProxyConnect) AddLocalPlayer(player string) (ok int) {
+	statusCode, _, err := this.client.Request(packetConnect.NewRequestNotifyPlayerAdd(player))
 	if err != nil {
-		return -1
-	}
-	if statusCode == packetConnect.STATUS_SUCCESS {
+		ok = -1
+	} else if statusCode == packetConnect.STATUS_SUCCESS {
 		this.localPlayersMutex.Lock()
 		defer this.localPlayersMutex.Unlock()
-		this.localPlayers[player] = true
-		return 1
+		this.localPlayers[player] = struct{}{}
+		ok = 1
 	} else if statusCode == packetConnect.STATUS_ERROR_GENERIC {
-		return 0
+		ok = 0
 	}
-	return -1
+	return
 }
 
 func (this *ProxyConnect) RemoveLocalPlayer(player string) {
 	this.localPlayersMutex.Lock()
 	defer this.localPlayersMutex.Unlock()
 	delete(this.localPlayers, player)
-	this.client.RequestLater(&packetConnect.RequestNotifyPlayer{false, player}, nil)
+	this.client.RequestLater(packetConnect.NewRequestNotifyPlayerRemove(player), nil)
 }
 
 func (this *ProxyConnect) ResendLocalPlayers() {
 	this.localPlayersMutex.RLock()
 	defer this.localPlayersMutex.RUnlock()
 	for player, _ := range this.localPlayers {
-		this.client.RequestLater(&packetConnect.RequestNotifyPlayer{true, player}, nil)
+		this.client.RequestLater(packetConnect.NewRequestNotifyPlayerAdd(player), nil)
 	}
 }
 
 func (this *ProxyConnect) QueryRemotePlayers() {
-	this.client.RequestLater(&packetConnect.RequestGetPlayers{false}, func(statusCode uint8, result packetConnect.Result) {
+	this.client.RequestLater(packetConnect.NewRequestGetPlayers(), func(statusCode uint8, result packetConnect.Result) {
 		if result == nil {
 			return
 		}
 		getPlayersResult := result.(*packetConnect.ResultGetPlayers)
 		this.players = getPlayersResult.CurrentPlayers
-		this.maxPlayers = getPlayersResult.MaximumPlayers
+		this.maxPlayers = getPlayersResult.MaxPlayers
 	})
 }
 
-func (this *ProxyConnect) HasServer(name string) bool {
+func (this *ProxyConnect) HasServer(name string) (val bool) {
 	this.serversMutex.RLock()
 	defer this.serversMutex.RUnlock()
-	if _, ok := this.servers[name]; ok {
-		return true
-	}
-	return false
+	_, val = this.servers[name]
+	return
 }
 
-func (this *ProxyConnect) Server(name string) *Server {
+func (this *ProxyConnect) Server(name string) (val *Server) {
 	this.serversMutex.RLock()
 	defer this.serversMutex.RUnlock()
-	if server, ok := this.servers[name]; ok {
-		return server
-	}
-	return nil
+	val, _ = this.servers[name]
+	return
 }
 
-func (this *ProxyConnect) Players() uint16 {
-	return this.players
+func (this *ProxyConnect) Players() (val uint16) {
+	val = this.players
+	return
 }
 
-func (this *ProxyConnect) MaxPlayers() uint16 {
-	return this.maxPlayers
+func (this *ProxyConnect) MaxPlayers() (val uint16) {
+	val = this.maxPlayers
+	return
 }
 
 func (this *ProxyConnect) OnRedirect(handler RedirectHandler) {

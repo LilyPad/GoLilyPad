@@ -1,12 +1,14 @@
 package main
 
-import "bufio"
-import "fmt"
-import "os"
-import "runtime"
-import "strings"
-import "github.com/LilyPad/GoLilyPad/server/connect"
-import "github.com/LilyPad/GoLilyPad/server/connect/main/config"
+import (
+	"bufio"
+	"fmt"
+	"os"
+	"runtime"
+	"strings"
+	"github.com/LilyPad/GoLilyPad/server/connect"
+	"github.com/LilyPad/GoLilyPad/server/connect/main/config"
+)
 
 var VERSION string
 
@@ -48,7 +50,6 @@ func main() {
 	}
 
 	fmt.Println("Connect server started, version:", VERSION)
-
 	for {
 		select {
 		case str := <-stdinString:
@@ -64,7 +65,7 @@ func main() {
 			} else if str == "debug" {
 				fmt.Println("runtime.NumCPU:", runtime.NumCPU())
 				fmt.Println("runtime.NumGoroutine:", runtime.NumGoroutine())
-				memStats := &runtime.MemStats{}
+				memStats := new(runtime.MemStats)
 				runtime.ReadMemStats(memStats)
 				fmt.Println("runtime.MemStats.Alloc:", memStats.Alloc, "bytes")
 				fmt.Println("runtime.MemStats.TotalAlloc:", memStats.TotalAlloc, "bytes")

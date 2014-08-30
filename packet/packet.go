@@ -1,6 +1,8 @@
 package packet
 
-import "io"
+import (
+	"io"
+)
 
 type Packet interface {
 	Id() int

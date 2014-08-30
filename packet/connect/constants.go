@@ -1,6 +1,8 @@
 package connect
 
-import "github.com/LilyPad/GoLilyPad/packet"
+import (
+	"github.com/LilyPad/GoLilyPad/packet"
+)
 
 const (
 	STATUS_ERROR_ROLE = 0x02
@@ -27,37 +29,37 @@ const (
 )
 
 var requestCodecs = []RequestCodec {
-	REQUEST_AUTHENTICATE: &RequestAuthenticateCodec{},
-	REQUEST_AS_SERVER: &RequestAsServerCodec{},
-	REQUEST_AS_PROXY: &RequestAsProxyCodec{},
-	REQUEST_GET_SALT: &RequestGetSaltCodec{},
-	REQUEST_GET_WHOAMI: &RequestGetWhoamiCodec{},
-	REQUEST_MESSAGE: &RequestMessageCodec{},
-	REQUEST_REDIRECT: &RequestRedirectCodec{},
-	REQUEST_GET_PLAYERS: &RequestGetPlayersCodec{},
-	REQUEST_NOTIFY_PLAYER: &RequestNotifyPlayerCodec{},
-	REQUEST_GET_DETAILS: &RequestGetDetailsCodec{},
+	REQUEST_AUTHENTICATE: new(requestAuthenticateCodec),
+	REQUEST_AS_SERVER: new(requestAsServerCodec),
+	REQUEST_AS_PROXY: new(requestAsProxyCodec),
+	REQUEST_GET_SALT: new(requestGetSaltCodec),
+	REQUEST_GET_WHOAMI: new(requestGetWhoamiCodec),
+	REQUEST_MESSAGE: new(requestMessageCodec),
+	REQUEST_REDIRECT: new(requestRedirectCodec),
+	REQUEST_GET_PLAYERS: new(requestGetPlayersCodec),
+	REQUEST_NOTIFY_PLAYER: new(requestNotifyPlayerCodec),
+	REQUEST_GET_DETAILS: new(requestGetDetailsCodec),
 }
 
 var resultCodecs = []ResultCodec {
-	REQUEST_AUTHENTICATE: &ResultAuthenticateCodec{},
-	REQUEST_AS_SERVER: &ResultAsServerCodec{},
-	REQUEST_AS_PROXY: &ResultAsProxyCodec{},
-	REQUEST_GET_SALT: &ResultGetSaltCodec{},
-	REQUEST_GET_WHOAMI: &ResultGetWhoamiCodec{},
-	REQUEST_MESSAGE: &ResultMessageCodec{},
-	REQUEST_REDIRECT: &ResultRedirectCodec{},
-	REQUEST_GET_PLAYERS: &ResultGetPlayersCodec{},
-	REQUEST_NOTIFY_PLAYER: &ResultNotifyPlayerCodec{},
-	REQUEST_GET_DETAILS: &ResultGetDetailsCodec{},
+	REQUEST_AUTHENTICATE: new(resultAuthenticateCodec),
+	REQUEST_AS_SERVER: new(resultAsServerCodec),
+	REQUEST_AS_PROXY: new(resultAsProxyCodec),
+	REQUEST_GET_SALT: new(resultGetSaltCodec),
+	REQUEST_GET_WHOAMI: new(resultGetWhoamiCodec),
+	REQUEST_MESSAGE: new(resultMessageCodec),
+	REQUEST_REDIRECT: new(resultRedirectCodec),
+	REQUEST_GET_PLAYERS: new(resultGetPlayersCodec),
+	REQUEST_NOTIFY_PLAYER: new(resultNotifyPlayerCodec),
+	REQUEST_GET_DETAILS: new(resultGetDetailsCodec),
 }
 
 var PacketCodecs = []packet.PacketCodec {
-	PACKET_KEEPALIVE: &PacketKeepaliveCodec{},
-	PACKET_REQUEST: &PacketRequestCodec{},
-	PACKET_RESULT: &PacketResultCodec{nil},
-	PACKET_MESSAGE_EVENT: &PacketMessageEventCodec{},
-	PACKET_REDIRECT_EVENT: &PacketRedirectEventCodec{},
-	PACKET_SERVER_EVENT: &PacketServerEventCodec{},
+	PACKET_KEEPALIVE: new(packetKeepaliveCodec),
+	PACKET_REQUEST: new(packetRequestCodec),
+	PACKET_RESULT: new(packetResultCodec),
+	PACKET_MESSAGE_EVENT: new(packetMessageEventCodec),
+	PACKET_REDIRECT_EVENT: new(packetRedirectEventCodec),
+	PACKET_SERVER_EVENT: new(packetServerEventCodec),
 }
 var PacketCodec = packet.NewPacketCodecVarIntLength(packet.NewPacketCodecRegistry(PacketCodecs))

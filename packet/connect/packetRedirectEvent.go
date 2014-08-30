@@ -1,23 +1,32 @@
 package connect
 
-import "io"
-import "github.com/LilyPad/GoLilyPad/packet"
+import (
+	"io"
+	"github.com/LilyPad/GoLilyPad/packet"
+)
 
 type PacketRedirectEvent struct {
 	Server string
 	Player string
 }
 
+func NewPacketRedirectEvent(server string, player string) (this *PacketRedirectEvent) {
+	this = new(PacketRedirectEvent)
+	this.Server = server
+	this.Player = player
+	return
+}
+
 func (this *PacketRedirectEvent) Id() int {
 	return PACKET_REDIRECT_EVENT
 }
 
-type PacketRedirectEventCodec struct {
-	
+type packetRedirectEventCodec struct {
+
 }
 
-func (this *PacketRedirectEventCodec) Decode(reader io.Reader, util []byte) (decode packet.Packet, err error) {
-	packetRedirectEvent := &PacketRedirectEvent{}
+func (this *packetRedirectEventCodec) Decode(reader io.Reader, util []byte) (decode packet.Packet, err error) {
+	packetRedirectEvent := new(PacketRedirectEvent)
 	packetRedirectEvent.Server, err = packet.ReadString(reader, util)
 	if err != nil {
 		return
@@ -26,10 +35,11 @@ func (this *PacketRedirectEventCodec) Decode(reader io.Reader, util []byte) (dec
 	if err != nil {
 		return
 	}
-	return packetRedirectEvent, nil
+	decode = packetRedirectEvent
+	return
 }
 
-func (this *PacketRedirectEventCodec) Encode(writer io.Writer, util []byte, encode packet.Packet) (err error) {
+func (this *packetRedirectEventCodec) Encode(writer io.Writer, util []byte, encode packet.Packet) (err error) {
 	packetRedirectEvent := encode.(*PacketRedirectEvent)
 	err = packet.WriteString(writer, util, packetRedirectEvent.Server)
 	if err != nil {

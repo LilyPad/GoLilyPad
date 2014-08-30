@@ -1,10 +1,12 @@
 package connect
 
-import "sync"
+import (
+	"sync"
+)
 
 type NetworkCache struct {
 	playerToProxy map[string]*Session
-	playerToProxyLock *sync.RWMutex
+	playerToProxyLock sync.RWMutex
 	addresses []string
 	ports []uint16
 	motds []string
@@ -15,20 +17,18 @@ type NetworkCache struct {
 	shownMotd string
 	shownVersion string
 	shownMaxPlayers uint16
-	rebuildLock *sync.RWMutex
+	rebuildLock sync.RWMutex
 }
 
-func NewNetworkCache() *NetworkCache {
-	return &NetworkCache{
-		playerToProxy: make(map[string]*Session),
-		playerToProxyLock: &sync.RWMutex{},
-		addresses: make([]string, 0),
-		ports: make([]uint16, 0),
-		motds: make([]string, 0),
-		versions: make([]string, 0),
-		maxPlayers: make([]uint16, 0),
-		rebuildLock: &sync.RWMutex{},
-	}
+func NewNetworkCache() (this *NetworkCache) {
+	this = new(NetworkCache)
+	this.playerToProxy = make(map[string]*Session)
+	this.addresses = make([]string, 0)
+	this.ports = make([]uint16, 0)
+	this.motds = make([]string, 0)
+	this.versions = make([]string, 0)
+	this.maxPlayers = make([]uint16, 0)
+	return
 }
 
 func (this *NetworkCache) RegisterProxy(session *Session) {
@@ -80,14 +80,14 @@ func (this *NetworkCache) UnregisterProxy(session *Session) {
 	this.RemovePlayersByProxy(session)
 }
 
-func (this *NetworkCache) AddPlayer(player string, session *Session) bool {
+func (this *NetworkCache) AddPlayer(player string, session *Session) (ok bool) {
 	this.playerToProxyLock.Lock()
 	defer this.playerToProxyLock.Unlock()
-	if _, ok := this.playerToProxy[player]; ok {
-		return false
+	if _, ok = this.playerToProxy[player]; !ok {
+		this.playerToProxy[player] = session
 	}
-	this.playerToProxy[player] = session
-	return true
+	ok = !ok
+	return
 }
 
 func (this *NetworkCache) RemovePlayer(player string) {
@@ -112,10 +112,11 @@ func (this *NetworkCache) Players() (players []string) {
 	return
 }
 
-func (this *NetworkCache) ProxyByPlayer(player string) *Session {
+func (this *NetworkCache) ProxyByPlayer(player string) (session *Session) {
 	this.playerToProxyLock.RLock()
 	defer this.playerToProxyLock.RUnlock()
-	return this.playerToProxy[player]
+	session = this.playerToProxy[player]
+	return
 }
 
 func (this *NetworkCache) Rebuild() {
@@ -151,32 +152,37 @@ func (this *NetworkCache) Rebuild() {
 	}
 }
 
-func (this *NetworkCache) Address() string {
+func (this *NetworkCache) Address() (val string) {
 	this.rebuildLock.RLock()
 	defer this.rebuildLock.RUnlock()
-	return this.shownAddress
+	val = this.shownAddress
+	return
 }
 
-func (this *NetworkCache) Port() uint16 {
+func (this *NetworkCache) Port() (val uint16) {
 	this.rebuildLock.RLock()
 	defer this.rebuildLock.RUnlock()
-	return this.shownPort
+	val = this.shownPort
+	return
 }
 
-func (this *NetworkCache) Motd() string {
+func (this *NetworkCache) Motd() (val string) {
 	this.rebuildLock.RLock()
 	defer this.rebuildLock.RUnlock()
-	return this.shownMotd
+	val = this.shownMotd
+	return
 }
 
-func (this *NetworkCache) Version() string {
+func (this *NetworkCache) Version() (val string) {
 	this.rebuildLock.RLock()
 	defer this.rebuildLock.RUnlock()
-	return this.shownVersion
+	val = this.shownVersion
+	return
 }
 
-func (this *NetworkCache) MaxPlayers() uint16 {
+func (this *NetworkCache) MaxPlayers() (val uint16) {
 	this.rebuildLock.RLock()
 	defer this.rebuildLock.RUnlock()
-	return this.shownMaxPlayers
+	val = this.shownMaxPlayers
+	return
 }

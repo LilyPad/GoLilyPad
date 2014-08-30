@@ -1,30 +1,39 @@
 package minecraft
 
-import "io"
-import "github.com/LilyPad/GoLilyPad/packet"
+import (
+	"io"
+	"github.com/LilyPad/GoLilyPad/packet"
+)
 
 type PacketClientStatusResponse struct {
 	Json string
+}
+
+func NewPacketClientStatusResponse(json string) (this *PacketClientStatusResponse) {
+	this = new(PacketClientStatusResponse)
+	this.Json = json
+	return
 }
 
 func (this *PacketClientStatusResponse) Id() int {
 	return PACKET_CLIENT_STATUS_RESPONSE
 }
 
-type PacketClientStatusResponseCodec struct {
-	
+type packetClientStatusResponseCodec struct {
+
 }
 
-func (this *PacketClientStatusResponseCodec) Decode(reader io.Reader, util []byte) (decode packet.Packet, err error) {
-	packetClientStatusResponse := &PacketClientStatusResponse{}
+func (this *packetClientStatusResponseCodec) Decode(reader io.Reader, util []byte) (decode packet.Packet, err error) {
+	packetClientStatusResponse := new(PacketClientStatusResponse)
 	packetClientStatusResponse.Json, err = packet.ReadString(reader, util)
 	if err != nil {
 		return
 	}
-	return packetClientStatusResponse, nil
+	decode = packetClientStatusResponse
+	return
 }
 
-func (this *PacketClientStatusResponseCodec) Encode(writer io.Writer, util []byte, encode packet.Packet) (err error) {
+func (this *packetClientStatusResponseCodec) Encode(writer io.Writer, util []byte, encode packet.Packet) (err error) {
 	packetClientStatusResponse := encode.(*PacketClientStatusResponse)
 	err = packet.WriteString(writer, util, packetClientStatusResponse.Json)
 	return

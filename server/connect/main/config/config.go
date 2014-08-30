@@ -1,9 +1,11 @@
 package config
 
-import "io/ioutil"
-import "regexp"
-import yaml "launchpad.net/goyaml"
-import "github.com/LilyPad/GoLilyPad/server/connect"
+import (
+	"io/ioutil"
+	"regexp"
+	yaml "launchpad.net/goyaml"
+	"github.com/LilyPad/GoLilyPad/server/connect"
+)
 
 type Config struct {
 	Bind string `yaml:"bind"`
@@ -48,13 +50,13 @@ type ConfigLogin struct {
 }
 
 func DefaultConfig() (config *Config) {
-	return &Config{
-		Bind: ":5091",
-		Logins: []ConfigLogin{
-			ConfigLogin{"example", "", nil, "example"},
-			ConfigLogin{"", "^example-.*$", nil, "example"},
-		},
+	config = new(Config)
+	config.Bind = ":5091"
+	config.Logins = []ConfigLogin{
+		ConfigLogin{"example", "", nil, "example"},
+		ConfigLogin{"", "^example-.*$", nil, "example"},
 	}
+	return
 }
 
 func LoadConfig(file string) (config *Config, err error) {
@@ -62,8 +64,7 @@ func LoadConfig(file string) (config *Config, err error) {
 	if err != nil {
 		return
 	}
-	var cfg Config
-	config = &cfg
+	config = new(Config)
 	err = yaml.Unmarshal(data, config)
 	return
 }

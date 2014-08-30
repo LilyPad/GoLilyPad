@@ -1,15 +1,21 @@
 package packet
 
-import "io"
+import (
+	"io"
+)
 
 type fullReader struct {
-	reader io.Reader
+	Reader io.Reader
 }
 
-func NewFullReader(reader io.Reader) io.Reader {
-	return &fullReader{reader}
+func NewFullReader(reader io.Reader) (this io.Reader) {
+	fullReader := new(fullReader)
+	fullReader.Reader = reader
+	this = fullReader
+	return
 }
 
 func (this *fullReader) Read(p []byte) (n int, err error) {
-	return io.ReadFull(this.reader, p)
+	n, err = io.ReadFull(this.Reader, p)
+	return
 }

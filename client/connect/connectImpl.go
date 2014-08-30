@@ -1,13 +1,15 @@
 package connect
 
-import "errors"
-import "fmt"
-import "net"
-import "sync"
-import "sync/atomic"
-import "time"
-import "github.com/LilyPad/GoLilyPad/packet"
-import "github.com/LilyPad/GoLilyPad/packet/connect"
+import (
+	"errors"
+	"fmt"
+	"net"
+	"sync"
+	"sync/atomic"
+	"time"
+	"github.com/LilyPad/GoLilyPad/packet"
+	"github.com/LilyPad/GoLilyPad/packet/connect"
+)
 
 type ConnectImpl struct {
 	EventDispatcher
@@ -15,14 +17,13 @@ type ConnectImpl struct {
 	connCodec *packet.PacketConnCodec
 
 	records map[int32]*RequestRecord
-	recordsMutex *sync.Mutex
-	sequenceId int32 
+	recordsMutex sync.Mutex
+	sequenceId int32
 }
 
-func NewConnect() Connect {
-	return &ConnectImpl{
-		recordsMutex: &sync.Mutex{},
-	}
+func NewConnectImpl() (this *ConnectImpl) {
+	this = new(ConnectImpl)
+	return
 }
 
 func (this *ConnectImpl) Connect(addr string) (err error) {
@@ -57,21 +58,23 @@ func (this *ConnectImpl) Disconnect() {
 	this.conn = nil
 }
 
-func (this *ConnectImpl) Connected() bool {
-	return this.conn != nil
+func (this *ConnectImpl) Connected() (val bool) {
+	val = this.conn != nil
+	return
 }
 
 func (this *ConnectImpl) Write(packet packet.Packet) (err error) {
-	return this.connCodec.Write(packet)
+	err = this.connCodec.Write(packet)
+	return
 }
 
 func (this *ConnectImpl) HandlePacket(packet packet.Packet) (err error) {
 	switch packet.Id() {
 	case connect.PACKET_KEEPALIVE:
-		this.Write(packet)
+		err = this.Write(packet)
 	case connect.PACKET_RESULT:
 		packetResult := packet.(*connect.PacketResult)
-		this.DispatchResult(packetResult.SequenceId, packetResult.StatusCode, packetResult.Result)
+		err = this.DispatchResult(packetResult.SequenceId, packetResult.StatusCode, packetResult.Result)
 	case connect.PACKET_MESSAGE_EVENT:
 		this.DispatchEvent("message", WrapEventMessage(packet.(*connect.PacketMessageEvent)))
 	case connect.PACKET_REDIRECT_EVENT:
@@ -97,20 +100,23 @@ func (this *ConnectImpl) Request(request connect.Request) (statusCode uint8, res
 	if err != nil {
 		return
 	}
-	return <-statusCodeChannel, <-resultChannel, nil
+	statusCode = <-statusCodeChannel
+	result = <-resultChannel
+	return
 }
 
 func (this *ConnectImpl) RequestLater(request connect.Request, callback RequestCallback) (err error) {
 	if !this.Connected() {
-		return errors.New("Not connected")
+		err = errors.New("Not connected")
+		return
 	}
 	sequenceId := atomic.AddInt32(&this.sequenceId, 1)
 	this.recordsMutex.Lock()
 	if this.records != nil {
-		this.records[sequenceId] = &RequestRecord{request, callback}
+		this.records[sequenceId] = NewRequestRecord(request, callback)
 	}
 	this.recordsMutex.Unlock()
-	err = this.Write(&connect.PacketRequest{sequenceId, request})
+	err = this.Write(connect.NewPacketRequest(sequenceId, request))
 	if err != nil {
 		this.recordsMutex.Lock()
 		delete(this.records, sequenceId)
@@ -120,12 +126,13 @@ func (this *ConnectImpl) RequestLater(request connect.Request, callback RequestC
 	return
 }
 
-func (this *ConnectImpl) DispatchResult(sequenceId int32, statusCode uint8, result connect.Result) {
+func (this *ConnectImpl) DispatchResult(sequenceId int32, statusCode uint8, result connect.Result) (err error) {
 	this.recordsMutex.Lock()
 	var record *RequestRecord
 	var ok bool
 	if record, ok = this.records[sequenceId]; !ok {
-		return // should there be an error here?
+		err = errors.New("No matching request for result")
+		return
 	}
 	this.recordsMutex.Unlock()
 	if record.callback != nil {
@@ -134,13 +141,16 @@ func (this *ConnectImpl) DispatchResult(sequenceId int32, statusCode uint8, resu
 	this.recordsMutex.Lock()
 	delete(this.records, sequenceId)
 	this.recordsMutex.Unlock()
+	return
 }
 
-func (this *ConnectImpl) RequestIdBySequenceId(sequenceId int32) int {
+func (this *ConnectImpl) RequestIdBySequenceId(sequenceId int32) (requestId int) {
 	this.recordsMutex.Lock()
 	defer this.recordsMutex.Unlock()
-	if _, ok := this.records[sequenceId]; !ok {
-		return -1
+	if record, ok := this.records[sequenceId]; !ok {
+		requestId = -1
+	} else {
+		requestId = record.request.Id()
 	}
-	return this.records[sequenceId].request.Id()
+	return
 }

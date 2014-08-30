@@ -1,23 +1,39 @@
 package connect
 
-import "io"
-import "github.com/LilyPad/GoLilyPad/packet"
+import (
+	"io"
+	"github.com/LilyPad/GoLilyPad/packet"
+)
 
 type RequestNotifyPlayer struct {
 	Add bool
 	Player string
 }
 
+func NewRequestNotifyPlayerAdd(player string) (this *RequestNotifyPlayer) {
+	this = new(RequestNotifyPlayer)
+	this.Add = true
+	this.Player = player
+	return
+}
+
+func NewRequestNotifyPlayerRemove(player string) (this *RequestNotifyPlayer) {
+	this = new(RequestNotifyPlayer)
+	this.Add = false
+	this.Player = player
+	return
+}
+
 func (this *RequestNotifyPlayer) Id() int {
 	return REQUEST_NOTIFY_PLAYER
 }
 
-type RequestNotifyPlayerCodec struct {
-	
+type requestNotifyPlayerCodec struct {
+
 }
 
-func (this *RequestNotifyPlayerCodec) Decode(reader io.Reader, util []byte) (request Request, err error) {
-	requestNotifyPlayer := &RequestNotifyPlayer{}
+func (this *requestNotifyPlayerCodec) Decode(reader io.Reader, util []byte) (request Request, err error) {
+	requestNotifyPlayer := new(RequestNotifyPlayer)
 	requestNotifyPlayer.Add, err = packet.ReadBool(reader, util)
 	if err != nil {
 		return
@@ -26,10 +42,11 @@ func (this *RequestNotifyPlayerCodec) Decode(reader io.Reader, util []byte) (req
 	if err != nil {
 		return
 	}
-	return requestNotifyPlayer, nil
+	request = requestNotifyPlayer
+	return
 }
 
-func (this *RequestNotifyPlayerCodec) Encode(writer io.Writer, util []byte, request Request) (err error) {
+func (this *requestNotifyPlayerCodec) Encode(writer io.Writer, util []byte, request Request) (err error) {
 	requestNotifyPlayer := request.(*RequestNotifyPlayer)
 	err = packet.WriteBool(writer, util, requestNotifyPlayer.Add)
 	if err != nil {
@@ -43,18 +60,24 @@ type ResultNotifyPlayer struct {
 
 }
 
+func NewResultNotifyPlayer() (this *ResultNotifyPlayer) {
+	this = new(ResultNotifyPlayer)
+	return
+}
+
 func (this *ResultNotifyPlayer) Id() int {
 	return REQUEST_NOTIFY_PLAYER
 }
 
-type ResultNotifyPlayerCodec struct {
+type resultNotifyPlayerCodec struct {
 
 }
 
-func (this *ResultNotifyPlayerCodec) Decode(reader io.Reader, util []byte) (result Result, err error) {
-	return &ResultNotifyPlayer{}, nil
+func (this *resultNotifyPlayerCodec) Decode(reader io.Reader, util []byte) (result Result, err error) {
+	result = new(ResultNotifyPlayer)
+	return
 }
 
-func (this *ResultNotifyPlayerCodec) Encode(writer io.Writer, util []byte, result Result) (err error) {
+func (this *resultNotifyPlayerCodec) Encode(writer io.Writer, util []byte, result Result) (err error) {
 	return
 }

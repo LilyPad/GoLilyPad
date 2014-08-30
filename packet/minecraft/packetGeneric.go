@@ -1,14 +1,23 @@
 package minecraft
 
-import "bytes"
-import "encoding/binary"
-import "io"
-import "io/ioutil"
-import "github.com/LilyPad/GoLilyPad/packet"
+import (
+	"bytes"
+	"encoding/binary"
+	"io"
+	"io/ioutil"
+	"github.com/LilyPad/GoLilyPad/packet"
+)
 
 type PacketGeneric struct {
 	id int
 	Bytes []byte
+}
+
+func NewPacketGeneric(id int, bytes []byte) (this *PacketGeneric) {
+	this = new(PacketGeneric)
+	this.id = id
+	this.Bytes = bytes
+	return
 }
 
 func (this *PacketGeneric) SwapEntities(a int32, b int32, clientServer bool) {
@@ -102,7 +111,7 @@ func (this *PacketGeneric) SwapEntitiesVarInt(a int32, b int32, clientServer boo
 		return
 	}
 	// Apply the new Id
-	newBuffer := &bytes.Buffer{}
+	newBuffer := new(bytes.Buffer)
 	err = packet.WriteVarInt(newBuffer, bufferUtil, newId)
 	if err != nil {
 		return
@@ -115,20 +124,28 @@ func (this *PacketGeneric) Id() int {
 	return this.id
 }
 
-type PacketGenericCodec struct {
+type packetGenericCodec struct {
 	Id int
 }
 
-func (this *PacketGenericCodec) Decode(reader io.Reader, util []byte) (packet packet.Packet, err error) {
-	bytes, err := ioutil.ReadAll(reader)
-	if err != nil {
-		return
-	}
-	packet = &PacketGeneric{this.Id, bytes}
+func NewPacketGenericCodec(id int) (this *packetGenericCodec) {
+	this = new(packetGenericCodec)
+	this.Id = id
 	return
 }
 
-func (this *PacketGenericCodec) Encode(writer io.Writer, util []byte, packet packet.Packet) (err error) {
-	_, err = writer.Write(packet.(*PacketGeneric).Bytes)
+func (this *packetGenericCodec) Decode(reader io.Reader, util []byte) (decode packet.Packet, err error) {
+	packetGeneric := new(PacketGeneric)
+	packetGeneric.id = this.Id
+	packetGeneric.Bytes, err = ioutil.ReadAll(reader)
+	if err != nil {
+		return
+	}
+	decode = packetGeneric
+	return
+}
+
+func (this *packetGenericCodec) Encode(writer io.Writer, util []byte, encode packet.Packet) (err error) {
+	_, err = writer.Write(encode.(*PacketGeneric).Bytes)
 	return
 }

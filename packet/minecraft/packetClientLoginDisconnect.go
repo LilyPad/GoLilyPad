@@ -1,30 +1,39 @@
 package minecraft
 
-import "io"
-import "github.com/LilyPad/GoLilyPad/packet"
+import (
+	"io"
+	"github.com/LilyPad/GoLilyPad/packet"
+)
 
 type PacketClientLoginDisconnect struct {
 	Json string
+}
+
+func NewPacketClientLoginDisconnect(json string) (this *PacketClientLoginDisconnect) {
+	this = new(PacketClientLoginDisconnect)
+	this.Json = json
+	return
 }
 
 func (this *PacketClientLoginDisconnect) Id() int {
 	return PACKET_CLIENT_LOGIN_DISCONNECT
 }
 
-type PacketClientLoginDisconnectCodec struct {
-	
+type packetClientLoginDisconnectCodec struct {
+
 }
 
-func (this *PacketClientLoginDisconnectCodec) Decode(reader io.Reader, util []byte) (decode packet.Packet, err error) {
-	packetClientLoginDisconnect := &PacketClientLoginDisconnect{}
+func (this *packetClientLoginDisconnectCodec) Decode(reader io.Reader, util []byte) (decode packet.Packet, err error) {
+	packetClientLoginDisconnect := new(PacketClientLoginDisconnect)
 	packetClientLoginDisconnect.Json, err = packet.ReadString(reader, util)
 	if err != nil {
 		return
 	}
-	return packetClientLoginDisconnect, nil
+	decode = packetClientLoginDisconnect
+	return
 }
 
-func (this *PacketClientLoginDisconnectCodec) Encode(writer io.Writer, util []byte, encode packet.Packet) (err error) {
+func (this *packetClientLoginDisconnectCodec) Encode(writer io.Writer, util []byte, encode packet.Packet) (err error) {
 	packetClientLoginDisconnect := encode.(*PacketClientLoginDisconnect)
 	err = packet.WriteString(writer, util, packetClientLoginDisconnect.Json)
 	return

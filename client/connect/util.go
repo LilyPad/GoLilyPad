@@ -1,14 +1,18 @@
 package connect
 
-import "crypto/sha1"
-import "encoding/hex"
+import (
+	"crypto/sha1"
+	"encoding/hex"
+)
 
-func Sha1Hex(str string) string {
+func Sha1Hex(str string) (val string) {
 	sha1 := sha1.New()
 	sha1.Write([]byte(str))
-	return hex.EncodeToString(sha1.Sum(nil))
+	val = hex.EncodeToString(sha1.Sum(nil))
+	return
 }
 
-func PasswordAndSaltHash(password string, passwordSalt string) string {
-	return Sha1Hex(Sha1Hex(passwordSalt) + Sha1Hex(password))
+func PasswordAndSaltHash(password string, passwordSalt string) (val string) {
+	val = Sha1Hex(Sha1Hex(passwordSalt) + Sha1Hex(password))
+	return
 }
