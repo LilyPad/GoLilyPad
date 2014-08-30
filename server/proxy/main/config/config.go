@@ -54,7 +54,9 @@ func (this *Config) RouteMotds(domain string) (val []string) {
 		} else if len(route.Motd) > 0 {
 			val = []string{route.Motd}
 		}
-	} else if domain != "" {
+		return
+	}
+	if domain != "" {
 		val = this.RouteMotds("")
 	} else {
 		val = []string{this.Proxy.Motd}
@@ -78,7 +80,9 @@ func (this *Config) RouteIcons(domain string) (val []string) {
 		} else if len(route.Icon) > 0 {
 			val = []string{route.Icon}
 		}
-	} else if domain != "" {
+		return
+	}
+	if domain != "" {
 		val = this.RouteIcons("")
 	} else {
 		val = []string{"server-icon.png"}
