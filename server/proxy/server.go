@@ -57,7 +57,8 @@ func (this *Server) ListenAndServe(addr string) (err error) {
 	for {
 		conn, err = this.listener.Accept()
 		if err != nil {
-			return
+			fmt.Println("Error listener:", err)
+			continue
 		}
 		NewSession(this, conn).Serve()
 	}
