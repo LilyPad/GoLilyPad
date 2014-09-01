@@ -15,7 +15,7 @@ type SessionOutBridge struct {
 	server *connect.Server
 	conn net.Conn
 	connCodec *packet.PacketConnCodec
-	codec *packet.PacketCodecVariable
+	pipeline *packet.PacketPipeline
 
 	remoteIp string
 	remotePort string
@@ -33,8 +33,10 @@ func NewSessionOutBridge(session *Session, server *connect.Server, conn net.Conn
 }
 
 func (this *SessionOutBridge) Serve() {
-	this.codec = packet.NewPacketCodecVariable(minecraft.HandshakePacketServerCodec, minecraft.HandshakePacketClientCodec)
-	this.connCodec = packet.NewPacketConnCodec(this.conn, this.codec, 30 * time.Second)
+	this.pipeline = packet.NewPacketPipeline()
+	this.pipeline.AddLast("varIntLength", packet.NewPacketCodecVarIntLength())
+	this.pipeline.AddLast("registry", minecraft.HandshakePacketClientCodec)
+	this.connCodec = packet.NewPacketConnCodec(this.conn, this.pipeline, 30 * time.Second)
 
 	inRemotePort, _ := strconv.ParseUint(this.session.remotePort, 10, 16)
 	outRemotePort, _ := strconv.ParseUint(this.remotePort, 10, 16)
@@ -52,8 +54,7 @@ func (this *SessionOutBridge) Serve() {
 	}
 	this.Write(minecraft.NewPacketServerHandshake(this.session.protocolVersion, EncodeLoginPayload(loginPayload), uint16(outRemotePort), 2))
 
-	this.codec.SetEncodeCodec(minecraft.LoginPacketServerCodec)
-	this.codec.SetDecodeCodec(minecraft.LoginPacketClientCodec)
+	this.pipeline.Replace("registry", minecraft.LoginPacketClientCodec)
 	this.Write(minecraft.NewPacketServerLoginStart(this.session.name))
 
 	this.state = STATE_LOGIN
@@ -76,8 +77,7 @@ func (this *SessionOutBridge) HandlePacket(packet packet.Packet) (err error) {
 			this.session.redirectMutex.Lock()
 			this.state = STATE_INIT
 			this.session.redirecting = true
-			this.codec.SetEncodeCodec(minecraft.PlayPacketServerCodec)
-			this.codec.SetDecodeCodec(minecraft.PlayPacketClientCodec)
+			this.pipeline.Replace("registry", minecraft.PlayPacketClientCodec)
 		} else if packet.Id() == minecraft.PACKET_CLIENT_LOGIN_DISCONNECT {
 			this.session.DisconnectJson(packet.(*minecraft.PacketClientLoginDisconnect).Json)
 			this.conn.Close()

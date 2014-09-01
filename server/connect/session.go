@@ -13,6 +13,7 @@ type Session struct {
 	server *Server
 	conn net.Conn
 	connCodec *packet.PacketConnCodec
+	pipeline *packet.PacketPipeline
 
 	uuid string
 	salt string
@@ -32,23 +33,23 @@ type Session struct {
 	remotePort string
 }
 
-func NewSession(server *Server, conn net.Conn) (this *Session, err error) {
+func NewSession(server *Server, conn net.Conn) (this *Session) {
 	this = new(Session)
 	this.server = server
 	this.conn = conn
 	this.role = ROLE_UNAUTHORIZED
-	this.uuid, err = GenUUID()
-	if err != nil {
-		return
-	}
-	this.salt, err = GenSalt()
+	this.uuid, _ = GenUUID()
+	this.salt, _ = GenSalt()
 	this.remoteIp, this.remotePort, _ = net.SplitHostPort(conn.RemoteAddr().String())
 	return
 }
 
 func (this *Session) Serve() {
-	this.connCodec = packet.NewPacketConnCodec(this.conn, connect.PacketCodec, 10 * time.Second)
-	go this.connCodec.ReadConn(this)
+	this.pipeline = packet.NewPacketPipeline()
+	this.pipeline.AddLast("varIntLength", packet.NewPacketCodecVarIntLength())
+	this.pipeline.AddLast("registry", connect.PacketCodec)
+	this.connCodec = packet.NewPacketConnCodec(this.conn, this.pipeline, 10 * time.Second)
+	this.connCodec.ReadConn(this)
 }
 
 func (this *Session) Write(packet packet.Packet) (err error) {

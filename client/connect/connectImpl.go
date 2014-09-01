@@ -15,6 +15,7 @@ type ConnectImpl struct {
 	EventDispatcher
 	conn net.Conn
 	connCodec *packet.PacketConnCodec
+	pipeline *packet.PacketPipeline
 
 	records map[int32]*RequestRecord
 	recordsMutex sync.Mutex
@@ -35,7 +36,10 @@ func (this *ConnectImpl) Connect(addr string) (err error) {
 	this.recordsMutex.Lock()
 	defer this.recordsMutex.Unlock()
 	this.records = make(map[int32]*RequestRecord)
-	this.connCodec = packet.NewPacketConnCodec(this.conn, NewCodec(this), 10 * time.Second)
+	this.pipeline = packet.NewPacketPipeline()
+	this.pipeline.AddLast("varIntLength", packet.NewPacketCodecVarIntLength())
+	this.pipeline.AddLast("registry", NewCodecRegistry(this))
+	this.connCodec = packet.NewPacketConnCodec(this.conn, this.pipeline, 10 * time.Second)
 	go this.connCodec.ReadConn(this)
 	return
 }

@@ -59,7 +59,7 @@ func (this *Server) ListenAndServe(addr string) (err error) {
 		if err != nil {
 			return
 		}
-		NewSession(this, conn).Serve()
+		go NewSession(this, conn).Serve()
 	}
 	return
 }

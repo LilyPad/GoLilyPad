@@ -112,17 +112,14 @@ const (
 	PACKET_SERVER_LOGIN_ENCRYPT_RESPONSE = 0x01
 )
 
-var HandshakePacketClientCodecs = []packet.PacketCodec {
+var HandshakePacketServerCodec = packet.NewPacketCodecRegistryDual([]packet.PacketCodec {
 
-}
-var HandshakePacketClientCodec = packet.NewPacketCodecVarIntLength(packet.NewPacketCodecRegistry(HandshakePacketClientCodecs))
-
-var HandshakePacketServerCodecs = []packet.PacketCodec {
+}, []packet.PacketCodec {
 	PACKET_SERVER_HANDSHAKE: new(packetServerHandshakeCodec),
-}
-var HandshakePacketServerCodec = packet.NewPacketCodecVarIntLength(packet.NewPacketCodecRegistry(HandshakePacketServerCodecs))
+})
+var HandshakePacketClientCodec = HandshakePacketServerCodec.Flip()
 
-var PlayPacketClientCodecs = []packet.PacketCodec {
+var PlayPacketServerCodec = packet.NewPacketCodecRegistryDual([]packet.PacketCodec {
 	PACKET_CLIENT_KEEPALIVE: NewPacketGenericCodec(PACKET_CLIENT_KEEPALIVE),
 	PACKET_CLIENT_JOIN_GAME: new(packetClientJoinGameCodec),
 	PACKET_CLIENT_CHAT: NewPacketGenericCodec(PACKET_CLIENT_CHAT),
@@ -188,7 +185,55 @@ var PlayPacketClientCodecs = []packet.PacketCodec {
 	PACKET_CLIENT_TEAMS: new(packetClientTeamsCodec),
 	PACKET_CLIENT_PLUGIN_MESSAGE: NewPacketGenericCodec(PACKET_CLIENT_PLUGIN_MESSAGE),
 	PACKET_CLIENT_DISCONNECT: new(packetClientDisconnectCodec),
-}
+}, []packet.PacketCodec {
+	PACKET_SERVER_KEEPALIVE: NewPacketGenericCodec(PACKET_SERVER_KEEPALIVE),
+	PACKET_SERVER_CHAT: NewPacketGenericCodec(PACKET_SERVER_CHAT),
+	PACKET_SERVER_USE_ENTITY: NewPacketGenericCodec(PACKET_SERVER_USE_ENTITY),
+	PACKET_SERVER_PLAYER: NewPacketGenericCodec(PACKET_SERVER_PLAYER),
+	PACKET_SERVER_PLAYER_POSITION: NewPacketGenericCodec(PACKET_SERVER_PLAYER_POSITION),
+	PACKET_SERVER_PLAYER_LOOK: NewPacketGenericCodec(PACKET_SERVER_PLAYER_LOOK),
+	PACKET_SERVER_PLAYER_LOOK_AND_POSITION: NewPacketGenericCodec(PACKET_SERVER_PLAYER_LOOK_AND_POSITION),
+	PACKET_SERVER_PLAYER_DIGGING: NewPacketGenericCodec(PACKET_SERVER_PLAYER_DIGGING),
+	PACKET_SERVER_PLAYER_BLOCK_PLACEMENT: NewPacketGenericCodec(PACKET_SERVER_PLAYER_BLOCK_PLACEMENT),
+	PACKET_SERVER_HELD_ITEM_CHANGE: NewPacketGenericCodec(PACKET_SERVER_HELD_ITEM_CHANGE),
+	PACKET_SERVER_ANIMATION: NewPacketGenericCodec(PACKET_SERVER_ANIMATION),
+	PACKET_SERVER_ENTITY_ACTION: NewPacketGenericCodec(PACKET_SERVER_ENTITY_ACTION),
+	PACKET_SERVER_STEER_VEHICLE: NewPacketGenericCodec(PACKET_SERVER_STEER_VEHICLE),
+	PACKET_SERVER_CLOSE_WINDOW: NewPacketGenericCodec(PACKET_SERVER_CLOSE_WINDOW),
+	PACKET_SERVER_CLICK_WINDOW: NewPacketGenericCodec(PACKET_SERVER_CLICK_WINDOW),
+	PACKET_SERVER_CONFIRM_TRANSACTION: NewPacketGenericCodec(PACKET_SERVER_CONFIRM_TRANSACTION),
+	PACKET_SERVER_CREATIVE_INVENTORY_ACTION: NewPacketGenericCodec(PACKET_SERVER_CREATIVE_INVENTORY_ACTION),
+	PACKET_SERVER_ENCHANT_ITEM: NewPacketGenericCodec(PACKET_SERVER_ENCHANT_ITEM),
+	PACKET_SERVER_UPDATE_SIGN: NewPacketGenericCodec(PACKET_SERVER_UPDATE_SIGN),
+	PACKET_SERVER_PLAYER_ABILITIES: NewPacketGenericCodec(PACKET_SERVER_PLAYER_ABILITIES),
+	PACKET_SERVER_TAB_COMPLETE: NewPacketGenericCodec(PACKET_SERVER_TAB_COMPLETE),
+	PACKET_SERVER_CLIENT_SETTINGS: new(packetServerClientSettingsCodec),
+	PACKET_SERVER_CLIENT_STATUS: NewPacketGenericCodec(PACKET_SERVER_CLIENT_STATUS),
+	PACKET_SERVER_PLUGIN_MESSAGE: new(packetServerPluginMessageCodec),
+})
+var PlayPacketClientCodec = PlayPacketServerCodec.Flip()
+
+var StatusPacketServerCodec = packet.NewPacketCodecRegistryDual([]packet.PacketCodec {
+	PACKET_CLIENT_STATUS_RESPONSE: new(packetClientStatusResponseCodec),
+	PACKET_CLIENT_STATUS_PING: new(packetClientStatusPingCodec),
+}, []packet.PacketCodec {
+	PACKET_SERVER_STATUS_REQUEST: new(packetServerStatusRequestCodec),
+	PACKET_SERVER_STATUS_PING: new(packetServerStatusPingCodec),
+})
+var StatusPacketClientCodec = StatusPacketServerCodec.Flip()
+
+var LoginPacketServerCodec = packet.NewPacketCodecRegistryDual([]packet.PacketCodec {
+	PACKET_CLIENT_LOGIN_DISCONNECT: new(packetClientLoginDisconnectCodec),
+	PACKET_CLIENT_LOGIN_ENCRYPT_REQUEST: new(packetClientLoginEncryptRequestCodec),
+	PACKET_CLIENT_LOGIN_SUCCESS: new(packetClientLoginSuccessCodec),
+}, []packet.PacketCodec {
+	PACKET_SERVER_LOGIN_START: new(packetServerLoginStartCodec),
+	PACKET_SERVER_LOGIN_ENCRYPT_RESPONSE: new(packetServerLoginEncryptResponseCodec),
+})
+var LoginPacketClientCodec = LoginPacketServerCodec.Flip()
+
+var Versions = []int { 5, 4 }
+
 var PlayPacketClientEntityIntPositions = [][]int {
 	PACKET_CLIENT_ENTITY_EQUIPMENT: { 0 },
 	PACKET_CLIENT_USE_BED: { 0 },
@@ -217,34 +262,6 @@ var PlayPacketClientEntityVarIntPositions = []bool {
 	PACKET_CLIENT_BLOCK_BREAK_ANIMATION: true,
 	PACKET_CLIENT_SPAWN_GLOBAL_ENTITY: true,
 }
-var PlayPacketClientCodec = packet.NewPacketCodecVarIntLength(packet.NewPacketCodecRegistry(PlayPacketClientCodecs))
-
-var PlayPacketServerCodecs = []packet.PacketCodec {
-	PACKET_SERVER_KEEPALIVE: NewPacketGenericCodec(PACKET_SERVER_KEEPALIVE),
-	PACKET_SERVER_CHAT: NewPacketGenericCodec(PACKET_SERVER_CHAT),
-	PACKET_SERVER_USE_ENTITY: NewPacketGenericCodec(PACKET_SERVER_USE_ENTITY),
-	PACKET_SERVER_PLAYER: NewPacketGenericCodec(PACKET_SERVER_PLAYER),
-	PACKET_SERVER_PLAYER_POSITION: NewPacketGenericCodec(PACKET_SERVER_PLAYER_POSITION),
-	PACKET_SERVER_PLAYER_LOOK: NewPacketGenericCodec(PACKET_SERVER_PLAYER_LOOK),
-	PACKET_SERVER_PLAYER_LOOK_AND_POSITION: NewPacketGenericCodec(PACKET_SERVER_PLAYER_LOOK_AND_POSITION),
-	PACKET_SERVER_PLAYER_DIGGING: NewPacketGenericCodec(PACKET_SERVER_PLAYER_DIGGING),
-	PACKET_SERVER_PLAYER_BLOCK_PLACEMENT: NewPacketGenericCodec(PACKET_SERVER_PLAYER_BLOCK_PLACEMENT),
-	PACKET_SERVER_HELD_ITEM_CHANGE: NewPacketGenericCodec(PACKET_SERVER_HELD_ITEM_CHANGE),
-	PACKET_SERVER_ANIMATION: NewPacketGenericCodec(PACKET_SERVER_ANIMATION),
-	PACKET_SERVER_ENTITY_ACTION: NewPacketGenericCodec(PACKET_SERVER_ENTITY_ACTION),
-	PACKET_SERVER_STEER_VEHICLE: NewPacketGenericCodec(PACKET_SERVER_STEER_VEHICLE),
-	PACKET_SERVER_CLOSE_WINDOW: NewPacketGenericCodec(PACKET_SERVER_CLOSE_WINDOW),
-	PACKET_SERVER_CLICK_WINDOW: NewPacketGenericCodec(PACKET_SERVER_CLICK_WINDOW),
-	PACKET_SERVER_CONFIRM_TRANSACTION: NewPacketGenericCodec(PACKET_SERVER_CONFIRM_TRANSACTION),
-	PACKET_SERVER_CREATIVE_INVENTORY_ACTION: NewPacketGenericCodec(PACKET_SERVER_CREATIVE_INVENTORY_ACTION),
-	PACKET_SERVER_ENCHANT_ITEM: NewPacketGenericCodec(PACKET_SERVER_ENCHANT_ITEM),
-	PACKET_SERVER_UPDATE_SIGN: NewPacketGenericCodec(PACKET_SERVER_UPDATE_SIGN),
-	PACKET_SERVER_PLAYER_ABILITIES: NewPacketGenericCodec(PACKET_SERVER_PLAYER_ABILITIES),
-	PACKET_SERVER_TAB_COMPLETE: NewPacketGenericCodec(PACKET_SERVER_TAB_COMPLETE),
-	PACKET_SERVER_CLIENT_SETTINGS: new(packetServerClientSettingsCodec),
-	PACKET_SERVER_CLIENT_STATUS: NewPacketGenericCodec(PACKET_SERVER_CLIENT_STATUS),
-	PACKET_SERVER_PLUGIN_MESSAGE: new(packetServerPluginMessageCodec),
-}
 var PlayPacketServerEntityIntPositions = [][]int {
 	PACKET_SERVER_USE_ENTITY: { 0 },
 	PACKET_SERVER_ANIMATION: { 0 },
@@ -253,32 +270,3 @@ var PlayPacketServerEntityIntPositions = [][]int {
 var PlayPacketServerEntityVarIntPositions = []bool {
 
 }
-var PlayPacketServerCodec = packet.NewPacketCodecVarIntLength(packet.NewPacketCodecRegistry(PlayPacketServerCodecs))
-
-var StatusPacketClientCodecs = []packet.PacketCodec {
-	PACKET_CLIENT_STATUS_RESPONSE: new(packetClientStatusResponseCodec),
-	PACKET_CLIENT_STATUS_PING: new(packetClientStatusPingCodec),
-}
-var StatusPacketClientCodec = packet.NewPacketCodecVarIntLength(packet.NewPacketCodecRegistry(StatusPacketClientCodecs))
-
-var StatusPacketServerCodecs = []packet.PacketCodec {
-	PACKET_SERVER_STATUS_REQUEST: new(packetServerStatusRequestCodec),
-	PACKET_SERVER_STATUS_PING: new(packetServerStatusPingCodec),
-}
-var StatusPacketServerCodec = packet.NewPacketCodecVarIntLength(packet.NewPacketCodecRegistry(StatusPacketServerCodecs))
-
-var LoginPacketClientCodecs = []packet.PacketCodec {
-	PACKET_CLIENT_LOGIN_DISCONNECT: new(packetClientLoginDisconnectCodec),
-	PACKET_CLIENT_LOGIN_ENCRYPT_REQUEST: new(packetClientLoginEncryptRequestCodec),
-	PACKET_CLIENT_LOGIN_SUCCESS: new(packetClientLoginSuccessCodec),
-}
-
-var LoginPacketClientCodec = packet.NewPacketCodecVarIntLength(packet.NewPacketCodecRegistry(LoginPacketClientCodecs))
-
-var LoginPacketServerCodecs = []packet.PacketCodec {
-	PACKET_SERVER_LOGIN_START: new(packetServerLoginStartCodec),
-	PACKET_SERVER_LOGIN_ENCRYPT_RESPONSE: new(packetServerLoginEncryptResponseCodec),
-}
-var LoginPacketServerCodec = packet.NewPacketCodecVarIntLength(packet.NewPacketCodecRegistry(LoginPacketServerCodecs))
-
-var Versions = []int { 5, 4 }

@@ -13,9 +13,9 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net"
-	"sync"
 	"time"
 	"strings"
+	"sync"
 	"github.com/LilyPad/GoLilyPad/packet"
 	"github.com/LilyPad/GoLilyPad/packet/minecraft"
 	"github.com/LilyPad/GoLilyPad/server/proxy/connect"
@@ -26,7 +26,7 @@ type Session struct {
 	server *Server
 	conn net.Conn
 	connCodec *packet.PacketConnCodec
-	codec *packet.PacketCodecVariable
+	pipeline *packet.PacketPipeline
 	outBridge *SessionOutBridge
 	active bool
 
@@ -70,9 +70,11 @@ func NewSession(server *Server, conn net.Conn) (this *Session) {
 }
 
 func (this *Session) Serve() {
-	this.codec = packet.NewPacketCodecVariable(minecraft.HandshakePacketClientCodec, minecraft.HandshakePacketServerCodec)
-	this.connCodec = packet.NewPacketConnCodec(this.conn, this.codec, 30 * time.Second)
-	go this.connCodec.ReadConn(this)
+	this.pipeline = packet.NewPacketPipeline()
+	this.pipeline.AddLast("varIntLength", packet.NewPacketCodecVarIntLength())
+	this.pipeline.AddLast("registry", minecraft.HandshakePacketServerCodec)
+	this.connCodec = packet.NewPacketConnCodec(this.conn, this.pipeline, 30 * time.Second)
+	this.connCodec.ReadConn(this)
 }
 
 func (this *Session) Write(packet packet.Packet) (err error) {
@@ -138,8 +140,7 @@ func (this *Session) SetAuthenticated(result bool) {
 	} else {
 		this.Write(minecraft.NewPacketClientLoginSuccess(this.profile.Id, this.name))
 	}
-	this.codec.SetEncodeCodec(minecraft.PlayPacketClientCodec)
-	this.codec.SetDecodeCodec(minecraft.PlayPacketServerCodec)
+	this.pipeline.Replace("registry", minecraft.PlayPacketServerCodec)
 	this.server.SessionRegistry.Register(this)
 	this.Redirect(server)
 }
@@ -150,9 +151,10 @@ func (this *Session) Disconnect(reason string) {
 }
 
 func (this *Session) DisconnectJson(json string) {
-	if this.codec.EncodeCodec() == minecraft.LoginPacketClientCodec {
+	registry := this.pipeline.Get("registry")
+	if registry == minecraft.LoginPacketServerCodec {
 		this.Write(minecraft.NewPacketClientLoginDisconnect(json))
-	} else if this.codec.EncodeCodec() == minecraft.PlayPacketClientCodec {
+	} else if registry == minecraft.PlayPacketServerCodec {
 		this.Write(minecraft.NewPacketClientDisconnect(json))
 	}
 	this.conn.Close()
@@ -177,16 +179,14 @@ func (this *Session) HandlePacket(packet packet.Packet) (err error) {
 				if !supportedVersion {
 					this.protocolVersion = minecraft.Versions[0]
 				}
-				this.codec.SetEncodeCodec(minecraft.StatusPacketClientCodec)
-				this.codec.SetDecodeCodec(minecraft.StatusPacketServerCodec)
+				this.pipeline.Replace("registry", minecraft.StatusPacketServerCodec)
 				this.state = STATE_STATUS
 			} else if handshakePacket.State ==  2 {
 				if !supportedVersion {
 					err = errors.New("Protocol version does not match")
 					return
 				}
-				this.codec.SetEncodeCodec(minecraft.LoginPacketClientCodec)
-				this.codec.SetDecodeCodec(minecraft.LoginPacketServerCodec)
+				this.pipeline.Replace("registry", minecraft.LoginPacketServerCodec)
 				this.state = STATE_LOGIN
 			} else {
 				err = errors.New("Unexpected state")
@@ -200,13 +200,6 @@ func (this *Session) HandlePacket(packet packet.Packet) (err error) {
 		if packet.Id() == minecraft.PACKET_SERVER_STATUS_REQUEST {
 			samplePath := this.server.router.RouteSample(this.serverAddress)
 			sampleTxt, sampleErr := ioutil.ReadFile(samplePath)
-			icons := this.server.router.RouteIcons(this.serverAddress)
-			iconPath := icons[RandomInt(len(icons))]
-			favicon, faviconErr := ioutil.ReadFile(iconPath)
-			var faviconString string
-			if faviconErr == nil {
-				faviconString = "data:image/png;base64," + base64.StdEncoding.EncodeToString(favicon)
-			}
 			sample := make([]map[string]interface{}, 0)
 			if sampleErr == nil {
 				lines := strings.Split(string(sampleTxt), "\n")
@@ -220,6 +213,13 @@ func (this *Session) HandlePacket(packet packet.Packet) (err error) {
 					entry["id"] = "00000000-0000-0000-0000-000000000000"
 					sample = append(sample, entry)
 				}
+			}
+			icons := this.server.router.RouteIcons(this.serverAddress)
+			iconPath := icons[RandomInt(len(icons))]
+			icon, iconErr := ioutil.ReadFile(iconPath)
+			var iconString string
+			if iconErr == nil {
+				iconString = "data:image/png;base64," + base64.StdEncoding.EncodeToString(icon)
 			}
 			version := make(map[string]interface{})
 			version["name"] = minecraft.STRING_VERSION
@@ -236,8 +236,8 @@ func (this *Session) HandlePacket(packet packet.Packet) (err error) {
 			response["version"] = version
 			response["players"] = players
 			response["description"] = description
-			if faviconString != "" {
-				response["favicon"] = faviconString
+			if iconString != "" {
+				response["favicon"] = iconString
 			}
 			var marshalled []byte
 			marshalled, err = json.Marshal(response)
@@ -318,7 +318,7 @@ func (this *Session) HandlePacket(packet packet.Packet) (err error) {
 			if err != nil {
 				return
 			}
-			streamReader := new(cipher.StreamReader)
+			streamReader := new(cipher.StreamReader) // TODO perhaps we should add this to the packetPipeline?
 			streamReader.R = this.connCodec.Reader
 			streamReader.S = minecraft.NewCFB8Decrypt(block, sharedSecret)
 			streamWriter := new(cipher.StreamWriter)

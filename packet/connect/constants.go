@@ -54,12 +54,11 @@ var resultCodecs = []ResultCodec {
 	REQUEST_GET_DETAILS: new(resultGetDetailsCodec),
 }
 
-var PacketCodecs = []packet.PacketCodec {
+var PacketCodec = packet.NewPacketCodecRegistry([]packet.PacketCodec {
 	PACKET_KEEPALIVE: new(packetKeepaliveCodec),
 	PACKET_REQUEST: new(packetRequestCodec),
 	PACKET_RESULT: new(packetResultCodec),
 	PACKET_MESSAGE_EVENT: new(packetMessageEventCodec),
 	PACKET_REDIRECT_EVENT: new(packetRedirectEventCodec),
 	PACKET_SERVER_EVENT: new(packetServerEventCodec),
-}
-var PacketCodec = packet.NewPacketCodecVarIntLength(packet.NewPacketCodecRegistry(PacketCodecs))
+})

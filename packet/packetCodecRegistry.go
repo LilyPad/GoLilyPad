@@ -7,12 +7,21 @@ import (
 )
 
 type PacketCodecRegistry struct {
-	packetCodecs []PacketCodec
+	EncodeCodecs []PacketCodec
+	DecodeCodecs []PacketCodec
 }
 
-func NewPacketCodecRegistry(packetCodecs []PacketCodec) (this *PacketCodecRegistry) {
+func NewPacketCodecRegistry(codecs []PacketCodec) (this *PacketCodecRegistry) {
 	this = new(PacketCodecRegistry)
-	this.packetCodecs = packetCodecs
+	this.EncodeCodecs = codecs
+	this.DecodeCodecs = codecs
+	return
+}
+
+func NewPacketCodecRegistryDual(encodeCodecs []PacketCodec, decodeCodecs []PacketCodec) (this *PacketCodecRegistry) {
+	this = new(PacketCodecRegistry)
+	this.EncodeCodecs = encodeCodecs
+	this.DecodeCodecs = decodeCodecs
 	return
 }
 
@@ -25,11 +34,11 @@ func (this *PacketCodecRegistry) Decode(reader io.Reader, util []byte) (packet P
 		err = errors.New(fmt.Sprintf("Decode, Packet Id is below zero: %d", id))
 		return
 	}
-	if id >= len(this.packetCodecs) {
+	if id >= len(this.DecodeCodecs) {
 		err = errors.New(fmt.Sprintf("Decode, Packet Id is above maximum: %d", id))
 		return
 	}
-	codec := this.packetCodecs[id]
+	codec := this.DecodeCodecs[id]
 	if codec == nil {
 		err = errors.New(fmt.Sprintf("Decode, Packet Id does not have a codec: %d", id))
 		return
@@ -48,15 +57,36 @@ func (this *PacketCodecRegistry) Encode(writer io.Writer, util []byte, packet Pa
 		err = errors.New(fmt.Sprintf("Encode, Packet Id is below zero: %d", id))
 		return
 	}
-	if id >= len(this.packetCodecs) {
+	if id >= len(this.EncodeCodecs) {
 		err = errors.New(fmt.Sprintf("Encode, Packet Id is above maximum: %d", id))
 		return
 	}
-	codec := this.packetCodecs[id]
+	codec := this.EncodeCodecs[id]
 	if codec == nil {
 		err = errors.New(fmt.Sprintf("Encode, Packet Id does not have a codec: %d", id))
 		return
 	}
 	err = codec.Encode(writer, util, packet)
 	return
+}
+
+func (this *PacketCodecRegistry) Flip() (thisCopy *PacketCodecRegistry) {
+	thisCopy = this.Copy()
+	encodeCodecs := thisCopy.EncodeCodecs
+	thisCopy.EncodeCodecs = thisCopy.DecodeCodecs
+	thisCopy.DecodeCodecs = encodeCodecs
+	return
+}
+
+func (this *PacketCodecRegistry) Copy() (thisCopy *PacketCodecRegistry) {
+	thisCopy = new(PacketCodecRegistry)
+	thisCopy.EncodeCodecs = make([]PacketCodec, len(this.EncodeCodecs))
+	copy(thisCopy.EncodeCodecs, this.EncodeCodecs)
+	thisCopy.DecodeCodecs = make([]PacketCodec, len(this.DecodeCodecs))
+	copy(thisCopy.DecodeCodecs, this.DecodeCodecs)
+	return
+}
+
+func (this *PacketCodecRegistry) SetCodec(codec PacketCodec) {
+	panic("PacketCodecRegistry must be last in the pipeline")
 }

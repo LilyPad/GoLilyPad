@@ -8,12 +8,11 @@ import (
 )
 
 type PacketCodecVarIntLength struct {
-	packetCodec PacketCodec
+	codec PacketCodec
 }
 
-func NewPacketCodecVarIntLength(packetCodec PacketCodec) (this *PacketCodecVarIntLength) {
+func NewPacketCodecVarIntLength() (this *PacketCodecVarIntLength) {
 	this = new(PacketCodecVarIntLength)
-	this.packetCodec = packetCodec
 	return
 }
 
@@ -35,13 +34,13 @@ func (this *PacketCodecVarIntLength) Decode(reader io.Reader, util []byte) (pack
 	if err != nil {
 		return
 	}
-	packet, err = this.packetCodec.Decode(bytes.NewReader(payload), util)
+	packet, err = this.codec.Decode(bytes.NewReader(payload), util)
 	return
 }
 
 func (this *PacketCodecVarIntLength) Encode(writer io.Writer, util []byte, packet Packet) (err error) {
 	buffer := new(bytes.Buffer)
-	err = this.packetCodec.Encode(buffer, util, packet)
+	err = this.codec.Encode(buffer, util, packet)
 	if err != nil {
 		return
 	}
@@ -51,4 +50,8 @@ func (this *PacketCodecVarIntLength) Encode(writer io.Writer, util []byte, packe
 	}
 	_, err = buffer.WriteTo(writer)
 	return
+}
+
+func (this *PacketCodecVarIntLength) SetCodec(codec PacketCodec) {
+	this.codec = codec
 }

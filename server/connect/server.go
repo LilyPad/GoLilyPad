@@ -30,17 +30,12 @@ func (this *Server) ListenAndServe(addr string) (err error) {
 	this.keepaliveDone = make(chan bool)
 	go Keepalive(this.SessionRegistry(ROLE_AUTHORIZED), this.keepaliveDone)
 	var conn net.Conn
-	var session *Session
 	for {
 		conn, err = this.listener.Accept()
 		if err != nil {
 			return
 		}
-		session, err = NewSession(this, conn)
-		if err != nil {
-			return
-		}
-		session.Serve()
+		go NewSession(this, conn).Serve()
 	}
 	return
 }
