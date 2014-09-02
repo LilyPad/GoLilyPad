@@ -36,6 +36,8 @@ func (this *PacketCodecZlib) Decode(reader io.Reader, util []byte) (packet Packe
 		return
 	}
 	if length == 0 {
+		packet, err = this.codec.Decode(reader, util)
+	} else {
 		var zlibReader io.ReadCloser
 		zlibReader, err = zlib.NewReader(reader)
 		if err != nil {
@@ -46,8 +48,6 @@ func (this *PacketCodecZlib) Decode(reader io.Reader, util []byte) (packet Packe
 			return
 		}
 		err = zlibReader.Close()
-	} else {
-		packet, err = this.codec.Decode(reader, util)
 	}
 	return
 }
@@ -59,7 +59,7 @@ func (this *PacketCodecZlib) Encode(writer io.Writer, util []byte, packet Packet
 		return
 	}
 	if buffer.Len() >= this.threshold {
-		err = WriteVarInt(writer, util, 0)
+		err = WriteVarInt(writer, util, buffer.Len())
 		if err != nil {
 			return
 		}
@@ -74,7 +74,7 @@ func (this *PacketCodecZlib) Encode(writer io.Writer, util []byte, packet Packet
 		}
 		err = zlibWriter.Close()
 	} else {
-		err = WriteVarInt(writer, util, buffer.Len())
+		err = WriteVarInt(writer, util, 0)
 		if err != nil {
 			return
 		}

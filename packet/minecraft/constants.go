@@ -124,6 +124,8 @@ const (
 	PACKET_SERVER_LOGIN_ENCRYPT_RESPONSE = 0x01
 )
 
+var Versions = []int { 46 }
+
 var HandshakePacketServerCodec = packet.NewPacketCodecRegistryDual([]packet.PacketCodec {
 
 }, []packet.PacketCodec {
@@ -256,9 +258,45 @@ var LoginPacketServerCodec = packet.NewPacketCodecRegistryDual([]packet.PacketCo
 })
 var LoginPacketClientCodec = LoginPacketServerCodec.Flip()
 
-var Versions = []int { 46 }
-
 var PlayPacketClientEntityIntPositions = [][]int {
+	PACKET_CLIENT_ENTITY_STATUS: { 0 },
+	PACKET_CLIENT_ATTACH_ENTITY: { 0, 4 },
+}
+var PlayPacketClientEntityVarIntPositions = []bool {
+	PACKET_CLIENT_ENTITY_EQUIPMENT: true,
+	PACKET_CLIENT_USE_BED: true,
+	PACKET_CLIENT_COLLECT_ITEM: true, // TODO change the second argument too?
+	PACKET_CLIENT_ANIMATION: true,
+	PACKET_CLIENT_SPAWN_PLAYER: true,
+	PACKET_CLIENT_SPAWN_OBJECT: true,
+	PACKET_CLIENT_SPAWN_MOB: true,
+	PACKET_CLIENT_SPAWN_PAINTING: true,
+	PACKET_CLIENT_SPAWN_EXPERIENCE_ORB: true,
+	PACKET_CLIENT_SPAWN_GLOBAL_ENTITY: true,
+	PACKET_CLIENT_ENTITY_VELOCITY: true,
+	PACKET_CLIENT_ENTITY: true,
+	PACKET_CLIENT_ENTITY_RELATIVE_MOVE: true,
+	PACKET_CLIENT_ENTITY_LOOK: true,
+	PACKET_CLIENT_ENTITY_LOOK_AND_RELATIVE_MOVE: true,
+	PACKET_CLIENT_ENTITY_TELEPORT: true,
+	PACKET_CLIENT_ENTITY_HEAD_LOOK: true,
+	PACKET_CLIENT_ENTITY_METADATA: true,
+	PACKET_CLIENT_ENTITY_EFFECT: true,
+	PACKET_CLIENT_REMOVE_ENTITY_EFFECT: true,
+	PACKET_CLIENT_ENTITY_PROPERTIES: true,
+	PACKET_CLIENT_BLOCK_BREAK_ANIMATION: true,
+	// TODO combat event
+	PACKET_CLIENT_UPDATE_ENTITY_NBT: true,
+}
+var PlayPacketServerEntityIntPositions = [][]int {
+
+}
+var PlayPacketServerEntityVarIntPositions = []bool {
+	PACKET_SERVER_USE_ENTITY: true,
+	PACKET_SERVER_ENTITY_ACTION: true,
+}
+
+var Play17PacketClientEntityIntPositions = [][]int {
 	PACKET_CLIENT_ENTITY_EQUIPMENT: { 0 },
 	PACKET_CLIENT_USE_BED: { 0 },
 	PACKET_CLIENT_COLLECT_ITEM: { 0, 4 },
@@ -276,7 +314,7 @@ var PlayPacketClientEntityIntPositions = [][]int {
 	PACKET_CLIENT_REMOVE_ENTITY_EFFECT: { 0 },
 	PACKET_CLIENT_ENTITY_PROPERTIES: { 0 },
 }
-var PlayPacketClientEntityVarIntPositions = []bool {
+var Play17PacketClientEntityVarIntPositions = []bool {
 	PACKET_CLIENT_ANIMATION: true,
 	PACKET_CLIENT_SPAWN_PLAYER: true,
 	PACKET_CLIENT_SPAWN_OBJECT: true,
@@ -286,11 +324,11 @@ var PlayPacketClientEntityVarIntPositions = []bool {
 	PACKET_CLIENT_BLOCK_BREAK_ANIMATION: true,
 	PACKET_CLIENT_SPAWN_GLOBAL_ENTITY: true,
 }
-var PlayPacketServerEntityIntPositions = [][]int {
+var Play17PacketServerEntityIntPositions = [][]int {
 	PACKET_SERVER_USE_ENTITY: { 0 },
 	PACKET_SERVER_ANIMATION: { 0 },
 	PACKET_SERVER_ENTITY_ACTION: { 0 },
 }
-var PlayPacketServerEntityVarIntPositions = []bool {
+var Play17PacketServerEntityVarIntPositions = []bool {
 
 }

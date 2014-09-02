@@ -86,7 +86,8 @@ func (this *packetClientPlayerListCodec) Decode(reader io.Reader, util []byte) (
 		return
 	}
 	packetClientPlayerList.Items = make([]PacketClientPlayerListItem, itemLength)
-	for _, item := range packetClientPlayerList.Items {
+	for i, _ := range packetClientPlayerList.Items {
+		item := &packetClientPlayerList.Items[i]
 		item.UUID, err = packet.ReadUUID(reader, util)
 		if err != nil {
 			return

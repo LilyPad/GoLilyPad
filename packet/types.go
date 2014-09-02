@@ -80,7 +80,7 @@ func WriteUUID(writer io.Writer, util []byte, val uuid.UUID) (err error) {
 }
 
 func ReadUUID(reader io.Reader, util []byte) (result uuid.UUID, err error) {
-	bytes := make([]byte, 128)
+	bytes := make([]byte, 16)
 	_, err = reader.Read(bytes)
 	if err != nil {
 		return
