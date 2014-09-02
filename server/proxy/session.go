@@ -183,9 +183,9 @@ func (this *Session) Disconnect(reason string) {
 
 func (this *Session) DisconnectJson(json string) {
 	registry := this.pipeline.Get("registry")
-	if registry == minecraft.LoginPacketServerCodec {
+	if registry == minecraft.LoginPacketServerCodec || registry == minecraft.LoginPacketServerCodec17 {
 		this.Write(minecraft.NewPacketClientLoginDisconnect(json))
-	} else if registry == minecraft.PlayPacketServerCodec {
+	} else if registry == minecraft.PlayPacketServerCodec || registry == minecraft.PlayPacketServerCodec17 {
 		this.Write(minecraft.NewPacketClientDisconnect(json))
 	}
 	this.conn.Close()
