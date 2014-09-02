@@ -1,6 +1,8 @@
 package minecraft
 
 import (
+	"errors"
+	"fmt"
 	"io"
 	"github.com/LilyPad/GoLilyPad/packet"
 )
@@ -31,11 +33,19 @@ func (this *packetServerPluginMessageCodec) Decode(reader io.Reader, util []byte
 	if err != nil {
 		return
 	}
-	dataSize, err := packet.ReadUint16(reader, util)
+	dataLength, err := packet.ReadVarInt(reader, util)
 	if err != nil {
 		return
 	}
-	packetServerPluginMessage.Data = make([]byte, dataSize)
+	if dataLength < 0 {
+		err = errors.New(fmt.Sprintf("Decode, Data length is below zero: %d", dataLength))
+		return
+	}
+	if dataLength > 65535 {
+		err = errors.New(fmt.Sprintf("Decode, Data length is above maximum: %d", dataLength))
+		return
+	}
+	packetServerPluginMessage.Data = make([]byte, dataLength)
 	_, err = reader.Read(packetServerPluginMessage.Data)
 	if err != nil {
 		return
@@ -50,7 +60,7 @@ func (this *packetServerPluginMessageCodec) Encode(writer io.Writer, util []byte
 	if err != nil {
 		return
 	}
-	err = packet.WriteUint16(writer, util, uint16(len(packetServerPluginMessage.Data)))
+	err = packet.WriteVarInt(writer, util, len(packetServerPluginMessage.Data))
 	if err != nil {
 		return
 	}

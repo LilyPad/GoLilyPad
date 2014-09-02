@@ -14,6 +14,7 @@ Pull the project and get the dependencies:
 ```bash
 $ go get github.com/LilyPad/GoLilyPad
 $ go get launchpad.net/goyaml
+$ go get code.google.com/p/go-uuid
 ```
 
 ### Server Connect ###

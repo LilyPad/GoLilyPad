@@ -9,18 +9,16 @@ type PacketServerClientSettings struct {
 	Locale string
 	ViewDistance byte
 	ChatFlags byte
-	Unused bool
-	Difficulty byte
+	ChatColours bool
 	ShowCape bool
 }
 
-func NewPacketServerClientSettings(locale string, viewDistance byte, chatFlags byte, unused bool, difficulty byte, showCape bool) (this *PacketServerClientSettings) {
+func NewPacketServerClientSettings(locale string, viewDistance byte, chatFlags byte, chatColours bool, showCape bool) (this *PacketServerClientSettings) {
 	this = new(PacketServerClientSettings)
 	this.Locale = locale
 	this.ViewDistance = viewDistance
 	this.ChatFlags = chatFlags
-	this.Unused = unused
-	this.Difficulty = difficulty
+	this.ChatColours = chatColours
 	this.ShowCape = showCape
 	return
 }
@@ -47,11 +45,7 @@ func (this *packetServerClientSettingsCodec) Decode(reader io.Reader, util []byt
 	if err != nil {
 		return
 	}
-	packetServerClientSettings.Unused, err = packet.ReadBool(reader, util)
-	if err != nil {
-		return
-	}
-	packetServerClientSettings.Difficulty, err = packet.ReadUint8(reader, util)
+	packetServerClientSettings.ChatColours, err = packet.ReadBool(reader, util)
 	if err != nil {
 		return
 	}
@@ -77,11 +71,7 @@ func (this *packetServerClientSettingsCodec) Encode(writer io.Writer, util []byt
 	if err != nil {
 		return
 	}
-	err = packet.WriteBool(writer, util, packetServerClientSettings.Unused)
-	if err != nil {
-		return
-	}
-	err = packet.WriteUint8(writer, util, packetServerClientSettings.Difficulty)
+	err = packet.WriteBool(writer, util, packetServerClientSettings.ChatColours)
 	if err != nil {
 		return
 	}

@@ -145,6 +145,26 @@ func (this *Session) SetAuthenticated(result bool) {
 	this.Redirect(server)
 }
 
+func (this *Session) SetCompression(threshold int) {
+	registry := this.pipeline.Get("registry")
+	if registry == minecraft.LoginPacketServerCodec {
+		this.Write(minecraft.NewPacketClientLoginSetCompression(threshold))
+	} else if registry == minecraft.PlayPacketServerCodec {
+		this.Write(minecraft.NewPacketClientSetCompression(threshold))
+	}
+	if threshold == -1 {
+		this.pipeline.Remove("zlib")
+		return
+	} else {
+		codec := packet.NewPacketCodecZlib(threshold)
+		if this.pipeline.HasName("zlib") {
+			this.pipeline.Replace("zlib", codec)
+		} else {
+			this.pipeline.AddBefore("zlib", "registry", codec)
+		}
+	}
+}
+
 func (this *Session) Disconnect(reason string) {
 	reasonJson, _ := json.Marshal(reason)
 	this.DisconnectJson("{\"text\":" + string(reasonJson) + "}")

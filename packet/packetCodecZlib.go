@@ -10,14 +10,19 @@ import (
 
 type PacketCodecZlib struct {
 	codec PacketCodec
-	level int
 	threshold int
+	level int
 }
 
-func NewPacketCodecZlib(level int, threshold int) (this *PacketCodecZlib) {
+func NewPacketCodecZlib(threshold int) (this *PacketCodecZlib) {
+	this = NewPacketCodecZlibLevel(threshold, zlib.DefaultCompression)
+	return
+}
+
+func NewPacketCodecZlibLevel(threshold int, level int) (this *PacketCodecZlib) {
 	this = new(PacketCodecZlib)
-	this.level = level
 	this.threshold = threshold
+	this.level = level
 	return
 }
 

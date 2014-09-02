@@ -1,8 +1,18 @@
 package minecraft
 
 import (
+	"errors"
+	"fmt"
 	"io"
 	"github.com/LilyPad/GoLilyPad/packet"
+)
+
+const (
+	PACKET_CLIENT_TEAMS_ACTION_ADD = int8(0)
+	PACKET_CLIENT_TEAMS_ACTION_REMOVE = int8(1)
+	PACKET_CLIENT_TEAMS_ACTION_INFO_UPDATE = int8(2)
+	PACKET_CLIENT_TEAMS_ACTION_PLAYERS_ADD = int8(3)
+	PACKET_CLIENT_TEAMS_ACTION_PLAYERS_REMOVE = int8(4)
 )
 
 type PacketClientTeams struct {
@@ -12,17 +22,21 @@ type PacketClientTeams struct {
 	Prefix string
 	Suffix string
 	FriendlyFire int8
+	NameTagVisibility string
+	Color int8
 	Players []string
 }
 
-func NewPacketClientTeamsAdd(name string, displayName string, prefix string, suffix string, friendlyFire int8, players []string) (this *PacketClientTeams) {
+func NewPacketClientTeamsAdd(name string, displayName string, prefix string, suffix string, friendlyFire int8, nameTagVisibility string, color int8, players []string) (this *PacketClientTeams) {
 	this = new(PacketClientTeams)
 	this.Name = name
-	this.Action = 0
+	this.Action = PACKET_CLIENT_TEAMS_ACTION_ADD
 	this.DisplayName = displayName
 	this.Prefix = prefix
 	this.Suffix = suffix
 	this.FriendlyFire = friendlyFire
+	this.NameTagVisibility = nameTagVisibility
+	this.Color = color
 	this.Players = players
 	return
 }
@@ -30,25 +44,27 @@ func NewPacketClientTeamsAdd(name string, displayName string, prefix string, suf
 func NewPacketClientTeamsRemove(name string) (this *PacketClientTeams) {
 	this = new(PacketClientTeams)
 	this.Name = name
-	this.Action = 1
+	this.Action = PACKET_CLIENT_TEAMS_ACTION_REMOVE
 	return
 }
 
-func NewPacketClientTeamsInfoUpdate(name string, displayName string, prefix string, suffix string, friendlyFire int8) (this *PacketClientTeams) {
+func NewPacketClientTeamsInfoUpdate(name string, displayName string, prefix string, suffix string, friendlyFire int8, nameTagVisibility string, color int8) (this *PacketClientTeams) {
 	this = new(PacketClientTeams)
 	this.Name = name
-	this.Action = 2
+	this.Action = PACKET_CLIENT_TEAMS_ACTION_INFO_UPDATE
 	this.DisplayName = displayName
 	this.Prefix = prefix
 	this.Suffix = suffix
 	this.FriendlyFire = friendlyFire
+	this.NameTagVisibility = nameTagVisibility
+	this.Color = color
 	return
 }
 
 func NewPacketClientTeamsPlayersAdd(name string, players []string) (this *PacketClientTeams) {
 	this = new(PacketClientTeams)
 	this.Name = name
-	this.Action = 3
+	this.Action = PACKET_CLIENT_TEAMS_ACTION_PLAYERS_ADD
 	this.Players = players
 	return
 }
@@ -56,7 +72,7 @@ func NewPacketClientTeamsPlayersAdd(name string, players []string) (this *Packet
 func NewPacketClientTeamsPlayersRemove(name string, players []string) (this *PacketClientTeams) {
 	this = new(PacketClientTeams)
 	this.Name = name
-	this.Action = 4
+	this.Action = PACKET_CLIENT_TEAMS_ACTION_PLAYERS_REMOVE
 	this.Players = players
 	return
 }
@@ -96,16 +112,31 @@ func (this *packetClientTeamsCodec) Decode(reader io.Reader, util []byte) (decod
 		if err != nil {
 			return
 		}
-	}
-	if packetClientTeams.Action == 0 || packetClientTeams.Action == 3 || packetClientTeams.Action == 4 {
-		var playersSize uint16
-		playersSize, err = packet.ReadUint16(reader, util)
+		packetClientTeams.NameTagVisibility, err = packet.ReadString(reader, util)
 		if err != nil {
 			return
 		}
-		packetClientTeams.Players = make([]string, playersSize)
-		var i uint16
-		for i = 0; i < playersSize; i++ {
+		packetClientTeams.Color, err = packet.ReadInt8(reader, util)
+		if err != nil {
+			return
+		}
+	}
+	if packetClientTeams.Action == 0 || packetClientTeams.Action == 3 || packetClientTeams.Action == 4 {
+		var playersLength int
+		playersLength, err = packet.ReadVarInt(reader, util)
+		if err != nil {
+			return
+		}
+		if playersLength < 0 {
+			err = errors.New(fmt.Sprintf("Decode, Players length is below zero: %d", playersLength))
+			return
+		}
+		if playersLength > 65535 {
+			err = errors.New(fmt.Sprintf("Decode, Players length is above maximum: %d", playersLength))
+			return
+		}
+		packetClientTeams.Players = make([]string, playersLength)
+		for i := 0; i < playersLength; i++ {
 			packetClientTeams.Players[i], err = packet.ReadString(reader, util)
 			if err != nil {
 				return
@@ -140,12 +171,20 @@ func (this *packetClientTeamsCodec) Encode(writer io.Writer, util []byte, encode
 			return
 		}
 		err = packet.WriteInt8(writer, util, packetClientTeams.FriendlyFire)
+		if err != nil {
+			return
+		}
+		err = packet.WriteString(writer, util, packetClientTeams.NameTagVisibility)
+		if err != nil {
+			return
+		}
+		err = packet.WriteInt8(writer, util, packetClientTeams.Color)
 	}
 	if packetClientTeams.Action == 0 || packetClientTeams.Action == 3 || packetClientTeams.Action == 4 {
 		if err != nil {
 			return
 		}
-		err = packet.WriteUint16(writer, util, uint16(len(packetClientTeams.Players)))
+		err = packet.WriteVarInt(writer, util, len(packetClientTeams.Players))
 		for i := 0; i < len(packetClientTeams.Players); i++ {
 			if err != nil {
 				return

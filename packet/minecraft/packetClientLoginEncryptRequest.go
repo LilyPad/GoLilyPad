@@ -1,6 +1,8 @@
 package minecraft
 
 import (
+	"errors"
+	"fmt"
 	"io"
 	"github.com/LilyPad/GoLilyPad/packet"
 )
@@ -33,20 +35,36 @@ func (this *packetClientLoginEncryptRequestCodec) Decode(reader io.Reader, util 
 	if err != nil {
 		return
 	}
-	publicKeySize, err := packet.ReadUint16(reader, util)
+	publicKeyLength, err := packet.ReadVarInt(reader, util)
 	if err != nil {
 		return
 	}
-	packetClientLoginEncryptRequest.PublicKey = make([]byte, publicKeySize)
+	if publicKeyLength < 0 {
+		err = errors.New(fmt.Sprintf("Decode, Public key length is below zero: %d", publicKeyLength))
+		return
+	}
+	if publicKeyLength > 65535 {
+		err = errors.New(fmt.Sprintf("Decode, Public key length is above maximum: %d", publicKeyLength))
+		return
+	}
+	packetClientLoginEncryptRequest.PublicKey = make([]byte, publicKeyLength)
 	_, err = reader.Read(packetClientLoginEncryptRequest.PublicKey)
 	if err != nil {
 		return
 	}
-	verifyTokenSize, err := packet.ReadUint16(reader, util)
+	verifyTokenLength, err := packet.ReadVarInt(reader, util)
 	if err != nil {
 		return
 	}
-	packetClientLoginEncryptRequest.VerifyToken = make([]byte, verifyTokenSize)
+	if verifyTokenLength < 0 {
+		err = errors.New(fmt.Sprintf("Decode, Verify token length is below zero: %d", verifyTokenLength))
+		return
+	}
+	if verifyTokenLength > 65535 {
+		err = errors.New(fmt.Sprintf("Decode, Verify token length is above maximum: %d", verifyTokenLength))
+		return
+	}
+	packetClientLoginEncryptRequest.VerifyToken = make([]byte, verifyTokenLength)
 	_, err = reader.Read(packetClientLoginEncryptRequest.VerifyToken)
 	if err != nil {
 		return
@@ -61,7 +79,7 @@ func (this *packetClientLoginEncryptRequestCodec) Encode(writer io.Writer, util 
 	if err != nil {
 		return
 	}
-	err = packet.WriteUint16(writer, util, uint16(len(packetClientLoginEncryptRequest.PublicKey)))
+	err = packet.WriteVarInt(writer, util, len(packetClientLoginEncryptRequest.PublicKey))
 	if err != nil {
 		return
 	}
@@ -69,7 +87,7 @@ func (this *packetClientLoginEncryptRequestCodec) Encode(writer io.Writer, util 
 	if err != nil {
 		return
 	}
-	err = packet.WriteUint16(writer, util, uint16(len(packetClientLoginEncryptRequest.VerifyToken)))
+	err = packet.WriteVarInt(writer, util, len(packetClientLoginEncryptRequest.VerifyToken))
 	if err != nil {
 		return
 	}

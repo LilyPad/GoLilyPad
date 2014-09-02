@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	uuid "code.google.com/p/go-uuid/uuid"
 )
 
 func WriteString(writer io.Writer, util []byte, val string) (err error) {
@@ -70,6 +71,21 @@ func ReadVarInt(reader io.Reader, util []byte) (result int, err error) {
 		}
 		break
 	}
+	return
+}
+
+func WriteUUID(writer io.Writer, util []byte, val uuid.UUID) (err error) {
+	_, err = writer.Write(val)
+	return
+}
+
+func ReadUUID(reader io.Reader, util []byte) (result uuid.UUID, err error) {
+	bytes := make([]byte, 128)
+	_, err = reader.Read(bytes)
+	if err != nil {
+		return
+	}
+	result = uuid.UUID(bytes)
 	return
 }
 

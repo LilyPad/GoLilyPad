@@ -12,9 +12,10 @@ type PacketClientJoinGame struct {
 	Difficulty int8
 	MaxPlayers int8
 	LevelType string
+	ReducedDebugInfo bool
 }
 
-func NewPacketClientJoinGame(entityId int32, gamemode int8, dimension int8, difficulty int8, maxPlayers int8, levelType string) (this *PacketClientJoinGame) {
+func NewPacketClientJoinGame(entityId int32, gamemode int8, dimension int8, difficulty int8, maxPlayers int8, levelType string, reducedDebugInfo bool) (this *PacketClientJoinGame) {
 	this = new(PacketClientJoinGame)
 	this.EntityId = entityId
 	this.Gamemode = gamemode
@@ -22,6 +23,7 @@ func NewPacketClientJoinGame(entityId int32, gamemode int8, dimension int8, diff
 	this.Difficulty = difficulty
 	this.MaxPlayers = maxPlayers
 	this.LevelType = levelType
+	this.ReducedDebugInfo = reducedDebugInfo
 	return
 }
 
@@ -59,6 +61,10 @@ func (this *packetClientJoinGameCodec) Decode(reader io.Reader, util []byte) (de
 	if err != nil {
 		return
 	}
+	packetClientJoinGame.ReducedDebugInfo, err = packet.ReadBool(reader, util)
+	if err != nil {
+		return
+	}
 	decode = packetClientJoinGame
 	return
 }
@@ -86,5 +92,9 @@ func (this *packetClientJoinGameCodec) Encode(writer io.Writer, util []byte, enc
 		return
 	}
 	err = packet.WriteString(writer, util, packetClientJoinGame.LevelType)
+	if err != nil {
+		return
+	}
+	err = packet.WriteBool(writer, util, packetClientJoinGame.ReducedDebugInfo)
 	return
 }

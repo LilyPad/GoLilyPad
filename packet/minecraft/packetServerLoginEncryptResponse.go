@@ -1,6 +1,8 @@
 package minecraft
 
 import (
+	"errors"
+	"fmt"
 	"io"
 	"github.com/LilyPad/GoLilyPad/packet"
 )
@@ -27,20 +29,36 @@ type packetServerLoginEncryptResponseCodec struct {
 
 func (this *packetServerLoginEncryptResponseCodec) Decode(reader io.Reader, util []byte) (decode packet.Packet, err error) {
 	packetServerLoginEncryptResponse := new(PacketServerLoginEncryptResponse)
-	sharedSecretSize, err := packet.ReadUint16(reader, util)
+	sharedSecretLength, err := packet.ReadVarInt(reader, util)
 	if err != nil {
 		return
 	}
-	packetServerLoginEncryptResponse.SharedSecret = make([]byte, sharedSecretSize)
+	if sharedSecretLength < 0 {
+		err = errors.New(fmt.Sprintf("Decode, Shared secret length is below zero: %d", sharedSecretLength))
+		return
+	}
+	if sharedSecretLength > 65535 {
+		err = errors.New(fmt.Sprintf("Decode, Shared secret length is above maximum: %d", sharedSecretLength))
+		return
+	}
+	packetServerLoginEncryptResponse.SharedSecret = make([]byte, sharedSecretLength)
 	_, err = reader.Read(packetServerLoginEncryptResponse.SharedSecret)
 	if err != nil {
 		return
 	}
-	verifyTokenSize, err := packet.ReadUint16(reader, util)
+	verifyTokenLength, err := packet.ReadVarInt(reader, util)
 	if err != nil {
 		return
 	}
-	packetServerLoginEncryptResponse.VerifyToken = make([]byte, verifyTokenSize)
+	if verifyTokenLength < 0 {
+		err = errors.New(fmt.Sprintf("Decode, Verify token length is below zero: %d", verifyTokenLength))
+		return
+	}
+	if verifyTokenLength > 65535 {
+		err = errors.New(fmt.Sprintf("Decode, Verify token length is above maximum: %d", verifyTokenLength))
+		return
+	}
+	packetServerLoginEncryptResponse.VerifyToken = make([]byte, verifyTokenLength)
 	_, err = reader.Read(packetServerLoginEncryptResponse.VerifyToken)
 	if err != nil {
 		return
@@ -51,7 +69,7 @@ func (this *packetServerLoginEncryptResponseCodec) Decode(reader io.Reader, util
 
 func (this *packetServerLoginEncryptResponseCodec) Encode(writer io.Writer, util []byte, encode packet.Packet) (err error) {
 	packetServerLoginEncryptResponse := encode.(*PacketServerLoginEncryptResponse)
-	err = packet.WriteUint16(writer, util, uint16(len(packetServerLoginEncryptResponse.SharedSecret)))
+	err = packet.WriteVarInt(writer, util, len(packetServerLoginEncryptResponse.SharedSecret))
 	if err != nil {
 		return
 	}
@@ -59,7 +77,7 @@ func (this *packetServerLoginEncryptResponseCodec) Encode(writer io.Writer, util
 	if err != nil {
 		return
 	}
-	err = packet.WriteUint16(writer, util, uint16(len(packetServerLoginEncryptResponse.VerifyToken)))
+	err = packet.WriteVarInt(writer, util, len(packetServerLoginEncryptResponse.VerifyToken))
 	if err != nil {
 		return
 	}
