@@ -113,7 +113,8 @@ func (this *packetClientPlayerListCodec) Decode(reader io.Reader, util []byte) (
 				return
 			}
 			addPlayer.Properties = make([]PacketClientPlayerListAddPlayerProperty, propertiesLength)
-			for _, property := range addPlayer.Properties {
+			for j, _ := range addPlayer.Properties {
+				property := &addPlayer.Properties[j]
 				property.Name, err = packet.ReadString(reader, util)
 				if err != nil {
 					return
