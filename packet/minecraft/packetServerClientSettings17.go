@@ -5,34 +5,11 @@ import (
 	"github.com/LilyPad/GoLilyPad/packet"
 )
 
-type PacketServerClientSettings struct {
-	Locale string
-	ViewDistance byte
-	ChatFlags byte
-	ChatColours bool
-	difficulty17 byte
-	ShowCape bool
-}
-
-func NewPacketServerClientSettings(locale string, viewDistance byte, chatFlags byte, chatColours bool, showCape bool) (this *PacketServerClientSettings) {
-	this = new(PacketServerClientSettings)
-	this.Locale = locale
-	this.ViewDistance = viewDistance
-	this.ChatFlags = chatFlags
-	this.ChatColours = chatColours
-	this.ShowCape = showCape
-	return
-}
-
-func (this *PacketServerClientSettings) Id() int {
-	return PACKET_SERVER_CLIENT_SETTINGS
-}
-
-type packetServerClientSettingsCodec struct {
+type packetServerClientSettingsCodec17 struct {
 
 }
 
-func (this *packetServerClientSettingsCodec) Decode(reader io.Reader, util []byte) (decode packet.Packet, err error) {
+func (this *packetServerClientSettingsCodec17) Decode(reader io.Reader, util []byte) (decode packet.Packet, err error) {
 	packetServerClientSettings := new(PacketServerClientSettings)
 	packetServerClientSettings.Locale, err = packet.ReadString(reader, util)
 	if err != nil {
@@ -50,6 +27,10 @@ func (this *packetServerClientSettingsCodec) Decode(reader io.Reader, util []byt
 	if err != nil {
 		return
 	}
+	packetServerClientSettings.difficulty17, err = packet.ReadUint8(reader, util)
+	if err != nil {
+		return
+	}
 	packetServerClientSettings.ShowCape, err = packet.ReadBool(reader, util)
 	if err != nil {
 		return
@@ -58,7 +39,7 @@ func (this *packetServerClientSettingsCodec) Decode(reader io.Reader, util []byt
 	return
 }
 
-func (this *packetServerClientSettingsCodec) Encode(writer io.Writer, util []byte, encode packet.Packet) (err error) {
+func (this *packetServerClientSettingsCodec17) Encode(writer io.Writer, util []byte, encode packet.Packet) (err error) {
 	packetServerClientSettings := encode.(*PacketServerClientSettings)
 	err = packet.WriteString(writer, util, packetServerClientSettings.Locale)
 	if err != nil {
@@ -73,6 +54,10 @@ func (this *packetServerClientSettingsCodec) Encode(writer io.Writer, util []byt
 		return
 	}
 	err = packet.WriteBool(writer, util, packetServerClientSettings.ChatColours)
+	if err != nil {
+		return
+	}
+	err = packet.WriteUint8(writer, util, packetServerClientSettings.difficulty17)
 	if err != nil {
 		return
 	}

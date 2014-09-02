@@ -20,7 +20,7 @@ func NewPacketGeneric(id int, bytes []byte) (this *PacketGeneric) {
 	return
 }
 
-func (this *PacketGeneric) SwapEntities(a int32, b int32, clientServer bool) {
+func (this *PacketGeneric) SwapEntities(a int32, b int32, clientServer bool, protocol17 bool) {
 	if a == b {
 		return
 	}
@@ -43,16 +43,24 @@ func (this *PacketGeneric) SwapEntities(a int32, b int32, clientServer bool) {
 	} else if this.id == PACKET_CLIENT_DESTROY_ENTITIES && clientServer {
 		// TODO
 	}
-	this.SwapEntitiesInt(a, b, clientServer)
-	this.SwapEntitiesVarInt(a, b, clientServer)
+	this.swapEntitiesInt(a, b, clientServer, protocol17)
+	this.swapEntitiesVarInt(a, b, clientServer, protocol17)
 }
 
-func (this *PacketGeneric) SwapEntitiesInt(a int32, b int32, clientServer bool) {
+func (this *PacketGeneric) swapEntitiesInt(a int32, b int32, clientServer bool, protocol17 bool) {
 	var positions [][]int
 	if clientServer {
-		positions = PlayPacketClientEntityIntPositions
+		if protocol17 {
+			positions = PlayPacketClientEntityIntPositions17
+		} else {
+			positions = PlayPacketClientEntityIntPositions
+		}
 	} else {
-		positions = PlayPacketServerEntityIntPositions
+		if protocol17 {
+			positions = PlayPacketServerEntityIntPositions17
+		} else {
+			positions = PlayPacketServerEntityIntPositions
+		}
 	}
 	if this.id < 0 {
 		return
@@ -78,12 +86,20 @@ func (this *PacketGeneric) SwapEntitiesInt(a int32, b int32, clientServer bool) 
 	}
 }
 
-func (this *PacketGeneric) SwapEntitiesVarInt(a int32, b int32, clientServer bool) {
+func (this *PacketGeneric) swapEntitiesVarInt(a int32, b int32, clientServer bool, protocol17 bool) {
 	var positions []bool
 	if clientServer {
-		positions = PlayPacketClientEntityVarIntPositions
+		if protocol17 {
+			positions = PlayPacketClientEntityVarIntPositions17
+		} else {
+			positions = PlayPacketClientEntityVarIntPositions
+		}
 	} else {
-		positions = PlayPacketServerEntityVarIntPositions
+		if protocol17 {
+			positions = PlayPacketServerEntityVarIntPositions17
+		} else {
+			positions = PlayPacketServerEntityVarIntPositions
+		}
 	}
 	if this.id < 0 {
 		return

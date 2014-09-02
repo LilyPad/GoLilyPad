@@ -3,6 +3,7 @@ package proxy
 import (
 	"bytes"
 	"net"
+	"fmt"
 	"time"
 	"strconv"
 	uuid "code.google.com/p/go-uuid/uuid"
@@ -29,6 +30,7 @@ func NewSessionOutBridge(session *Session, server *connect.Server, conn net.Conn
 	this.session = session
 	this.server = server
 	this.conn = conn
+	this.compressionThreshold = -1
 	this.remoteIp, this.remotePort, _ = net.SplitHostPort(conn.RemoteAddr().String())
 	this.state = STATE_DISCONNECTED
 	return
@@ -56,7 +58,11 @@ func (this *SessionOutBridge) Serve() {
 	}
 	this.Write(minecraft.NewPacketServerHandshake(this.session.protocolVersion, EncodeLoginPayload(loginPayload), uint16(outRemotePort), 2))
 
-	this.pipeline.Replace("registry", minecraft.LoginPacketClientCodec)
+	if this.session.protocol17 {
+		this.pipeline.Replace("registry", minecraft.LoginPacketClientCodec17)
+	} else {
+		this.pipeline.Replace("registry", minecraft.LoginPacketClientCodec)
+	}
 	this.Write(minecraft.NewPacketServerLoginStart(this.session.name))
 
 	this.state = STATE_LOGIN
@@ -66,6 +72,31 @@ func (this *SessionOutBridge) Serve() {
 func (this *SessionOutBridge) Write(packet packet.Packet) (err error) {
 	err = this.connCodec.Write(packet)
 	return
+}
+
+func (this *SessionOutBridge) EnsureCompression() {
+	this.SetCompression(this.compressionThreshold)
+}
+
+func (this *SessionOutBridge) SetCompression(threshold int) {
+	if this.state == STATE_INIT || this.state == STATE_CONNECTED {
+		this.session.SetCompression(threshold)
+	}
+	if this.compressionThreshold == threshold {
+		return
+	}
+	this.compressionThreshold = threshold
+	if threshold == -1 {
+		this.pipeline.Remove("zlib")
+		return
+	} else {
+		codec := packet.NewPacketCodecZlib(threshold)
+		if this.pipeline.HasName("zlib") {
+			this.pipeline.Replace("zlib", codec)
+		} else {
+			this.pipeline.AddBefore("zlib", "registry", codec)
+		}
+	}
 }
 
 func (this *SessionOutBridge) HandlePacket(packet packet.Packet) (err error) {
@@ -80,7 +111,11 @@ func (this *SessionOutBridge) HandlePacket(packet packet.Packet) (err error) {
 			this.state = STATE_INIT
 			this.session.redirecting = true
 			this.EnsureCompression()
-			this.pipeline.Replace("registry", minecraft.PlayPacketClientCodec)
+			if this.session.protocol17 {
+				this.pipeline.Replace("registry", minecraft.PlayPacketClientCodec17)
+			} else {
+				this.pipeline.Replace("registry", minecraft.PlayPacketClientCodec)
+			}
 		} else if packet.Id() == minecraft.PACKET_CLIENT_LOGIN_DISCONNECT {
 			this.session.DisconnectJson(packet.(*minecraft.PacketClientLoginDisconnect).Json)
 			this.conn.Close()
@@ -134,11 +169,17 @@ func (this *SessionOutBridge) HandlePacket(packet packet.Packet) (err error) {
 				this.session.Write(minecraft.NewPacketClientRespawn(swapDimension, 2, 0, "DEFAULT"))
 				this.session.Write(minecraft.NewPacketClientRespawn(int32(joinGamePacket.Dimension), joinGamePacket.Difficulty, joinGamePacket.Gamemode, joinGamePacket.LevelType))
 				if len(this.session.playerList) > 0 {
-					items := make([]minecraft.PacketClientPlayerListItem, 0, len(this.session.playerList))
-					for uuidString, _ := range this.session.playerList {
-						items = append(items, minecraft.PacketClientPlayerListItem{UUID: uuid.UUID(uuidString)})
+					if this.session.protocol17 {
+						for player, _ := range this.session.playerList {
+							this.session.Write(minecraft.NewPacketClientPlayerList17Remove(player))
+						}
+					} else {
+						items := make([]minecraft.PacketClientPlayerListItem, 0, len(this.session.playerList))
+						for uuidString, _ := range this.session.playerList {
+							items = append(items, minecraft.PacketClientPlayerListItem{UUID: uuid.UUID(uuidString)})
+						}
+						this.session.Write(minecraft.NewPacketClientPlayerList(minecraft.PACKET_CLIENT_PLAYER_LIST_ACTION_REMOVE, items))
 					}
-					this.session.Write(minecraft.NewPacketClientPlayerList(minecraft.PACKET_CLIENT_PLAYER_LIST_ACTION_REMOVE, items))
 					this.session.playerList = make(map[string]struct{})
 				}
 				if len(this.session.scoreboards) > 0 {
@@ -163,14 +204,23 @@ func (this *SessionOutBridge) HandlePacket(packet packet.Packet) (err error) {
 				return
 			}
 		case minecraft.PACKET_CLIENT_PLAYER_LIST:
-			playerListPacket := packet.(*minecraft.PacketClientPlayerList)
-			if playerListPacket.Action == minecraft.PACKET_CLIENT_PLAYER_LIST_ACTION_ADD {
-				for _, item := range playerListPacket.Items {
-					this.session.playerList[string(item.UUID)] = struct{}{}
+			if this.session.protocol17 {
+				playerListPacket := packet.(*minecraft.PacketClientPlayerList17)
+				if playerListPacket.Online {
+					this.session.playerList[playerListPacket.Name] = struct{}{}
+				} else {
+					delete(this.session.playerList, playerListPacket.Name)
 				}
-			} else if playerListPacket.Action == minecraft.PACKET_CLIENT_PLAYER_LIST_ACTION_REMOVE {
-				for _, item := range playerListPacket.Items {
-					delete(this.session.playerList, string(item.UUID))
+			} else {
+				playerListPacket := packet.(*minecraft.PacketClientPlayerList)
+				if playerListPacket.Action == minecraft.PACKET_CLIENT_PLAYER_LIST_ACTION_ADD {
+					for _, item := range playerListPacket.Items {
+						this.session.playerList[string(item.UUID)] = struct{}{}
+					}
+				} else if playerListPacket.Action == minecraft.PACKET_CLIENT_PLAYER_LIST_ACTION_REMOVE {
+					for _, item := range playerListPacket.Items {
+						delete(this.session.playerList, string(item.UUID))
+					}
 				}
 			}
 		case minecraft.PACKET_CLIENT_SCOREBOARD_OBJECTIVE:
@@ -195,35 +245,12 @@ func (this *SessionOutBridge) HandlePacket(packet packet.Packet) (err error) {
 			return
 		default:
 			if genericPacket, ok := packet.(*minecraft.PacketGeneric); ok {
-				genericPacket.SwapEntities(this.session.clientEntityId, this.session.serverEntityId, true)
+				genericPacket.SwapEntities(this.session.clientEntityId, this.session.serverEntityId, true, this.session.protocol17)
 			}
 		}
 		this.session.Write(packet)
 	}
 	return
-}
-
-func (this *SessionOutBridge) EnsureCompression() {
-	this.SetCompression(this.compressionThreshold)
-}
-
-func (this *SessionOutBridge) SetCompression(threshold int) {
-	this.compressionThreshold = threshold
-	if this.state == STATE_INIT || this.state == STATE_CONNECTED {
-		this.session.SetCompression(threshold)
-	}
-	if threshold == -1 {
-		this.pipeline.Remove("zlib")
-		return
-	} else {
-		codec := packet.NewPacketCodecZlib(threshold)
-		if this.pipeline.HasName("zlib") {
-			this.pipeline.Replace("zlib", codec)
-		} else {
-			this.pipeline.AddBefore("zlib", "registry", codec)
-		}
-	}
-
 }
 
 func (this *SessionOutBridge) ErrorCaught(err error) {

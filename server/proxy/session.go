@@ -28,12 +28,14 @@ type Session struct {
 	connCodec *packet.PacketConnCodec
 	pipeline *packet.PacketPipeline
 	outBridge *SessionOutBridge
+	compressionThreshold int
 	active bool
 
 	redirectMutex sync.Mutex
 	redirecting bool
 
 	protocolVersion int
+	protocol17 bool
 	serverAddress string
 	name string
 	profile auth.GameProfile
@@ -58,6 +60,7 @@ func NewSession(server *Server, conn net.Conn) (this *Session) {
 	this = new(Session)
 	this.server = server
 	this.conn = conn
+	this.compressionThreshold = -1
 	this.active = true
 	this.redirecting = false
 	this.pluginChannels = make(map[string]struct{})
@@ -140,12 +143,20 @@ func (this *Session) SetAuthenticated(result bool) {
 	} else {
 		this.Write(minecraft.NewPacketClientLoginSuccess(this.profile.Id, this.name))
 	}
-	this.pipeline.Replace("registry", minecraft.PlayPacketServerCodec)
+	if this.protocol17 {
+		this.pipeline.Replace("registry", minecraft.PlayPacketServerCodec17)
+	} else {
+		this.pipeline.Replace("registry", minecraft.PlayPacketServerCodec)
+	}
 	this.server.SessionRegistry.Register(this)
 	this.Redirect(server)
 }
 
 func (this *Session) SetCompression(threshold int) {
+	if this.compressionThreshold == threshold {
+		return
+	}
+	this.compressionThreshold = threshold
 	registry := this.pipeline.Get("registry")
 	if registry == minecraft.LoginPacketServerCodec {
 		this.Write(minecraft.NewPacketClientLoginSetCompression(threshold))
@@ -201,12 +212,17 @@ func (this *Session) HandlePacket(packet packet.Packet) (err error) {
 				}
 				this.pipeline.Replace("registry", minecraft.StatusPacketServerCodec)
 				this.state = STATE_STATUS
-			} else if handshakePacket.State ==  2 {
+			} else if handshakePacket.State == 2 {
 				if !supportedVersion {
 					err = errors.New("Protocol version does not match")
 					return
 				}
-				this.pipeline.Replace("registry", minecraft.LoginPacketServerCodec)
+				this.protocol17 = this.protocolVersion < minecraft.Versions[0]
+				if this.protocol17 {
+					this.pipeline.Replace("registry", minecraft.LoginPacketServerCodec17)
+				} else {
+					this.pipeline.Replace("registry", minecraft.LoginPacketServerCodec)
+				}
 				this.state = STATE_LOGIN
 			} else {
 				err = errors.New("Unexpected state")
@@ -387,7 +403,7 @@ func (this *Session) HandlePacket(packet packet.Packet) (err error) {
 			break
 		}
 		if genericPacket, ok := packet.(*minecraft.PacketGeneric); ok {
-			genericPacket.SwapEntities(this.clientEntityId, this.serverEntityId, false)
+			genericPacket.SwapEntities(this.clientEntityId, this.serverEntityId, false, this.protocol17)
 		}
 		this.outBridge.Write(packet)
 	}
