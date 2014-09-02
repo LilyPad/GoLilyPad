@@ -3,7 +3,6 @@ package proxy
 import (
 	"bytes"
 	"net"
-	"fmt"
 	"time"
 	"strconv"
 	uuid "code.google.com/p/go-uuid/uuid"
