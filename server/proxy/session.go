@@ -261,7 +261,11 @@ func (this *Session) HandlePacket(packet packet.Packet) (err error) {
 			version["name"] = minecraft.STRING_VERSION
 			version["protocol"] = this.protocolVersion
 			players := make(map[string]interface{})
-			players["max"] = this.server.connect.MaxPlayers()
+			if this.server.SyncMaxPlayers() {
+				players["max"] = this.server.connect.MaxPlayers()
+			} else {
+				players["max"] = this.server.MaxPlayers()
+			}
 			players["online"] = this.server.connect.Players()
 			players["sample"] = sample
 			description := make(map[string]interface{})

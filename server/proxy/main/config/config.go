@@ -155,6 +155,7 @@ type ConfigProxy struct {
 	Locale ConfigProxyLocale `yaml:"locale"`
 	Motd string `yaml:"motd"`
 	MaxPlayers uint16 `yaml:"maxPlayers"`
+	SyncMaxPlayers bool `yaml:"syncMaxPlayers"`
 	Authenticate bool `yaml:"authenticate"`
 }
 

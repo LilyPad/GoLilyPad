@@ -50,7 +50,7 @@ func main() {
 	var server *proxy.Server
 	go func() {
 		var err error
-		server, err = proxy.NewServer(&cfg.Proxy.Motd, &cfg.Proxy.MaxPlayers, &cfg.Proxy.Authenticate, cfg, cfg, proxyConnect)
+		server, err = proxy.NewServer(&cfg.Proxy.Motd, &cfg.Proxy.MaxPlayers, &cfg.Proxy.SyncMaxPlayers, &cfg.Proxy.Authenticate, cfg, cfg, proxyConnect)
 		if err != nil {
 			serverErr <- err
 			return
