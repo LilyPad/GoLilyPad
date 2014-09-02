@@ -5,7 +5,7 @@ import (
 )
 
 const (
-	STRING_VERSION = string("1.8-pre3")
+	STRING_VERSION = string("1.8")
 	MAGIC = string("§")
 
 	PACKET_SERVER_HANDSHAKE = 0x00
@@ -124,7 +124,7 @@ const (
 	PACKET_SERVER_LOGIN_ENCRYPT_RESPONSE = 0x01
 )
 
-var Versions = []int { 46, 5, 4 }
+var Versions = []int { 47, 5, 4 }
 
 var HandshakePacketServerCodec = packet.NewPacketCodecRegistryDual([]packet.PacketCodec {
 
