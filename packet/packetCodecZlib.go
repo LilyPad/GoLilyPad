@@ -41,7 +41,7 @@ func (this *PacketCodecZlib) Decode(reader io.Reader, util []byte) (packet Packe
 	} else {
 		zlibBytes := reader.(Byteser).Bytes() // FIXME assuming the caller is a Byteser is a bad idea
 		var zlibReader io.ReadCloser
-		zlibReader, err = NewZlibToggleReaderBuffer(zlibBytes, rawBytes)
+		zlibReader, err = NewZlibToggleReaderBuffer(rawBytes, zlibBytes)
 		if err != nil {
 			return
 		}

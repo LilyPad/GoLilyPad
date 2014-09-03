@@ -192,7 +192,7 @@ func (this *packetGenericCodec) Decode(reader io.Reader, util []byte) (decode pa
 	packetGeneric := new(PacketGeneric)
 	packetGeneric.id = this.Id
 	if zlibReader, ok := reader.(*packet.ZlibToggleReader); ok {
-		zlibReader.SetRaw(false)
+		zlibReader.SetRaw(true)
 		packetGeneric.compressed = true
 	}
 	packetGeneric.Bytes, err = ioutil.ReadAll(reader)
