@@ -29,11 +29,11 @@ func (this *PacketGeneric) Decompress() (err error) {
 	}
 	buffer := bytes.NewReader(this.Bytes)
 	bufferUtil := make([]byte, packet.UTIL_BUFFER_LENGTH)
-	zlibReader, err := zlib.NewReader(buffer)
+	_, err = packet.ReadVarInt(buffer, bufferUtil) // compression length
 	if err != nil {
 		return
 	}
-	_, err = packet.ReadVarInt(zlibReader, bufferUtil) // compression length
+	zlibReader, err := zlib.NewReader(buffer)
 	if err != nil {
 		return
 	}
