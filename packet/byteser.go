@@ -1,5 +1,5 @@
 package packet
 
-type Byteser {
+type Byteser interface {
 	Bytes() []byte
 }
