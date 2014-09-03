@@ -2,6 +2,7 @@ package minecraft
 
 import (
 	"bytes"
+	"compress/zlib"
 	"encoding/binary"
 	"io"
 	"io/ioutil"
@@ -11,12 +12,41 @@ import (
 type PacketGeneric struct {
 	id int
 	Bytes []byte
+	compressed bool
 }
 
-func NewPacketGeneric(id int, bytes []byte) (this *PacketGeneric) {
+func NewPacketGeneric(id int, bytes []byte, compressed bool) (this *PacketGeneric) {
 	this = new(PacketGeneric)
 	this.id = id
 	this.Bytes = bytes
+	this.compressed = compressed
+	return
+}
+
+func (this *PacketGeneric) Decompress() (err error) {
+	if !this.compressed {
+		return
+	}
+	buffer := bytes.NewReader(this.Bytes)
+	bufferUtil := make([]byte, packet.UTIL_BUFFER_LENGTH)
+	zlibReader, err := zlib.NewReader(buffer)
+	if err != nil {
+		return
+	}
+	_, err = packet.ReadVarInt(zlibReader, bufferUtil) // compression length
+	if err != nil {
+		return
+	}
+	_, err = packet.ReadVarInt(zlibReader, bufferUtil) // id
+	if err != nil {
+		return
+	}
+	bytes, err := ioutil.ReadAll(zlibReader)
+	if err != nil {
+		return
+	}
+	this.Bytes = bytes
+	this.compressed = false
 	return
 }
 
@@ -25,6 +55,7 @@ func (this *PacketGeneric) SwapEntities(a int32, b int32, clientServer bool, pro
 		return
 	}
 	if this.id == PACKET_CLIENT_SPAWN_OBJECT && clientServer {
+		this.Decompress()
 		buffer := bytes.NewBuffer(this.Bytes)
 		bufferUtil := make([]byte, packet.UTIL_BUFFER_LENGTH)
 		_, err := packet.ReadVarInt(buffer, bufferUtil)
@@ -41,6 +72,7 @@ func (this *PacketGeneric) SwapEntities(a int32, b int32, clientServer bool, pro
 			}
 		}
 	} else if this.id == PACKET_CLIENT_DESTROY_ENTITIES && clientServer {
+		this.Decompress()
 		// TODO
 	}
 	this.swapEntitiesInt(a, b, clientServer, protocol17)
@@ -72,6 +104,7 @@ func (this *PacketGeneric) swapEntitiesInt(a int32, b int32, clientServer bool, 
 	if idPositions == nil {
 		return
 	}
+	this.Decompress()
 	var id int32
 	for _, position := range idPositions {
 		if len(this.Bytes) < position + 4 {
@@ -110,6 +143,7 @@ func (this *PacketGeneric) swapEntitiesVarInt(a int32, b int32, clientServer boo
 	if positions[this.id] == false {
 		return
 	}
+	this.Decompress()
 	// Read the old Id
 	buffer := bytes.NewBuffer(this.Bytes)
 	bufferUtil := make([]byte, packet.UTIL_BUFFER_LENGTH)
@@ -136,6 +170,10 @@ func (this *PacketGeneric) swapEntitiesVarInt(a int32, b int32, clientServer boo
 	this.Bytes = newBuffer.Bytes()
 }
 
+func (this *PacketGeneric) Raw() bool {
+	return this.compressed
+}
+
 func (this *PacketGeneric) Id() int {
 	return this.id
 }
@@ -153,6 +191,10 @@ func NewPacketGenericCodec(id int) (this *packetGenericCodec) {
 func (this *packetGenericCodec) Decode(reader io.Reader, util []byte) (decode packet.Packet, err error) {
 	packetGeneric := new(PacketGeneric)
 	packetGeneric.id = this.Id
+	if zlibReader, ok := reader.(*packet.ZlibToggleReader); ok {
+		zlibReader.SetRaw(false)
+		packetGeneric.compressed = true
+	}
 	packetGeneric.Bytes, err = ioutil.ReadAll(reader)
 	if err != nil {
 		return
