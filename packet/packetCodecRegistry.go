@@ -63,12 +63,12 @@ func (this *PacketCodecRegistry) Encode(writer io.Writer, util []byte, packet Pa
 		return
 	}
 	if raw, ok := packet.(PacketRaw); ok && raw.Raw() {
+		err = codec.Encode(writer, util, packet)
+	} else {
 		err = WriteVarInt(writer, util, id)
 		if err != nil {
 			return
 		}
-		err = codec.Encode(writer, util, packet)
-	} else {
 		err = codec.Encode(writer, util, packet)
 	}
 	return
