@@ -2,8 +2,6 @@ package proxy
 
 import (
 	"bytes"
-	"crypto/aes"
-	"crypto/cipher"
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
@@ -150,6 +148,15 @@ func (this *Session) SetAuthenticated(result bool) {
 	}
 	this.server.SessionRegistry.Register(this)
 	this.Redirect(server)
+}
+
+func (this *Session) SetEncryption(sharedSecret []byte) (err error) {
+	codec, err := packet.NewPacketCodecCfb8(sharedSecret)
+	if err != nil {
+		return
+	}
+	this.pipeline.AddBefore("cfb8", "varIntLength", codec)
+	return
 }
 
 func (this *Session) SetCompression(threshold int) {
@@ -353,19 +360,10 @@ func (this *Session) HandlePacket(packet packet.Packet) (err error) {
 				err = errors.New("Verify token does not match")
 				return
 			}
-			var block cipher.Block
-			block, err = aes.NewCipher(sharedSecret)
+			err = this.SetEncryption(sharedSecret)
 			if err != nil {
 				return
 			}
-			streamReader := new(cipher.StreamReader) // TODO perhaps we should add this to the packetPipeline?
-			streamReader.R = this.connCodec.Reader
-			streamReader.S = minecraft.NewCFB8Decrypt(block, sharedSecret)
-			streamWriter := new(cipher.StreamWriter)
-			streamWriter.W = this.connCodec.Writer
-			streamWriter.S = minecraft.NewCFB8Encrypt(block, sharedSecret)
-			this.connCodec.Reader = streamReader
-			this.connCodec.Writer = streamWriter
 			var authErr error
 			this.profile, authErr = auth.Authenticate(this.name, this.serverId, sharedSecret, this.publicKey)
 			if authErr != nil {

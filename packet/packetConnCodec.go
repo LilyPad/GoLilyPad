@@ -8,8 +8,8 @@ import (
 )
 
 type PacketConnCodec struct {
-	Reader io.Reader
-	Writer io.Writer
+	reader io.Reader
+	writer io.Writer
 	conn net.Conn
 	packetCodec PacketCodec
 	timeout time.Duration
@@ -20,8 +20,8 @@ type PacketConnCodec struct {
 
 func NewPacketConnCodec(conn net.Conn, packetCodec PacketCodec, timeout time.Duration) (this *PacketConnCodec) {
 	this = new(PacketConnCodec)
-	this.Reader = NewFullReader(conn)
-	this.Writer = conn
+	this.reader = NewFullReader(conn)
+	this.writer = conn
 	this.conn = conn
 	this.packetCodec = packetCodec
 	this.timeout = timeout
@@ -33,7 +33,7 @@ func NewPacketConnCodec(conn net.Conn, packetCodec PacketCodec, timeout time.Dur
 func (this *PacketConnCodec) Write(packet Packet) (err error) {
 	this.writeMutex.Lock()
 	defer this.writeMutex.Unlock()
-	err = this.packetCodec.Encode(this.Writer, this.writeUtil, packet)
+	err = this.packetCodec.Encode(this.writer, this.writeUtil, packet)
 	return
 }
 
@@ -42,7 +42,7 @@ func (this *PacketConnCodec) ReadConn(packetHandler PacketHandler) {
 		if this.timeout != -1 {
 			this.conn.SetReadDeadline(time.Now().Add(this.timeout))
 		}
-		packet, err := this.packetCodec.Decode(this.Reader, this.readUtil)
+		packet, err := this.packetCodec.Decode(this.reader, this.readUtil)
 		if err != nil {
 			packetHandler.ErrorCaught(err)
 			return
