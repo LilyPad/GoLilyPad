@@ -77,6 +77,9 @@ func main() {
 				if err != nil {
 					fmt.Println("Error during reloading config", err)
 					continue
+				} else {
+					fmt.Println("Configuration reloaded successfully.")
+					continue
 				}
 				*cfg = *newCfg
 			} else if str == "debug" {
@@ -88,6 +91,7 @@ func main() {
 				fmt.Println("runtime.MemStats.TotalAlloc:", memStats.TotalAlloc, "bytes")
 			} else if str == "exit" || str == "stop" || str == "halt" {
 				fmt.Println("Stopping...")
+				fmt.Println("Proxy server stopped.")
 				closeAll()
 				return
 			} else if str == "help" {
