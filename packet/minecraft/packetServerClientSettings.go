@@ -11,16 +11,16 @@ type PacketServerClientSettings struct {
 	ChatFlags byte
 	ChatColours bool
 	difficulty17 byte
-	ShowCape bool
+	SkinParts byte
 }
 
-func NewPacketServerClientSettings(locale string, viewDistance byte, chatFlags byte, chatColours bool, showCape bool) (this *PacketServerClientSettings) {
+func NewPacketServerClientSettings(locale string, viewDistance byte, chatFlags byte, chatColours bool, skinParts byte) (this *PacketServerClientSettings) {
 	this = new(PacketServerClientSettings)
 	this.Locale = locale
 	this.ViewDistance = viewDistance
 	this.ChatFlags = chatFlags
 	this.ChatColours = chatColours
-	this.ShowCape = showCape
+	this.SkinParts = skinParts
 	return
 }
 
@@ -50,7 +50,7 @@ func (this *packetServerClientSettingsCodec) Decode(reader io.Reader, util []byt
 	if err != nil {
 		return
 	}
-	packetServerClientSettings.ShowCape, err = packet.ReadBool(reader, util)
+	packetServerClientSettings.SkinParts, err = packet.ReadUint8(reader, util)
 	if err != nil {
 		return
 	}
@@ -76,6 +76,6 @@ func (this *packetServerClientSettingsCodec) Encode(writer io.Writer, util []byt
 	if err != nil {
 		return
 	}
-	err = packet.WriteBool(writer, util, packetServerClientSettings.ShowCape)
+	err = packet.WriteUint8(writer, util, packetServerClientSettings.SkinParts)
 	return
 }

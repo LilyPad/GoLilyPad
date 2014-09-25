@@ -31,7 +31,7 @@ func (this *packetServerClientSettingsCodec17) Decode(reader io.Reader, util []b
 	if err != nil {
 		return
 	}
-	packetServerClientSettings.ShowCape, err = packet.ReadBool(reader, util)
+	packetServerClientSettings.SkinParts, err = packet.ReadUint8(reader, util)
 	if err != nil {
 		return
 	}
@@ -61,6 +61,6 @@ func (this *packetServerClientSettingsCodec17) Encode(writer io.Writer, util []b
 	if err != nil {
 		return
 	}
-	err = packet.WriteBool(writer, util, packetServerClientSettings.ShowCape)
+	err = packet.WriteUint8(writer, util, packetServerClientSettings.SkinParts)
 	return
 }
