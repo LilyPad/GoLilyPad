@@ -136,9 +136,6 @@ func (this *SessionOutBridge) HandlePacket(packet packet.Packet) (err error) {
 		}
 		fallthrough
 	case STATE_CONNECTED:
-		if packet.Id() == minecraft.PACKET_CLIENT_DISCONNECT {
-			this.state = STATE_DISCONNECTED
-		}
 		if this.state == STATE_CONNECTED {
 			this.session.redirectMutex.Lock()
 			if this.session.outBridge != this {
@@ -237,6 +234,7 @@ func (this *SessionOutBridge) HandlePacket(packet packet.Packet) (err error) {
 				delete(this.session.teams, teamPacket.Name)
 			}
 		case minecraft.PACKET_CLIENT_DISCONNECT:
+			this.state = STATE_DISCONNECTED
 			this.session.DisconnectJson(packet.(*minecraft.PacketClientDisconnect).Json)
 			return
 		case minecraft.PACKET_CLIENT_SET_COMPRESSION:
