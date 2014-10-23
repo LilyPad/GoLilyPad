@@ -416,7 +416,11 @@ func (this *Session) ErrorCaught(err error) {
 	if this.Authenticated() {
 		this.server.connect.RemoveLocalPlayer(this.name)
 		this.server.SessionRegistry.Unregister(this)
-		fmt.Println("Proxy server, name:", this.name, "ip:", this.remoteIp, "disconnected:", err)
+		if this.outBridge == nil {
+			fmt.Println("Proxy server, name:", this.name, "ip:", this.remoteIp, "disconnected, err:", err)
+		} else {
+			fmt.Println("Proxy server, name:", this.name, "ip:", this.remoteIp, "disconnected, err:", err, "outBridgeErr:", this.outBridge.disconnectErr)
+		}
 	}
 	this.state = STATE_DISCONNECTED
 	this.conn.Close()

@@ -22,6 +22,7 @@ type SessionOutBridge struct {
 	remoteIp string
 	remotePort string
 	state SessionState
+	disconnectErr error
 }
 
 func NewSessionOutBridge(session *Session, server *connect.Server, conn net.Conn) (this *SessionOutBridge) {
@@ -255,6 +256,7 @@ func (this *SessionOutBridge) ErrorCaught(err error) {
 		this.session.redirecting = false
 		this.session.redirectMutex.Unlock()
 	}
+	this.disconnectErr = err
 	if this.state != STATE_DISCONNECTED && this.session.outBridge == this {
 		this.session.Disconnect(minecraft.Colorize(this.session.server.localizer.LocaleLostConn()))
 	}
