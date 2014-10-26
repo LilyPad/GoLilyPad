@@ -8,6 +8,7 @@ import (
 	"runtime"
 	"strconv"
 	"strings"
+	"time"
 	"github.com/LilyPad/GoLilyPad/server/proxy"
 	"github.com/LilyPad/GoLilyPad/server/proxy/connect"
 	"github.com/LilyPad/GoLilyPad/server/proxy/main/config"
@@ -35,6 +36,7 @@ func main() {
 		for {
 			str, err := reader.ReadString('\n')
 			if err == io.EOF {
+				time.Sleep(100*time.Millisecond)
 				continue
 			}
 			if err != nil {
