@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"io"
 	"fmt"
 	"os"
 	"runtime"
@@ -33,6 +34,9 @@ func main() {
 		reader := bufio.NewReader(os.Stdin)
 		for {
 			str, err := reader.ReadString('\n')
+			if err == io.EOF {
+				continue
+			}
 			if err != nil {
 				stdinErr <- err
 			}
