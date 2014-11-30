@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"github.com/LilyPad/GoLilyPad/packet"
 )
 
@@ -33,20 +34,7 @@ func (this *packetServerPluginMessageCodec) Decode(reader io.Reader, util []byte
 	if err != nil {
 		return
 	}
-	dataLength, err := packet.ReadVarInt(reader, util)
-	if err != nil {
-		return
-	}
-	if dataLength < 0 {
-		err = errors.New(fmt.Sprintf("Decode, Data length is below zero: %d", dataLength))
-		return
-	}
-	if dataLength > 65535 {
-		err = errors.New(fmt.Sprintf("Decode, Data length is above maximum: %d", dataLength))
-		return
-	}
-	packetServerPluginMessage.Data = make([]byte, dataLength)
-	_, err = reader.Read(packetServerPluginMessage.Data)
+	packetServerPluginMessage.Data, err = ioutil.ReadAll(reader)
 	if err != nil {
 		return
 	}
@@ -57,10 +45,6 @@ func (this *packetServerPluginMessageCodec) Decode(reader io.Reader, util []byte
 func (this *packetServerPluginMessageCodec) Encode(writer io.Writer, util []byte, encode packet.Packet) (err error) {
 	packetServerPluginMessage := encode.(*PacketServerPluginMessage)
 	err = packet.WriteString(writer, util, packetServerPluginMessage.Channel)
-	if err != nil {
-		return
-	}
-	err = packet.WriteVarInt(writer, util, len(packetServerPluginMessage.Data))
 	if err != nil {
 		return
 	}
