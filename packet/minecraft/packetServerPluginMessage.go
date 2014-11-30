@@ -1,8 +1,6 @@
 package minecraft
 
 import (
-	"errors"
-	"fmt"
 	"io"
 	"io/ioutil"
 	"github.com/LilyPad/GoLilyPad/packet"
