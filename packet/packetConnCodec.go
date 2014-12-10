@@ -54,3 +54,7 @@ func (this *PacketConnCodec) ReadConn(packetHandler PacketHandler) {
 		}
 	}
 }
+
+func (this *PacketConnCodec) SetTimeout(timeout time.Duration) {
+	this.timeout = timeout
+}

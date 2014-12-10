@@ -1,5 +1,10 @@
 package auth
 
+import (
+	"crypto/tls"
+	"crypto/x509"
+)
+
 const (
 	URL = "https://sessionserver.mojang.com/session/minecraft/hasJoined?username=%s&serverId=%s"
 	Certificate = `-----BEGIN CERTIFICATE-----
@@ -32,3 +37,11 @@ sPTIFwwKlhR8Cbds4cLYVdQYoKpBaXAko7nv6VrcPuuUSvC33l8Odvr7+2kDRUBQ
 7nIMpBKGgc0T0U7EPMpODdIm8QC3tKai4W56gf0wrHofx1l7
 -----END CERTIFICATE-----`
 )
+
+var TLSConfig *tls.Config
+
+func init() {
+	TLSConfig = new(tls.Config)
+	TLSConfig.RootCAs = x509.NewCertPool()
+	TLSConfig.RootCAs.AppendCertsFromPEM([]byte(Certificate))
+}

@@ -1,8 +1,9 @@
 package proxy
 
 import (
-	"crypto/rand"
+	cryptoRand "crypto/rand"
 	"crypto/rsa"
+	"crypto/x509"
 	"net"
 	"github.com/LilyPad/GoLilyPad/server/proxy/connect"
 )
@@ -19,6 +20,7 @@ type Server struct {
 	localizer Localizer
 	connect *connect.ProxyConnect
 	privateKey *rsa.PrivateKey
+	publicKey []byte
 }
 
 func NewServer(motd *string, maxPlayers *uint16, syncMaxPlayers *bool, authenticate *bool, router Router, localizer Localizer, connect *connect.ProxyConnect) (this *Server, err error) {
@@ -31,7 +33,11 @@ func NewServer(motd *string, maxPlayers *uint16, syncMaxPlayers *bool, authentic
 	this.router = router
 	this.localizer = localizer
 	this.connect = connect
-	this.privateKey, err = rsa.GenerateKey(rand.Reader, 2048)
+	this.privateKey, err = rsa.GenerateKey(cryptoRand.Reader, 2048)
+	if err != nil {
+		return
+	}
+	this.publicKey, err = x509.MarshalPKIXPublicKey(&this.privateKey.PublicKey)
 	if err != nil {
 		return
 	}

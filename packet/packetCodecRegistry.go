@@ -43,9 +43,6 @@ func (this *PacketCodecRegistry) Decode(reader io.Reader, util []byte) (packet P
 		err = errors.New(fmt.Sprintf("Decode, Packet Id does not have a codec: %d", id))
 		return
 	}
-	if zlibReader, ok := reader.(*ZlibToggleReader); ok {
-		zlibReader.Buffer() // FIXME this is a workaround for a bug in Go's zlib library
-	}
 	packet, err = codec.Decode(reader, util)
 	return
 }

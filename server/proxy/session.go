@@ -2,9 +2,8 @@ package proxy
 
 import (
 	"bytes"
-	"crypto/rand"
+	cryptoRand "crypto/rand"
 	"crypto/rsa"
-	"crypto/x509"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
@@ -38,7 +37,6 @@ type Session struct {
 	name string
 	profile auth.GameProfile
 	serverId string
-	publicKey []byte
 	verifyToken []byte
 
 	clientSettings packet.Packet
@@ -74,7 +72,7 @@ func (this *Session) Serve() {
 	this.pipeline = packet.NewPacketPipeline()
 	this.pipeline.AddLast("varIntLength", packet.NewPacketCodecVarIntLength())
 	this.pipeline.AddLast("registry", minecraft.HandshakePacketServerCodec)
-	this.connCodec = packet.NewPacketConnCodec(this.conn, this.pipeline, 30 * time.Second)
+	this.connCodec = packet.NewPacketConnCodec(this.conn, this.pipeline, 10 * time.Second)
 	this.connCodec.ReadConn(this)
 }
 
@@ -146,6 +144,7 @@ func (this *Session) SetAuthenticated(result bool) {
 	} else {
 		this.pipeline.Replace("registry", minecraft.PlayPacketServerCodec)
 	}
+	this.connCodec.SetTimeout(20 * time.Second)
 	this.server.SessionRegistry.Register(this)
 	this.Redirect(server)
 }
@@ -319,15 +318,11 @@ func (this *Session) HandlePacket(packet packet.Packet) (err error) {
 				if err != nil {
 					return
 				}
-				this.publicKey, err = x509.MarshalPKIXPublicKey(&this.server.privateKey.PublicKey)
-				if err != nil {
-					return
-				}
 				this.verifyToken, err = RandomBytes(4)
 				if err != nil {
 					return
 				}
-				err = this.Write(minecraft.NewPacketClientLoginEncryptRequest(this.serverId, this.publicKey, this.verifyToken))
+				err = this.Write(minecraft.NewPacketClientLoginEncryptRequest(this.serverId, this.server.publicKey, this.verifyToken))
 				if err != nil {
 					return
 				}
@@ -347,12 +342,12 @@ func (this *Session) HandlePacket(packet packet.Packet) (err error) {
 		if packet.Id() == minecraft.PACKET_SERVER_LOGIN_ENCRYPT_RESPONSE {
 			loginEncryptResponsePacket := packet.(*minecraft.PacketServerLoginEncryptResponse)
 			var sharedSecret []byte
-			sharedSecret, err = rsa.DecryptPKCS1v15(rand.Reader, this.server.privateKey, loginEncryptResponsePacket.SharedSecret)
+			sharedSecret, err = rsa.DecryptPKCS1v15(cryptoRand.Reader, this.server.privateKey, loginEncryptResponsePacket.SharedSecret)
 			if err != nil {
 				return
 			}
 			var verifyToken []byte
-			verifyToken, err = rsa.DecryptPKCS1v15(rand.Reader, this.server.privateKey, loginEncryptResponsePacket.VerifyToken)
+			verifyToken, err = rsa.DecryptPKCS1v15(cryptoRand.Reader, this.server.privateKey, loginEncryptResponsePacket.VerifyToken)
 			if err != nil {
 				return
 			}
@@ -365,7 +360,7 @@ func (this *Session) HandlePacket(packet packet.Packet) (err error) {
 				return
 			}
 			var authErr error
-			this.profile, authErr = auth.Authenticate(this.name, this.serverId, sharedSecret, this.publicKey)
+			this.profile, authErr = auth.Authenticate(this.name, this.serverId, sharedSecret, this.server.publicKey)
 			if authErr != nil {
 				this.SetAuthenticated(false)
 				fmt.Println("Proxy server, failed to authorize:", this.name, "ip:", this.remoteIp, "err:", authErr)
@@ -380,8 +375,7 @@ func (this *Session) HandlePacket(packet packet.Packet) (err error) {
 	case STATE_CONNECTED:
 		if packet.Id() == minecraft.PACKET_SERVER_CLIENT_SETTINGS {
 			this.clientSettings = packet
-		}
-		if packet.Id() == minecraft.PACKET_SERVER_PLUGIN_MESSAGE {
+		} else if packet.Id() == minecraft.PACKET_SERVER_PLUGIN_MESSAGE {
 			pluginMessagePacket := packet.(*minecraft.PacketServerPluginMessage)
 			if pluginMessagePacket.Channel == "REGISTER" {
 				for _, channelBytes := range bytes.Split(pluginMessagePacket.Data[:], []byte{0}) {

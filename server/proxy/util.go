@@ -45,12 +45,11 @@ func GenNameUUID(name string) (val string) {
 }
 
 func GenSalt() (str string, err error) {
-	salt := make([]byte, 10)
-	_, err = io.ReadFull(cryptoRand.Reader, salt)
+	bytes, err := RandomBytes(10)
 	if err != nil {
 		return
 	}
-	str = hex.EncodeToString(salt)
+	str = hex.EncodeToString(bytes)
 	return
 }
 

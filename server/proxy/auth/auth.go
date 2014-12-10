@@ -1,8 +1,6 @@
 package auth
 
 import (
-	"crypto/tls"
-	"crypto/x509"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -22,9 +20,7 @@ type GameProfileProperty struct {
 
 func Authenticate(name string, serverId string, sharedSecret []byte, publicKey []byte) (profile GameProfile, err error) {
 	transport := new(http.Transport)
-	transport.TLSClientConfig = new(tls.Config)
-	transport.TLSClientConfig.RootCAs = x509.NewCertPool()
-	transport.TLSClientConfig.RootCAs.AppendCertsFromPEM([]byte(Certificate))
+	transport.TLSClientConfig = TLSConfig
 	client := new(http.Client)
 	client.Transport = transport
 	response, err := client.Get(fmt.Sprintf(URL, name, MojangSha1Hex([]byte(serverId), sharedSecret, publicKey)))
