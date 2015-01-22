@@ -3,6 +3,7 @@ package minecraft
 import (
 	"io"
 	"github.com/LilyPad/GoLilyPad/packet"
+	"strings"
 )
 
 type PacketServerHandshake struct {
@@ -10,6 +11,7 @@ type PacketServerHandshake struct {
 	ServerAddress string
 	ServerPort uint16
 	State int
+	NullAppendedData string
 }
 
 func NewPacketServerHandshake(protocolVersion int, serverAddress string, serverPort uint16, state int) (this *PacketServerHandshake) {
@@ -47,6 +49,14 @@ func (this *packetServerHandshakeCodec) Decode(reader io.Reader, util []byte) (d
 	if err != nil {
 		return
 	}
+
+	// Handling for 1.8 FML appending '\0FML\0' to the host-string
+	idx := strings.Index(packetServerHandshake.ServerAddress, "\x00")
+	if idx != -1 {
+		packetServerHandshake.NullAppendedData = packetServerHandshake.ServerAddress[idx:]
+		packetServerHandshake.ServerAddress = packetServerHandshake.ServerAddress[:idx]
+	}
+
 	decode = packetServerHandshake
 	return
 }
