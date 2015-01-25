@@ -22,12 +22,12 @@ type requestGetSaltCodec struct {
 
 }
 
-func (this *requestGetSaltCodec) Decode(reader io.Reader, util []byte) (request Request, err error) {
+func (this *requestGetSaltCodec) Decode(reader io.Reader) (request Request, err error) {
 	request = new(RequestGetSalt)
 	return
 }
 
-func (this *requestGetSaltCodec) Encode(writer io.Writer, util []byte, request Request) (err error) {
+func (this *requestGetSaltCodec) Encode(writer io.Writer, request Request) (err error) {
 	return
 }
 
@@ -49,9 +49,9 @@ type resultGetSaltCodec struct {
 
 }
 
-func (this *resultGetSaltCodec) Decode(reader io.Reader, util []byte) (result Result, err error) {
+func (this *resultGetSaltCodec) Decode(reader io.Reader) (result Result, err error) {
 	resultGetSalt := new(ResultGetSalt)
-	resultGetSalt.Salt, err = packet.ReadString(reader, util)
+	resultGetSalt.Salt, err = packet.ReadString(reader)
 	if err != nil {
 		return
 	}
@@ -59,7 +59,7 @@ func (this *resultGetSaltCodec) Decode(reader io.Reader, util []byte) (result Re
 	return
 }
 
-func (this *resultGetSaltCodec) Encode(writer io.Writer, util []byte, result Result) (err error) {
-	err = packet.WriteString(writer, util, result.(*ResultGetSalt).Salt)
+func (this *resultGetSaltCodec) Encode(writer io.Writer, result Result) (err error) {
+	err = packet.WriteString(writer, result.(*ResultGetSalt).Salt)
 	return
 }

@@ -29,9 +29,9 @@ type requestGetPlayersCodec struct {
 
 }
 
-func (this *requestGetPlayersCodec) Decode(reader io.Reader, util []byte) (request Request, err error) {
+func (this *requestGetPlayersCodec) Decode(reader io.Reader) (request Request, err error) {
 	requestGetPlayers := new(RequestGetPlayers)
-	requestGetPlayers.List, err = packet.ReadBool(reader, util)
+	requestGetPlayers.List, err = packet.ReadBool(reader)
 	if err != nil {
 		return
 	}
@@ -39,8 +39,8 @@ func (this *requestGetPlayersCodec) Decode(reader io.Reader, util []byte) (reque
 	return
 }
 
-func (this *requestGetPlayersCodec) Encode(writer io.Writer, util []byte, request Request) (err error) {
-	err = packet.WriteBool(writer, util, request.(*RequestGetPlayers).List)
+func (this *requestGetPlayersCodec) Encode(writer io.Writer, request Request) (err error) {
+	err = packet.WriteBool(writer, request.(*RequestGetPlayers).List)
 	return
 }
 
@@ -76,17 +76,17 @@ type resultGetPlayersCodec struct {
 
 }
 
-func (this *resultGetPlayersCodec) Decode(reader io.Reader, util []byte) (result Result, err error) {
+func (this *resultGetPlayersCodec) Decode(reader io.Reader) (result Result, err error) {
 	resultGetPlayers := new(ResultGetPlayers)
-	resultGetPlayers.List, err = packet.ReadBool(reader, util)
+	resultGetPlayers.List, err = packet.ReadBool(reader)
 	if err != nil {
 		return
 	}
-	resultGetPlayers.CurrentPlayers, err = packet.ReadUint16(reader, util)
+	resultGetPlayers.CurrentPlayers, err = packet.ReadUint16(reader)
 	if err != nil {
 		return
 	}
-	resultGetPlayers.MaxPlayers, err = packet.ReadUint16(reader, util)
+	resultGetPlayers.MaxPlayers, err = packet.ReadUint16(reader)
 	if err != nil {
 		return
 	}
@@ -97,31 +97,31 @@ func (this *resultGetPlayersCodec) Decode(reader io.Reader, util []byte) (result
 			if err != nil {
 				return
 			}
-			resultGetPlayers.Players[i], err = packet.ReadString(reader, util)
+			resultGetPlayers.Players[i], err = packet.ReadString(reader)
 		}
 	}
 	result = resultGetPlayers
 	return
 }
 
-func (this *resultGetPlayersCodec) Encode(writer io.Writer, util []byte, result Result) (err error) {
+func (this *resultGetPlayersCodec) Encode(writer io.Writer, result Result) (err error) {
 	resultGetPlayers := result.(*ResultGetPlayers)
-	err = packet.WriteBool(writer, util, resultGetPlayers.List)
+	err = packet.WriteBool(writer, resultGetPlayers.List)
 	if err != nil {
 		return
 	}
-	err = packet.WriteUint16(writer, util, resultGetPlayers.CurrentPlayers)
+	err = packet.WriteUint16(writer, resultGetPlayers.CurrentPlayers)
 	if err != nil {
 		return
 	}
-	err = packet.WriteUint16(writer, util, resultGetPlayers.MaxPlayers)
+	err = packet.WriteUint16(writer, resultGetPlayers.MaxPlayers)
 	if resultGetPlayers.List {
 		var i uint16
 		for i = 0; i < resultGetPlayers.CurrentPlayers; i++ {
 			if err != nil {
 				return
 			}
-			err = packet.WriteString(writer, util, resultGetPlayers.Players[i])
+			err = packet.WriteString(writer, resultGetPlayers.Players[i])
 		}
 	}
 	return

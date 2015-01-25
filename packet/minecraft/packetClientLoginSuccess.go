@@ -25,13 +25,13 @@ type packetClientLoginSuccessCodec struct {
 
 }
 
-func (this *packetClientLoginSuccessCodec) Decode(reader io.Reader, util []byte) (decode packet.Packet, err error) {
+func (this *packetClientLoginSuccessCodec) Decode(reader io.Reader) (decode packet.Packet, err error) {
 	packetClientLoginSuccess := new(PacketClientLoginSuccess)
-	packetClientLoginSuccess.UUID, err = packet.ReadString(reader, util)
+	packetClientLoginSuccess.UUID, err = packet.ReadString(reader)
 	if err != nil {
 		return
 	}
-	packetClientLoginSuccess.Name, err = packet.ReadString(reader, util)
+	packetClientLoginSuccess.Name, err = packet.ReadString(reader)
 	if err != nil {
 		return
 	}
@@ -39,12 +39,12 @@ func (this *packetClientLoginSuccessCodec) Decode(reader io.Reader, util []byte)
 	return
 }
 
-func (this *packetClientLoginSuccessCodec) Encode(writer io.Writer, util []byte, encode packet.Packet) (err error) {
+func (this *packetClientLoginSuccessCodec) Encode(writer io.Writer, encode packet.Packet) (err error) {
 	packetClientLoginSuccess := encode.(*PacketClientLoginSuccess)
-	err = packet.WriteString(writer, util, packetClientLoginSuccess.UUID)
+	err = packet.WriteString(writer, packetClientLoginSuccess.UUID)
 	if err != nil {
 		return
 	}
-	err = packet.WriteString(writer, util, packetClientLoginSuccess.Name)
+	err = packet.WriteString(writer, packetClientLoginSuccess.Name)
 	return
 }

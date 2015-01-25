@@ -25,15 +25,15 @@ func NewPacketCodecCfb8(sharedSecret []byte) (this *PacketCodecCfb8, err error) 
 	return
 }
 
-func (this *PacketCodecCfb8) Decode(reader io.Reader, util []byte) (packet Packet, err error) {
+func (this *PacketCodecCfb8) Decode(reader io.Reader) (packet Packet, err error) {
 	this.reader.R = reader
-	packet, err = this.codec.Decode(this.reader, util)
+	packet, err = this.codec.Decode(this.reader)
 	return
 }
 
-func (this *PacketCodecCfb8) Encode(writer io.Writer, util []byte, packet Packet) (err error) {
+func (this *PacketCodecCfb8) Encode(writer io.Writer, packet Packet) (err error) {
 	this.writer.W = writer
-	err = this.codec.Encode(this.writer, util, packet)
+	err = this.codec.Encode(this.writer, packet)
 	return
 }
 

@@ -16,8 +16,8 @@ func NewPacketCodecVarIntLength() (this *PacketCodecVarIntLength) {
 	return
 }
 
-func (this *PacketCodecVarIntLength) Decode(reader io.Reader, util []byte) (packet Packet, err error) {
-	length, err := ReadVarInt(reader, util)
+func (this *PacketCodecVarIntLength) Decode(reader io.Reader) (packet Packet, err error) {
+	length, err := ReadVarInt(reader)
 	if err != nil {
 		return
 	}
@@ -34,17 +34,17 @@ func (this *PacketCodecVarIntLength) Decode(reader io.Reader, util []byte) (pack
 	if err != nil {
 		return
 	}
-	packet, err = this.codec.Decode(bytes.NewBuffer(payload), util)
+	packet, err = this.codec.Decode(bytes.NewBuffer(payload))
 	return
 }
 
-func (this *PacketCodecVarIntLength) Encode(writer io.Writer, util []byte, packet Packet) (err error) {
+func (this *PacketCodecVarIntLength) Encode(writer io.Writer, packet Packet) (err error) {
 	buffer := new(bytes.Buffer)
-	err = this.codec.Encode(buffer, util, packet)
+	err = this.codec.Encode(buffer, packet)
 	if err != nil {
 		return
 	}
-	err = WriteVarInt(writer, util, buffer.Len())
+	err = WriteVarInt(writer, buffer.Len())
 	if err != nil {
 		return
 	}

@@ -9,13 +9,13 @@ type packetClientLoginEncryptRequestCodec17 struct {
 
 }
 
-func (this *packetClientLoginEncryptRequestCodec17) Decode(reader io.Reader, util []byte) (decode packet.Packet, err error) {
+func (this *packetClientLoginEncryptRequestCodec17) Decode(reader io.Reader) (decode packet.Packet, err error) {
 	packetClientLoginEncryptRequest := new(PacketClientLoginEncryptRequest)
-	packetClientLoginEncryptRequest.ServerId, err = packet.ReadString(reader, util)
+	packetClientLoginEncryptRequest.ServerId, err = packet.ReadString(reader)
 	if err != nil {
 		return
 	}
-	publicKeyLength, err := packet.ReadUint16(reader, util)
+	publicKeyLength, err := packet.ReadUint16(reader)
 	if err != nil {
 		return
 	}
@@ -24,7 +24,7 @@ func (this *packetClientLoginEncryptRequestCodec17) Decode(reader io.Reader, uti
 	if err != nil {
 		return
 	}
-	verifyTokenLength, err := packet.ReadUint16(reader, util)
+	verifyTokenLength, err := packet.ReadUint16(reader)
 	if err != nil {
 		return
 	}
@@ -37,13 +37,13 @@ func (this *packetClientLoginEncryptRequestCodec17) Decode(reader io.Reader, uti
 	return
 }
 
-func (this *packetClientLoginEncryptRequestCodec17) Encode(writer io.Writer, util []byte, encode packet.Packet) (err error) {
+func (this *packetClientLoginEncryptRequestCodec17) Encode(writer io.Writer, encode packet.Packet) (err error) {
 	packetClientLoginEncryptRequest := encode.(*PacketClientLoginEncryptRequest)
-	err = packet.WriteString(writer, util, packetClientLoginEncryptRequest.ServerId)
+	err = packet.WriteString(writer, packetClientLoginEncryptRequest.ServerId)
 	if err != nil {
 		return
 	}
-	err = packet.WriteUint16(writer, util, uint16(len(packetClientLoginEncryptRequest.PublicKey)))
+	err = packet.WriteUint16(writer, uint16(len(packetClientLoginEncryptRequest.PublicKey)))
 	if err != nil {
 		return
 	}
@@ -51,7 +51,7 @@ func (this *packetClientLoginEncryptRequestCodec17) Encode(writer io.Writer, uti
 	if err != nil {
 		return
 	}
-	err = packet.WriteUint16(writer, util, uint16(len(packetClientLoginEncryptRequest.VerifyToken)))
+	err = packet.WriteUint16(writer, uint16(len(packetClientLoginEncryptRequest.VerifyToken)))
 	if err != nil {
 		return
 	}

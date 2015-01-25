@@ -32,13 +32,13 @@ type requestNotifyPlayerCodec struct {
 
 }
 
-func (this *requestNotifyPlayerCodec) Decode(reader io.Reader, util []byte) (request Request, err error) {
+func (this *requestNotifyPlayerCodec) Decode(reader io.Reader) (request Request, err error) {
 	requestNotifyPlayer := new(RequestNotifyPlayer)
-	requestNotifyPlayer.Add, err = packet.ReadBool(reader, util)
+	requestNotifyPlayer.Add, err = packet.ReadBool(reader)
 	if err != nil {
 		return
 	}
-	requestNotifyPlayer.Player, err = packet.ReadString(reader, util)
+	requestNotifyPlayer.Player, err = packet.ReadString(reader)
 	if err != nil {
 		return
 	}
@@ -46,13 +46,13 @@ func (this *requestNotifyPlayerCodec) Decode(reader io.Reader, util []byte) (req
 	return
 }
 
-func (this *requestNotifyPlayerCodec) Encode(writer io.Writer, util []byte, request Request) (err error) {
+func (this *requestNotifyPlayerCodec) Encode(writer io.Writer, request Request) (err error) {
 	requestNotifyPlayer := request.(*RequestNotifyPlayer)
-	err = packet.WriteBool(writer, util, requestNotifyPlayer.Add)
+	err = packet.WriteBool(writer, requestNotifyPlayer.Add)
 	if err != nil {
 		return
 	}
-	err = packet.WriteString(writer, util, requestNotifyPlayer.Player)
+	err = packet.WriteString(writer, requestNotifyPlayer.Player)
 	return
 }
 
@@ -73,11 +73,11 @@ type resultNotifyPlayerCodec struct {
 
 }
 
-func (this *resultNotifyPlayerCodec) Decode(reader io.Reader, util []byte) (result Result, err error) {
+func (this *resultNotifyPlayerCodec) Decode(reader io.Reader) (result Result, err error) {
 	result = new(ResultNotifyPlayer)
 	return
 }
 
-func (this *resultNotifyPlayerCodec) Encode(writer io.Writer, util []byte, result Result) (err error) {
+func (this *resultNotifyPlayerCodec) Encode(writer io.Writer, result Result) (err error) {
 	return
 }

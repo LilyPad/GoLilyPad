@@ -53,13 +53,13 @@ type packetClientScoreboardObjectiveCodec struct {
 
 }
 
-func (this *packetClientScoreboardObjectiveCodec) Decode(reader io.Reader, util []byte) (decode packet.Packet, err error) {
+func (this *packetClientScoreboardObjectiveCodec) Decode(reader io.Reader) (decode packet.Packet, err error) {
 	packetClientScoreboardObjective := new(PacketClientScoreboardObjective)
-	packetClientScoreboardObjective.Name, err = packet.ReadString(reader, util)
+	packetClientScoreboardObjective.Name, err = packet.ReadString(reader)
 	if err != nil {
 		return
 	}
-	packetClientScoreboardObjective.Action, err = packet.ReadInt8(reader, util)
+	packetClientScoreboardObjective.Action, err = packet.ReadInt8(reader)
 	if err != nil {
 		return
 	}
@@ -67,11 +67,11 @@ func (this *packetClientScoreboardObjectiveCodec) Decode(reader io.Reader, util 
 	case PACKET_CLIENT_SCOREBOARD_OBJECTIVE_ACTION_ADD:
 		fallthrough
 	case PACKET_CLIENT_SCOREBOARD_OBJECTIVE_ACTION_UPDATE:
-		packetClientScoreboardObjective.Value, err = packet.ReadString(reader, util)
+		packetClientScoreboardObjective.Value, err = packet.ReadString(reader)
 		if err != nil {
 			return
 		}
-		packetClientScoreboardObjective.Type, err = packet.ReadString(reader, util)
+		packetClientScoreboardObjective.Type, err = packet.ReadString(reader)
 		if err != nil {
 			return
 		}
@@ -84,13 +84,13 @@ func (this *packetClientScoreboardObjectiveCodec) Decode(reader io.Reader, util 
 	return
 }
 
-func (this *packetClientScoreboardObjectiveCodec) Encode(writer io.Writer, util []byte, encode packet.Packet) (err error) {
+func (this *packetClientScoreboardObjectiveCodec) Encode(writer io.Writer, encode packet.Packet) (err error) {
 	packetClientScoreboardObjective := encode.(*PacketClientScoreboardObjective)
-	err = packet.WriteString(writer, util, packetClientScoreboardObjective.Name)
+	err = packet.WriteString(writer, packetClientScoreboardObjective.Name)
 	if err != nil {
 		return
 	}
-	err = packet.WriteInt8(writer, util, packetClientScoreboardObjective.Action)
+	err = packet.WriteInt8(writer, packetClientScoreboardObjective.Action)
 	if err != nil {
 		return
 	}
@@ -98,11 +98,11 @@ func (this *packetClientScoreboardObjectiveCodec) Encode(writer io.Writer, util 
 	case PACKET_CLIENT_SCOREBOARD_OBJECTIVE_ACTION_ADD:
 		fallthrough
 	case PACKET_CLIENT_SCOREBOARD_OBJECTIVE_ACTION_UPDATE:
-		err = packet.WriteString(writer, util, packetClientScoreboardObjective.Value)
+		err = packet.WriteString(writer, packetClientScoreboardObjective.Value)
 		if err != nil {
 			return
 		}
-		err = packet.WriteString(writer, util, packetClientScoreboardObjective.Type)
+		err = packet.WriteString(writer, packetClientScoreboardObjective.Type)
 	case PACKET_CLIENT_SCOREBOARD_OBJECTIVE_ACTION_REMOVE:
 		// no payload
 	default:

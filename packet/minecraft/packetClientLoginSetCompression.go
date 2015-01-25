@@ -23,9 +23,9 @@ type packetClientLoginSetCompressionCodec struct {
 
 }
 
-func (this *packetClientLoginSetCompressionCodec) Decode(reader io.Reader, util []byte) (decode packet.Packet, err error) {
+func (this *packetClientLoginSetCompressionCodec) Decode(reader io.Reader) (decode packet.Packet, err error) {
 	packetClientLoginSetCompression := new(PacketClientLoginSetCompression)
-	packetClientLoginSetCompression.Threshold, err = packet.ReadVarInt(reader, util)
+	packetClientLoginSetCompression.Threshold, err = packet.ReadVarInt(reader)
 	if err != nil {
 		return
 	}
@@ -33,8 +33,8 @@ func (this *packetClientLoginSetCompressionCodec) Decode(reader io.Reader, util 
 	return
 }
 
-func (this *packetClientLoginSetCompressionCodec) Encode(writer io.Writer, util []byte, encode packet.Packet) (err error) {
+func (this *packetClientLoginSetCompressionCodec) Encode(writer io.Writer, encode packet.Packet) (err error) {
 	packetClientLoginSetCompression := encode.(*PacketClientLoginSetCompression)
-	err = packet.WriteVarInt(writer, util, packetClientLoginSetCompression.Threshold)
+	err = packet.WriteVarInt(writer, packetClientLoginSetCompression.Threshold)
 	return
 }

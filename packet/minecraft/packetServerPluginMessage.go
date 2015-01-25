@@ -26,9 +26,9 @@ type packetServerPluginMessageCodec struct {
 
 }
 
-func (this *packetServerPluginMessageCodec) Decode(reader io.Reader, util []byte) (decode packet.Packet, err error) {
+func (this *packetServerPluginMessageCodec) Decode(reader io.Reader) (decode packet.Packet, err error) {
 	packetServerPluginMessage := new(PacketServerPluginMessage)
-	packetServerPluginMessage.Channel, err = packet.ReadString(reader, util)
+	packetServerPluginMessage.Channel, err = packet.ReadString(reader)
 	if err != nil {
 		return
 	}
@@ -40,9 +40,9 @@ func (this *packetServerPluginMessageCodec) Decode(reader io.Reader, util []byte
 	return
 }
 
-func (this *packetServerPluginMessageCodec) Encode(writer io.Writer, util []byte, encode packet.Packet) (err error) {
+func (this *packetServerPluginMessageCodec) Encode(writer io.Writer, encode packet.Packet) (err error) {
 	packetServerPluginMessage := encode.(*PacketServerPluginMessage)
-	err = packet.WriteString(writer, util, packetServerPluginMessage.Channel)
+	err = packet.WriteString(writer, packetServerPluginMessage.Channel)
 	if err != nil {
 		return
 	}

@@ -31,25 +31,25 @@ type requestAsProxyCodec struct {
 
 }
 
-func (this *requestAsProxyCodec) Decode(reader io.Reader, util []byte) (request Request, err error) {
+func (this *requestAsProxyCodec) Decode(reader io.Reader) (request Request, err error) {
 	requestAsProxy := new(RequestAsProxy)
-	requestAsProxy.Address, err = packet.ReadString(reader, util)
+	requestAsProxy.Address, err = packet.ReadString(reader)
 	if err != nil {
 		return
 	}
-	requestAsProxy.Port, err = packet.ReadUint16(reader, util)
+	requestAsProxy.Port, err = packet.ReadUint16(reader)
 	if err != nil {
 		return
 	}
-	requestAsProxy.Motd, err = packet.ReadString(reader, util)
+	requestAsProxy.Motd, err = packet.ReadString(reader)
 	if err != nil {
 		return
 	}
-	requestAsProxy.Version, err = packet.ReadString(reader, util)
+	requestAsProxy.Version, err = packet.ReadString(reader)
 	if err != nil {
 		return
 	}
-	requestAsProxy.MaxPlayers, err = packet.ReadUint16(reader, util)
+	requestAsProxy.MaxPlayers, err = packet.ReadUint16(reader)
 	if err != nil {
 		return
 	}
@@ -57,25 +57,25 @@ func (this *requestAsProxyCodec) Decode(reader io.Reader, util []byte) (request 
 	return
 }
 
-func (this *requestAsProxyCodec) Encode(writer io.Writer, util []byte, request Request) (err error) {
+func (this *requestAsProxyCodec) Encode(writer io.Writer, request Request) (err error) {
 	requestAsProxy := request.(*RequestAsProxy)
-	err = packet.WriteString(writer, util, requestAsProxy.Address)
+	err = packet.WriteString(writer, requestAsProxy.Address)
 	if err != nil {
 		return
 	}
-	err = packet.WriteUint16(writer, util, requestAsProxy.Port)
+	err = packet.WriteUint16(writer, requestAsProxy.Port)
 	if err != nil {
 		return
 	}
-	err = packet.WriteString(writer, util, requestAsProxy.Motd)
+	err = packet.WriteString(writer, requestAsProxy.Motd)
 	if err != nil {
 		return
 	}
-	err = packet.WriteString(writer, util, requestAsProxy.Version)
+	err = packet.WriteString(writer, requestAsProxy.Version)
 	if err != nil {
 		return
 	}
-	err = packet.WriteUint16(writer, util, requestAsProxy.MaxPlayers)
+	err = packet.WriteUint16(writer, requestAsProxy.MaxPlayers)
 	return
 }
 
@@ -96,11 +96,11 @@ type resultAsProxyCodec struct {
 
 }
 
-func (this *resultAsProxyCodec) Decode(reader io.Reader, util []byte) (result Result, err error) {
+func (this *resultAsProxyCodec) Decode(reader io.Reader) (result Result, err error) {
 	result = new(ResultAsProxy)
 	return
 }
 
-func (this *resultAsProxyCodec) Encode(writer io.Writer, util []byte, result Result) (err error) {
+func (this *resultAsProxyCodec) Encode(writer io.Writer, result Result) (err error) {
 	return
 }

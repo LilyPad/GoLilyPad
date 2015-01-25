@@ -29,13 +29,13 @@ type packetClientLoginEncryptRequestCodec struct {
 
 }
 
-func (this *packetClientLoginEncryptRequestCodec) Decode(reader io.Reader, util []byte) (decode packet.Packet, err error) {
+func (this *packetClientLoginEncryptRequestCodec) Decode(reader io.Reader) (decode packet.Packet, err error) {
 	packetClientLoginEncryptRequest := new(PacketClientLoginEncryptRequest)
-	packetClientLoginEncryptRequest.ServerId, err = packet.ReadString(reader, util)
+	packetClientLoginEncryptRequest.ServerId, err = packet.ReadString(reader)
 	if err != nil {
 		return
 	}
-	publicKeyLength, err := packet.ReadVarInt(reader, util)
+	publicKeyLength, err := packet.ReadVarInt(reader)
 	if err != nil {
 		return
 	}
@@ -52,7 +52,7 @@ func (this *packetClientLoginEncryptRequestCodec) Decode(reader io.Reader, util 
 	if err != nil {
 		return
 	}
-	verifyTokenLength, err := packet.ReadVarInt(reader, util)
+	verifyTokenLength, err := packet.ReadVarInt(reader)
 	if err != nil {
 		return
 	}
@@ -73,13 +73,13 @@ func (this *packetClientLoginEncryptRequestCodec) Decode(reader io.Reader, util 
 	return
 }
 
-func (this *packetClientLoginEncryptRequestCodec) Encode(writer io.Writer, util []byte, encode packet.Packet) (err error) {
+func (this *packetClientLoginEncryptRequestCodec) Encode(writer io.Writer, encode packet.Packet) (err error) {
 	packetClientLoginEncryptRequest := encode.(*PacketClientLoginEncryptRequest)
-	err = packet.WriteString(writer, util, packetClientLoginEncryptRequest.ServerId)
+	err = packet.WriteString(writer, packetClientLoginEncryptRequest.ServerId)
 	if err != nil {
 		return
 	}
-	err = packet.WriteVarInt(writer, util, len(packetClientLoginEncryptRequest.PublicKey))
+	err = packet.WriteVarInt(writer, len(packetClientLoginEncryptRequest.PublicKey))
 	if err != nil {
 		return
 	}
@@ -87,7 +87,7 @@ func (this *packetClientLoginEncryptRequestCodec) Encode(writer io.Writer, util 
 	if err != nil {
 		return
 	}
-	err = packet.WriteVarInt(writer, util, len(packetClientLoginEncryptRequest.VerifyToken))
+	err = packet.WriteVarInt(writer, len(packetClientLoginEncryptRequest.VerifyToken))
 	if err != nil {
 		return
 	}

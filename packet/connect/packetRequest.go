@@ -28,13 +28,13 @@ type packetRequestCodec struct {
 
 }
 
-func (this *packetRequestCodec) Decode(reader io.Reader, util []byte) (decode packet.Packet, err error) {
+func (this *packetRequestCodec) Decode(reader io.Reader) (decode packet.Packet, err error) {
 	packetRequest := new(PacketRequest)
-	packetRequest.SequenceId, err = packet.ReadInt32(reader, util)
+	packetRequest.SequenceId, err = packet.ReadInt32(reader)
 	if err != nil {
 		return
 	}
-	requestId, err := packet.ReadUint8(reader, util)
+	requestId, err := packet.ReadUint8(reader)
 	if err != nil {
 		return
 	}
@@ -46,7 +46,7 @@ func (this *packetRequestCodec) Decode(reader io.Reader, util []byte) (decode pa
 		err = errors.New(fmt.Sprintf("Decode, Request Id is above maximum: %d", requestId))
 		return
 	}
-	payloadSize, err := packet.ReadUint16(reader, util)
+	payloadSize, err := packet.ReadUint16(reader)
 	if err != nil {
 		return
 	}
@@ -61,7 +61,7 @@ func (this *packetRequestCodec) Decode(reader io.Reader, util []byte) (decode pa
 		err = errors.New(fmt.Sprintf("Decode, Request Id does not have a codec: %d", requestId))
 		return
 	}
-	packetRequest.Request, err = codec.Decode(buffer, util)
+	packetRequest.Request, err = codec.Decode(buffer)
 	if err != nil {
 		return
 	}
@@ -69,13 +69,13 @@ func (this *packetRequestCodec) Decode(reader io.Reader, util []byte) (decode pa
 	return
 }
 
-func (this *packetRequestCodec) Encode(writer io.Writer, util []byte, encode packet.Packet) (err error) {
+func (this *packetRequestCodec) Encode(writer io.Writer, encode packet.Packet) (err error) {
 	packetRequest := encode.(*PacketRequest)
-	err = packet.WriteInt32(writer, util, packetRequest.SequenceId)
+	err = packet.WriteInt32(writer, packetRequest.SequenceId)
 	if err != nil {
 		return
 	}
-	err = packet.WriteUint8(writer, util, uint8(packetRequest.Request.Id()))
+	err = packet.WriteUint8(writer, uint8(packetRequest.Request.Id()))
 	if err != nil {
 		return
 	}
@@ -93,12 +93,12 @@ func (this *packetRequestCodec) Encode(writer io.Writer, util []byte, encode pac
 		err = errors.New(fmt.Sprintf("Encode, Request Id does not have a codec: %d", packetRequest.Request.Id()))
 		return
 	}
-	err = codec.Encode(buffer, util, packetRequest.Request)
+	err = codec.Encode(buffer, packetRequest.Request)
 	if err != nil {
 		return
 	}
 	payload := buffer.Bytes()
-	err = packet.WriteUint16(writer, util, uint16(len(payload)))
+	err = packet.WriteUint16(writer, uint16(len(payload)))
 	if err != nil {
 		return
 	}

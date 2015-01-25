@@ -28,8 +28,7 @@ func (this *PacketGeneric) Decompress() (err error) {
 		return
 	}
 	buffer := bytes.NewReader(this.Bytes)
-	bufferUtil := make([]byte, packet.UTIL_BUFFER_LENGTH)
-	_, err = packet.ReadVarInt(buffer, bufferUtil) // compression length
+	_, err = packet.ReadVarInt(buffer) // compression length
 	if err != nil {
 		return
 	}
@@ -37,7 +36,7 @@ func (this *PacketGeneric) Decompress() (err error) {
 	if err != nil {
 		return
 	}
-	_, err = packet.ReadVarInt(zlibReader, bufferUtil) // id
+	_, err = packet.ReadVarInt(zlibReader) // id
 	if err != nil {
 		return
 	}
@@ -57,8 +56,7 @@ func (this *PacketGeneric) SwapEntities(a int32, b int32, clientServer bool, pro
 	if this.id == PACKET_CLIENT_SPAWN_OBJECT && clientServer {
 		this.Decompress()
 		buffer := bytes.NewBuffer(this.Bytes)
-		bufferUtil := make([]byte, packet.UTIL_BUFFER_LENGTH)
-		_, err := packet.ReadVarInt(buffer, bufferUtil)
+		_, err := packet.ReadVarInt(buffer)
 		varIntLength := len(this.Bytes) - buffer.Len()
 		if err == nil && len(this.Bytes) > varIntLength + 19 {
 			objectType := this.Bytes[varIntLength]
@@ -146,8 +144,7 @@ func (this *PacketGeneric) swapEntitiesVarInt(a int32, b int32, clientServer boo
 	this.Decompress()
 	// Read the old Id
 	buffer := bytes.NewBuffer(this.Bytes)
-	bufferUtil := make([]byte, packet.UTIL_BUFFER_LENGTH)
-	id, err := packet.ReadVarInt(buffer, bufferUtil)
+	id, err := packet.ReadVarInt(buffer)
 	if err != nil {
 		return
 	}
@@ -162,7 +159,7 @@ func (this *PacketGeneric) swapEntitiesVarInt(a int32, b int32, clientServer boo
 	}
 	// Apply the new Id
 	newBuffer := new(bytes.Buffer)
-	err = packet.WriteVarInt(newBuffer, bufferUtil, newId)
+	err = packet.WriteVarInt(newBuffer, newId)
 	if err != nil {
 		return
 	}
@@ -188,7 +185,7 @@ func NewPacketGenericCodec(id int) (this *packetGenericCodec) {
 	return
 }
 
-func (this *packetGenericCodec) Decode(reader io.Reader, util []byte) (decode packet.Packet, err error) {
+func (this *packetGenericCodec) Decode(reader io.Reader) (decode packet.Packet, err error) {
 	packetGeneric := new(PacketGeneric)
 	packetGeneric.id = this.Id
 	if zlibReader, ok := reader.(*packet.ZlibToggleReader); ok {
@@ -203,7 +200,7 @@ func (this *packetGenericCodec) Decode(reader io.Reader, util []byte) (decode pa
 	return
 }
 
-func (this *packetGenericCodec) Encode(writer io.Writer, util []byte, encode packet.Packet) (err error) {
+func (this *packetGenericCodec) Encode(writer io.Writer, encode packet.Packet) (err error) {
 	_, err = writer.Write(encode.(*PacketGeneric).Bytes)
 	return
 }

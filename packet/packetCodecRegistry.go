@@ -25,8 +25,8 @@ func NewPacketCodecRegistryDual(encodeCodecs []PacketCodec, decodeCodecs []Packe
 	return
 }
 
-func (this *PacketCodecRegistry) Decode(reader io.Reader, util []byte) (packet Packet, err error) {
-	id, err := ReadVarInt(reader, util)
+func (this *PacketCodecRegistry) Decode(reader io.Reader) (packet Packet, err error) {
+	id, err := ReadVarInt(reader)
 	if err != nil {
 		return
 	}
@@ -43,11 +43,11 @@ func (this *PacketCodecRegistry) Decode(reader io.Reader, util []byte) (packet P
 		err = errors.New(fmt.Sprintf("Decode, Packet Id does not have a codec: %d", id))
 		return
 	}
-	packet, err = codec.Decode(reader, util)
+	packet, err = codec.Decode(reader)
 	return
 }
 
-func (this *PacketCodecRegistry) Encode(writer io.Writer, util []byte, packet Packet) (err error) {
+func (this *PacketCodecRegistry) Encode(writer io.Writer, packet Packet) (err error) {
 	id := packet.Id()
 	if id < 0 {
 		err = errors.New(fmt.Sprintf("Encode, Packet Id is below zero: %d", id))
@@ -63,13 +63,13 @@ func (this *PacketCodecRegistry) Encode(writer io.Writer, util []byte, packet Pa
 		return
 	}
 	if raw, ok := packet.(PacketRaw); ok && raw.Raw() {
-		err = codec.Encode(writer, util, packet)
+		err = codec.Encode(writer, packet)
 	} else {
-		err = WriteVarInt(writer, util, id)
+		err = WriteVarInt(writer, id)
 		if err != nil {
 			return
 		}
-		err = codec.Encode(writer, util, packet)
+		err = codec.Encode(writer, packet)
 	}
 	return
 }

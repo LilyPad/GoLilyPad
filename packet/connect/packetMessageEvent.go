@@ -27,17 +27,17 @@ type packetMessageEventCodec struct {
 
 }
 
-func (this *packetMessageEventCodec) Decode(reader io.Reader, util []byte) (decode packet.Packet, err error) {
+func (this *packetMessageEventCodec) Decode(reader io.Reader) (decode packet.Packet, err error) {
 	packetMessageEvent := new(PacketMessageEvent)
-	packetMessageEvent.Sender, err = packet.ReadString(reader, util)
+	packetMessageEvent.Sender, err = packet.ReadString(reader)
 	if err != nil {
 		return
 	}
-	packetMessageEvent.Channel, err = packet.ReadString(reader, util)
+	packetMessageEvent.Channel, err = packet.ReadString(reader)
 	if err != nil {
 		return
 	}
-	payloadSize, err := packet.ReadUint16(reader, util)
+	payloadSize, err := packet.ReadUint16(reader)
 	if err != nil {
 		return
 	}
@@ -50,17 +50,17 @@ func (this *packetMessageEventCodec) Decode(reader io.Reader, util []byte) (deco
 	return
 }
 
-func (this *packetMessageEventCodec) Encode(writer io.Writer, util []byte, encode packet.Packet) (err error) {
+func (this *packetMessageEventCodec) Encode(writer io.Writer, encode packet.Packet) (err error) {
 	packetMessageEvent := encode.(*PacketMessageEvent)
-	err = packet.WriteString(writer, util, packetMessageEvent.Sender)
+	err = packet.WriteString(writer, packetMessageEvent.Sender)
 	if err != nil {
 		return
 	}
-	err = packet.WriteString(writer, util, packetMessageEvent.Channel)
+	err = packet.WriteString(writer, packetMessageEvent.Channel)
 	if err != nil {
 		return
 	}
-	err = packet.WriteUint16(writer, util, uint16(len(packetMessageEvent.Payload)))
+	err = packet.WriteUint16(writer, uint16(len(packetMessageEvent.Payload)))
 	if err != nil {
 		return
 	}

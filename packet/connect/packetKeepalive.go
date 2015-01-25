@@ -23,9 +23,9 @@ type packetKeepaliveCodec struct {
 
 }
 
-func (this *packetKeepaliveCodec) Decode(reader io.Reader, util []byte) (decode packet.Packet, err error) {
+func (this *packetKeepaliveCodec) Decode(reader io.Reader) (decode packet.Packet, err error) {
 	packetKeepalive := new(PacketKeepalive)
-	packetKeepalive.Random, err = packet.ReadInt32(reader, util)
+	packetKeepalive.Random, err = packet.ReadInt32(reader)
 	if err != nil {
 		return
 	}
@@ -33,7 +33,7 @@ func (this *packetKeepaliveCodec) Decode(reader io.Reader, util []byte) (decode 
 	return
 }
 
-func (this *packetKeepaliveCodec) Encode(writer io.Writer, util []byte, encode packet.Packet) (err error) {
-	err = packet.WriteInt32(writer, util, encode.(*PacketKeepalive).Random)
+func (this *packetKeepaliveCodec) Encode(writer io.Writer, encode packet.Packet) (err error) {
+	err = packet.WriteInt32(writer, encode.(*PacketKeepalive).Random)
 	return
 }

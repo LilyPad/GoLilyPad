@@ -29,21 +29,21 @@ type packetServerHandshakeCodec struct {
 
 }
 
-func (this *packetServerHandshakeCodec) Decode(reader io.Reader, util []byte) (decode packet.Packet, err error) {
+func (this *packetServerHandshakeCodec) Decode(reader io.Reader) (decode packet.Packet, err error) {
 	packetServerHandshake := new(PacketServerHandshake)
-	packetServerHandshake.ProtocolVersion, err = packet.ReadVarInt(reader, util)
+	packetServerHandshake.ProtocolVersion, err = packet.ReadVarInt(reader)
 	if err != nil {
 		return
 	}
-	packetServerHandshake.ServerAddress, err = packet.ReadString(reader, util)
+	packetServerHandshake.ServerAddress, err = packet.ReadString(reader)
 	if err != nil {
 		return
 	}
-	packetServerHandshake.ServerPort, err = packet.ReadUint16(reader, util)
+	packetServerHandshake.ServerPort, err = packet.ReadUint16(reader)
 	if err != nil {
 		return
 	}
-	packetServerHandshake.State, err = packet.ReadVarInt(reader, util)
+	packetServerHandshake.State, err = packet.ReadVarInt(reader)
 	if err != nil {
 		return
 	}
@@ -51,20 +51,20 @@ func (this *packetServerHandshakeCodec) Decode(reader io.Reader, util []byte) (d
 	return
 }
 
-func (this *packetServerHandshakeCodec) Encode(writer io.Writer, util []byte, encode packet.Packet) (err error) {
+func (this *packetServerHandshakeCodec) Encode(writer io.Writer, encode packet.Packet) (err error) {
 	packetServerHandshake := encode.(*PacketServerHandshake)
-	err = packet.WriteVarInt(writer, util, packetServerHandshake.ProtocolVersion)
+	err = packet.WriteVarInt(writer, packetServerHandshake.ProtocolVersion)
 	if err != nil {
 		return
 	}
-	err = packet.WriteString(writer, util, packetServerHandshake.ServerAddress)
+	err = packet.WriteString(writer, packetServerHandshake.ServerAddress)
 	if err != nil {
 		return
 	}
-	err = packet.WriteUint16(writer, util, packetServerHandshake.ServerPort)
+	err = packet.WriteUint16(writer, packetServerHandshake.ServerPort)
 	if err != nil {
 		return
 	}
-	err = packet.WriteVarInt(writer, util, packetServerHandshake.State)
+	err = packet.WriteVarInt(writer, packetServerHandshake.State)
 	return
 }

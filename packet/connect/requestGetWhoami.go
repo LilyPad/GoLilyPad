@@ -22,12 +22,12 @@ type requestGetWhoamiCodec struct {
 
 }
 
-func (this *requestGetWhoamiCodec) Decode(reader io.Reader, util []byte) (request Request, err error) {
+func (this *requestGetWhoamiCodec) Decode(reader io.Reader) (request Request, err error) {
 	request = new(RequestGetWhoami)
 	return
 }
 
-func (this *requestGetWhoamiCodec) Encode(writer io.Writer, util []byte, request Request) (err error) {
+func (this *requestGetWhoamiCodec) Encode(writer io.Writer, request Request) (err error) {
 	return
 }
 
@@ -49,9 +49,9 @@ type resultGetWhoamiCodec struct {
 
 }
 
-func (this *resultGetWhoamiCodec) Decode(reader io.Reader, util []byte) (result Result, err error) {
+func (this *resultGetWhoamiCodec) Decode(reader io.Reader) (result Result, err error) {
 	resultGetWhoami := new(ResultGetWhoami)
-	resultGetWhoami.Whoiam, err = packet.ReadString(reader, util)
+	resultGetWhoami.Whoiam, err = packet.ReadString(reader)
 	if err != nil {
 		return
 	}
@@ -59,7 +59,7 @@ func (this *resultGetWhoamiCodec) Decode(reader io.Reader, util []byte) (result 
 	return
 }
 
-func (this *resultGetWhoamiCodec) Encode(writer io.Writer, util []byte, result Result) (err error) {
-	err = packet.WriteString(writer, util, result.(*ResultGetWhoami).Whoiam)
+func (this *resultGetWhoamiCodec) Encode(writer io.Writer, result Result) (err error) {
+	err = packet.WriteString(writer, result.(*ResultGetWhoami).Whoiam)
 	return
 }

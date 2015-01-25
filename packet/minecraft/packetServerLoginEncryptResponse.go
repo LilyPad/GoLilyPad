@@ -27,9 +27,9 @@ type packetServerLoginEncryptResponseCodec struct {
 
 }
 
-func (this *packetServerLoginEncryptResponseCodec) Decode(reader io.Reader, util []byte) (decode packet.Packet, err error) {
+func (this *packetServerLoginEncryptResponseCodec) Decode(reader io.Reader) (decode packet.Packet, err error) {
 	packetServerLoginEncryptResponse := new(PacketServerLoginEncryptResponse)
-	sharedSecretLength, err := packet.ReadVarInt(reader, util)
+	sharedSecretLength, err := packet.ReadVarInt(reader)
 	if err != nil {
 		return
 	}
@@ -46,7 +46,7 @@ func (this *packetServerLoginEncryptResponseCodec) Decode(reader io.Reader, util
 	if err != nil {
 		return
 	}
-	verifyTokenLength, err := packet.ReadVarInt(reader, util)
+	verifyTokenLength, err := packet.ReadVarInt(reader)
 	if err != nil {
 		return
 	}
@@ -67,9 +67,9 @@ func (this *packetServerLoginEncryptResponseCodec) Decode(reader io.Reader, util
 	return
 }
 
-func (this *packetServerLoginEncryptResponseCodec) Encode(writer io.Writer, util []byte, encode packet.Packet) (err error) {
+func (this *packetServerLoginEncryptResponseCodec) Encode(writer io.Writer, encode packet.Packet) (err error) {
 	packetServerLoginEncryptResponse := encode.(*PacketServerLoginEncryptResponse)
-	err = packet.WriteVarInt(writer, util, len(packetServerLoginEncryptResponse.SharedSecret))
+	err = packet.WriteVarInt(writer, len(packetServerLoginEncryptResponse.SharedSecret))
 	if err != nil {
 		return
 	}
@@ -77,7 +77,7 @@ func (this *packetServerLoginEncryptResponseCodec) Encode(writer io.Writer, util
 	if err != nil {
 		return
 	}
-	err = packet.WriteVarInt(writer, util, len(packetServerLoginEncryptResponse.VerifyToken))
+	err = packet.WriteVarInt(writer, len(packetServerLoginEncryptResponse.VerifyToken))
 	if err != nil {
 		return
 	}

@@ -67,13 +67,13 @@ type packetClientPlayerListCodec struct {
 
 }
 
-func (this *packetClientPlayerListCodec) Decode(reader io.Reader, util []byte) (decode packet.Packet, err error) {
+func (this *packetClientPlayerListCodec) Decode(reader io.Reader) (decode packet.Packet, err error) {
 	packetClientPlayerList := new(PacketClientPlayerList)
-	packetClientPlayerList.Action, err = packet.ReadVarInt(reader, util)
+	packetClientPlayerList.Action, err = packet.ReadVarInt(reader)
 	if err != nil {
 		return
 	}
-	itemLength, err := packet.ReadVarInt(reader, util)
+	itemLength, err := packet.ReadVarInt(reader)
 	if err != nil {
 		return
 	}
@@ -88,19 +88,19 @@ func (this *packetClientPlayerListCodec) Decode(reader io.Reader, util []byte) (
 	packetClientPlayerList.Items = make([]PacketClientPlayerListItem, itemLength)
 	for i, _ := range packetClientPlayerList.Items {
 		item := &packetClientPlayerList.Items[i]
-		item.UUID, err = packet.ReadUUID(reader, util)
+		item.UUID, err = packet.ReadUUID(reader)
 		if err != nil {
 			return
 		}
 		switch packetClientPlayerList.Action {
 		case PACKET_CLIENT_PLAYER_LIST_ACTION_ADD:
 			addPlayer := PacketClientPlayerListAddPlayer{}
-			addPlayer.Name, err = packet.ReadString(reader, util)
+			addPlayer.Name, err = packet.ReadString(reader)
 			if err != nil {
 				return
 			}
 			var propertiesLength int
-			propertiesLength, err = packet.ReadVarInt(reader, util)
+			propertiesLength, err = packet.ReadVarInt(reader)
 			if err != nil {
 				return
 			}
@@ -115,41 +115,41 @@ func (this *packetClientPlayerListCodec) Decode(reader io.Reader, util []byte) (
 			addPlayer.Properties = make([]PacketClientPlayerListAddPlayerProperty, propertiesLength)
 			for j, _ := range addPlayer.Properties {
 				property := &addPlayer.Properties[j]
-				property.Name, err = packet.ReadString(reader, util)
+				property.Name, err = packet.ReadString(reader)
 				if err != nil {
 					return
 				}
-				property.Value, err = packet.ReadString(reader, util)
+				property.Value, err = packet.ReadString(reader)
 				if err != nil {
 					return
 				}
 				var signed bool
-				signed, err = packet.ReadBool(reader, util)
+				signed, err = packet.ReadBool(reader)
 				if err != nil {
 					return
 				}
 				if signed {
-					property.Signature, err = packet.ReadString(reader, util)
+					property.Signature, err = packet.ReadString(reader)
 					if err != nil {
 						return
 					}
 				}
 			}
-			addPlayer.Gamemode, err = packet.ReadVarInt(reader, util)
+			addPlayer.Gamemode, err = packet.ReadVarInt(reader)
 			if err != nil {
 				return
 			}
-			addPlayer.Latency, err = packet.ReadVarInt(reader, util)
+			addPlayer.Latency, err = packet.ReadVarInt(reader)
 			if err != nil {
 				return
 			}
 			var hasDisplayName bool
-			hasDisplayName, err = packet.ReadBool(reader, util)
+			hasDisplayName, err = packet.ReadBool(reader)
 			if err != nil {
 				return
 			}
 			if hasDisplayName {
-				addPlayer.DisplayName, err = packet.ReadString(reader, util)
+				addPlayer.DisplayName, err = packet.ReadString(reader)
 				if err != nil {
 					return
 				}
@@ -157,14 +157,14 @@ func (this *packetClientPlayerListCodec) Decode(reader io.Reader, util []byte) (
 			item.Info = addPlayer
 		case PACKET_CLIENT_PLAYER_LIST_ACTION_UPDATE_GAMEMODE:
 			updateGamemode := PacketClientPlayerListUpdateGamemode{}
-			updateGamemode.Gamemode, err = packet.ReadVarInt(reader, util)
+			updateGamemode.Gamemode, err = packet.ReadVarInt(reader)
 			if err != nil {
 				return
 			}
 			item.Info = updateGamemode
 		case PACKET_CLIENT_PLAYER_LIST_ACTION_UPDATE_LATENCY:
 			updateLatency := PacketClientPlayerListUpdateLatency{}
-			updateLatency.Latency, err = packet.ReadVarInt(reader, util)
+			updateLatency.Latency, err = packet.ReadVarInt(reader)
 			if err != nil {
 				return
 			}
@@ -172,12 +172,12 @@ func (this *packetClientPlayerListCodec) Decode(reader io.Reader, util []byte) (
 		case PACKET_CLIENT_PLAYER_LIST_ACTION_UPDATE_DISPLAY_NAME:
 			updateDisplayName := PacketClientPlayerListUpdateDisplayName{}
 			var hasDisplayName bool
-			hasDisplayName, err = packet.ReadBool(reader, util)
+			hasDisplayName, err = packet.ReadBool(reader)
 			if err != nil {
 				return
 			}
 			if hasDisplayName {
-				updateDisplayName.DisplayName, err = packet.ReadString(reader, util)
+				updateDisplayName.DisplayName, err = packet.ReadString(reader)
 				if err != nil {
 					return
 				}
@@ -193,105 +193,105 @@ func (this *packetClientPlayerListCodec) Decode(reader io.Reader, util []byte) (
 	return
 }
 
-func (this *packetClientPlayerListCodec) Encode(writer io.Writer, util []byte, encode packet.Packet) (err error) {
+func (this *packetClientPlayerListCodec) Encode(writer io.Writer, encode packet.Packet) (err error) {
 	packetClientPlayerList := encode.(*PacketClientPlayerList)
-	err = packet.WriteVarInt(writer, util, packetClientPlayerList.Action)
+	err = packet.WriteVarInt(writer, packetClientPlayerList.Action)
 	if err != nil {
 		return
 	}
-	err = packet.WriteVarInt(writer, util, len(packetClientPlayerList.Items))
+	err = packet.WriteVarInt(writer, len(packetClientPlayerList.Items))
 	if err != nil {
 		return
 	}
 	for _, item := range packetClientPlayerList.Items {
-		err = packet.WriteUUID(writer, util, item.UUID)
+		err = packet.WriteUUID(writer, item.UUID)
 		if err != nil {
 			return
 		}
 		switch packetClientPlayerList.Action {
 		case PACKET_CLIENT_PLAYER_LIST_ACTION_ADD:
 			addPlayer := item.Info.(PacketClientPlayerListAddPlayer)
-			err = packet.WriteString(writer, util, addPlayer.Name)
+			err = packet.WriteString(writer, addPlayer.Name)
 			if err != nil {
 				return
 			}
-			err = packet.WriteVarInt(writer, util, len(addPlayer.Properties))
+			err = packet.WriteVarInt(writer, len(addPlayer.Properties))
 			if err != nil {
 				return
 			}
 			for _, property := range addPlayer.Properties {
-				err = packet.WriteString(writer, util, property.Name)
+				err = packet.WriteString(writer, property.Name)
 				if err != nil {
 					return
 				}
-				err = packet.WriteString(writer, util, property.Value)
+				err = packet.WriteString(writer, property.Value)
 				if err != nil {
 					return
 				}
 				if property.Signature == "" {
-					err = packet.WriteBool(writer, util, false)
+					err = packet.WriteBool(writer, false)
 					if err != nil {
 						return
 					}
 				} else {
-					err = packet.WriteBool(writer, util, true)
+					err = packet.WriteBool(writer, true)
 					if err != nil {
 						return
 					}
-					err = packet.WriteString(writer, util, property.Signature)
+					err = packet.WriteString(writer, property.Signature)
 					if err != nil {
 						return
 					}
 				}
 			}
-			err = packet.WriteVarInt(writer, util, addPlayer.Gamemode)
+			err = packet.WriteVarInt(writer, addPlayer.Gamemode)
 			if err != nil {
 				return
 			}
-			err = packet.WriteVarInt(writer, util, addPlayer.Latency)
+			err = packet.WriteVarInt(writer, addPlayer.Latency)
 			if err != nil {
 				return
 			}
 			if addPlayer.DisplayName == "" {
-				err = packet.WriteBool(writer, util, false)
+				err = packet.WriteBool(writer, false)
 				if err != nil {
 					return
 				}
 			} else {
-				err = packet.WriteBool(writer, util, true)
+				err = packet.WriteBool(writer, true)
 				if err != nil {
 					return
 				}
-				err = packet.WriteString(writer, util, addPlayer.DisplayName)
+				err = packet.WriteString(writer, addPlayer.DisplayName)
 				if err != nil {
 					return
 				}
 			}
 		case PACKET_CLIENT_PLAYER_LIST_ACTION_UPDATE_GAMEMODE:
 			updateGamemode := item.Info.(PacketClientPlayerListUpdateGamemode)
-			err = packet.WriteVarInt(writer, util, updateGamemode.Gamemode)
+			err = packet.WriteVarInt(writer, updateGamemode.Gamemode)
 			if err != nil {
 				return
 			}
 		case PACKET_CLIENT_PLAYER_LIST_ACTION_UPDATE_LATENCY:
 			updateLatency := item.Info.(PacketClientPlayerListUpdateLatency)
-			err = packet.WriteVarInt(writer, util, updateLatency.Latency)
+			err = packet.WriteVarInt(writer, updateLatency.Latency)
 			if err != nil {
 				return
 			}
 		case PACKET_CLIENT_PLAYER_LIST_ACTION_UPDATE_DISPLAY_NAME:
 			updateDisplayName := item.Info.(PacketClientPlayerListUpdateDisplayName)
 			if updateDisplayName.DisplayName == "" {
-				err = packet.WriteBool(writer, util, false)
+				err = packet.WriteBool(writer, false)
 				if err != nil {
 					return
 				}
 			} else {
-				err = packet.WriteBool(writer, util, true)
+				err = packet.WriteBool(writer, true)
 				if err != nil {
 					return
 				}
-				err = packet.WriteString(writer, util, updateDisplayName.DisplayName)
+				err = packet.WriteString(writer, updateDisplayName.DisplayName)
 				if err != nil {
 					return
 				}

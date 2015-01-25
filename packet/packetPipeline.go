@@ -18,13 +18,13 @@ func NewPacketPipeline() (this *PacketPipeline) {
 	return
 }
 
-func (this *PacketPipeline) Decode(reader io.Reader, util []byte) (packet Packet, err error) {
-	packet, err = this.children[0].Decode(reader, util)
+func (this *PacketPipeline) Decode(reader io.Reader) (packet Packet, err error) {
+	packet, err = this.children[0].Decode(reader)
 	return
 }
 
-func (this *PacketPipeline) Encode(writer io.Writer, util []byte, packet Packet) (err error) {
-	err = this.children[0].Encode(writer, util, packet)
+func (this *PacketPipeline) Encode(writer io.Writer, packet Packet) (err error) {
+	err = this.children[0].Encode(writer, packet)
 	return
 }
 

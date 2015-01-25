@@ -38,26 +38,26 @@ type packetServerEventCodec struct {
 
 }
 
-func (this *packetServerEventCodec) Decode(reader io.Reader, util []byte) (decode packet.Packet, err error) {
+func (this *packetServerEventCodec) Decode(reader io.Reader) (decode packet.Packet, err error) {
 	packetServerEvent := new(PacketServerEvent)
-	packetServerEvent.Add, err = packet.ReadBool(reader, util)
+	packetServerEvent.Add, err = packet.ReadBool(reader)
 	if err != nil {
 		return
 	}
-	packetServerEvent.Server, err = packet.ReadString(reader, util)
+	packetServerEvent.Server, err = packet.ReadString(reader)
 	if err != nil {
 		return
 	}
 	if packetServerEvent.Add {
-		packetServerEvent.SecurityKey, err = packet.ReadString(reader, util)
+		packetServerEvent.SecurityKey, err = packet.ReadString(reader)
 		if err != nil {
 			return
 		}
-		packetServerEvent.Address, err = packet.ReadString(reader, util)
+		packetServerEvent.Address, err = packet.ReadString(reader)
 		if err != nil {
 			return
 		}
-		packetServerEvent.Port, err = packet.ReadUint16(reader, util)
+		packetServerEvent.Port, err = packet.ReadUint16(reader)
 		if err != nil {
 			return
 		}
@@ -66,26 +66,26 @@ func (this *packetServerEventCodec) Decode(reader io.Reader, util []byte) (decod
 	return
 }
 
-func (this *packetServerEventCodec) Encode(writer io.Writer, util []byte, encode packet.Packet) (err error) {
+func (this *packetServerEventCodec) Encode(writer io.Writer, encode packet.Packet) (err error) {
 	packetServerEvent := encode.(*PacketServerEvent)
-	err = packet.WriteBool(writer, util, packetServerEvent.Add)
+	err = packet.WriteBool(writer, packetServerEvent.Add)
 	if err != nil {
 		return
 	}
-	err = packet.WriteString(writer, util, packetServerEvent.Server)
+	err = packet.WriteString(writer, packetServerEvent.Server)
 	if packetServerEvent.Add {
 		if err != nil {
 			return
 		}
-		err = packet.WriteString(writer, util, packetServerEvent.SecurityKey)
+		err = packet.WriteString(writer, packetServerEvent.SecurityKey)
 		if err != nil {
 			return
 		}
-		err = packet.WriteString(writer, util, packetServerEvent.Address)
+		err = packet.WriteString(writer, packetServerEvent.Address)
 		if err != nil {
 			return
 		}
-		err = packet.WriteUint16(writer, util, packetServerEvent.Port)
+		err = packet.WriteUint16(writer, packetServerEvent.Port)
 	}
 	return
 }

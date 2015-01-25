@@ -27,25 +27,25 @@ type requestMessageCodec struct {
 
 }
 
-func (this *requestMessageCodec) Decode(reader io.Reader, util []byte) (request Request, err error) {
+func (this *requestMessageCodec) Decode(reader io.Reader) (request Request, err error) {
 	requestMessage := new(RequestMessage)
-	recipientsSize, err := packet.ReadUint16(reader, util)
+	recipientsSize, err := packet.ReadUint16(reader)
 	if err != nil {
 		return
 	}
 	requestMessage.Recipients = make([]string, recipientsSize)
 	var i uint16
 	for i = 0; i < recipientsSize; i++ {
-		requestMessage.Recipients[i], err = packet.ReadString(reader, util)
+		requestMessage.Recipients[i], err = packet.ReadString(reader)
 		if err != nil {
 			return
 		}
 	}
-	requestMessage.Channel, err = packet.ReadString(reader, util)
+	requestMessage.Channel, err = packet.ReadString(reader)
 	if err != nil {
 		return
 	}
-	messageSize, err := packet.ReadUint16(reader, util)
+	messageSize, err := packet.ReadUint16(reader)
 	if err != nil {
 		return
 	}
@@ -58,23 +58,23 @@ func (this *requestMessageCodec) Decode(reader io.Reader, util []byte) (request 
 	return
 }
 
-func (this *requestMessageCodec) Encode(writer io.Writer, util []byte, request Request) (err error) {
+func (this *requestMessageCodec) Encode(writer io.Writer, request Request) (err error) {
 	requestMessage := request.(*RequestMessage)
-	err = packet.WriteUint16(writer, util, uint16(len(requestMessage.Recipients)))
+	err = packet.WriteUint16(writer, uint16(len(requestMessage.Recipients)))
 	for i := 0; i < len(requestMessage.Recipients); i++ {
 		if err != nil {
 			return
 		}
-		err = packet.WriteString(writer, util, requestMessage.Recipients[i])
+		err = packet.WriteString(writer, requestMessage.Recipients[i])
 	}
 	if err != nil {
 		return
 	}
-	err = packet.WriteString(writer, util, requestMessage.Channel)
+	err = packet.WriteString(writer, requestMessage.Channel)
 	if err != nil {
 		return
 	}
-	err = packet.WriteUint16(writer, util, uint16(len(requestMessage.Message)))
+	err = packet.WriteUint16(writer, uint16(len(requestMessage.Message)))
 	if err != nil {
 		return
 	}
@@ -99,11 +99,11 @@ type resultMessageCodec struct {
 
 }
 
-func (this *resultMessageCodec) Decode(reader io.Reader, util []byte) (result Result, err error) {
+func (this *resultMessageCodec) Decode(reader io.Reader) (result Result, err error) {
 	result = new(ResultMessage)
 	return
 }
 
-func (this *resultMessageCodec) Encode(writer io.Writer, util []byte, result Result) (err error) {
+func (this *resultMessageCodec) Encode(writer io.Writer, result Result) (err error) {
 	return
 }

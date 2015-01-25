@@ -34,17 +34,17 @@ type packetClientPlayerListCodec17 struct {
 
 }
 
-func (this *packetClientPlayerListCodec17) Decode(reader io.Reader, util []byte) (decode packet.Packet, err error) {
+func (this *packetClientPlayerListCodec17) Decode(reader io.Reader) (decode packet.Packet, err error) {
 	packetClientPlayerList := new(PacketClientPlayerList17)
-	packetClientPlayerList.Name, err = packet.ReadString(reader, util)
+	packetClientPlayerList.Name, err = packet.ReadString(reader)
 	if err != nil {
 		return
 	}
-	packetClientPlayerList.Online, err = packet.ReadBool(reader, util)
+	packetClientPlayerList.Online, err = packet.ReadBool(reader)
 	if err != nil {
 		return
 	}
-	packetClientPlayerList.Ping, err = packet.ReadInt16(reader, util)
+	packetClientPlayerList.Ping, err = packet.ReadInt16(reader)
 	if err != nil {
 		return
 	}
@@ -52,16 +52,16 @@ func (this *packetClientPlayerListCodec17) Decode(reader io.Reader, util []byte)
 	return
 }
 
-func (this *packetClientPlayerListCodec17) Encode(writer io.Writer, util []byte, encode packet.Packet) (err error) {
+func (this *packetClientPlayerListCodec17) Encode(writer io.Writer, encode packet.Packet) (err error) {
 	packetClientPlayerList := encode.(*PacketClientPlayerList17)
-	err = packet.WriteString(writer, util, packetClientPlayerList.Name)
+	err = packet.WriteString(writer, packetClientPlayerList.Name)
 	if err != nil {
 		return
 	}
-	err = packet.WriteBool(writer, util, packetClientPlayerList.Online)
+	err = packet.WriteBool(writer, packetClientPlayerList.Online)
 	if err != nil {
 		return
 	}
-	err = packet.WriteInt16(writer, util, packetClientPlayerList.Ping)
+	err = packet.WriteInt16(writer, packetClientPlayerList.Ping)
 	return
 }

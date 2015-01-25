@@ -9,13 +9,13 @@ type packetServerPluginMessageCodec17 struct {
 
 }
 
-func (this *packetServerPluginMessageCodec17) Decode(reader io.Reader, util []byte) (decode packet.Packet, err error) {
+func (this *packetServerPluginMessageCodec17) Decode(reader io.Reader) (decode packet.Packet, err error) {
 	packetServerPluginMessage := new(PacketServerPluginMessage)
-	packetServerPluginMessage.Channel, err = packet.ReadString(reader, util)
+	packetServerPluginMessage.Channel, err = packet.ReadString(reader)
 	if err != nil {
 		return
 	}
-	dataLength, err := packet.ReadUint16(reader, util)
+	dataLength, err := packet.ReadUint16(reader)
 	if err != nil {
 		return
 	}
@@ -28,13 +28,13 @@ func (this *packetServerPluginMessageCodec17) Decode(reader io.Reader, util []by
 	return
 }
 
-func (this *packetServerPluginMessageCodec17) Encode(writer io.Writer, util []byte, encode packet.Packet) (err error) {
+func (this *packetServerPluginMessageCodec17) Encode(writer io.Writer, encode packet.Packet) (err error) {
 	packetServerPluginMessage := encode.(*PacketServerPluginMessage)
-	err = packet.WriteString(writer, util, packetServerPluginMessage.Channel)
+	err = packet.WriteString(writer, packetServerPluginMessage.Channel)
 	if err != nil {
 		return
 	}
-	err = packet.WriteUint16(writer, util, uint16(len(packetServerPluginMessage.Data)))
+	err = packet.WriteUint16(writer, uint16(len(packetServerPluginMessage.Data)))
 	if err != nil {
 		return
 	}

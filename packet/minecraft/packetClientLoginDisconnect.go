@@ -23,9 +23,9 @@ type packetClientLoginDisconnectCodec struct {
 
 }
 
-func (this *packetClientLoginDisconnectCodec) Decode(reader io.Reader, util []byte) (decode packet.Packet, err error) {
+func (this *packetClientLoginDisconnectCodec) Decode(reader io.Reader) (decode packet.Packet, err error) {
 	packetClientLoginDisconnect := new(PacketClientLoginDisconnect)
-	packetClientLoginDisconnect.Json, err = packet.ReadString(reader, util)
+	packetClientLoginDisconnect.Json, err = packet.ReadString(reader)
 	if err != nil {
 		return
 	}
@@ -33,8 +33,8 @@ func (this *packetClientLoginDisconnectCodec) Decode(reader io.Reader, util []by
 	return
 }
 
-func (this *packetClientLoginDisconnectCodec) Encode(writer io.Writer, util []byte, encode packet.Packet) (err error) {
+func (this *packetClientLoginDisconnectCodec) Encode(writer io.Writer, encode packet.Packet) (err error) {
 	packetClientLoginDisconnect := encode.(*PacketClientLoginDisconnect)
-	err = packet.WriteString(writer, util, packetClientLoginDisconnect.Json)
+	err = packet.WriteString(writer, packetClientLoginDisconnect.Json)
 	return
 }

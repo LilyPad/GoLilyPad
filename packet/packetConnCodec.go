@@ -14,8 +14,6 @@ type PacketConnCodec struct {
 	packetCodec PacketCodec
 	timeout time.Duration
 	writeMutex sync.Mutex
-	writeUtil []byte
-	readUtil []byte
 }
 
 func NewPacketConnCodec(conn net.Conn, packetCodec PacketCodec, timeout time.Duration) (this *PacketConnCodec) {
@@ -25,15 +23,13 @@ func NewPacketConnCodec(conn net.Conn, packetCodec PacketCodec, timeout time.Dur
 	this.conn = conn
 	this.packetCodec = packetCodec
 	this.timeout = timeout
-	this.writeUtil = make([]byte, UTIL_BUFFER_LENGTH)
-	this.readUtil = make([]byte, UTIL_BUFFER_LENGTH)
 	return
 }
 
 func (this *PacketConnCodec) Write(packet Packet) (err error) {
 	this.writeMutex.Lock()
 	defer this.writeMutex.Unlock()
-	err = this.packetCodec.Encode(this.writer, this.writeUtil, packet)
+	err = this.packetCodec.Encode(this.writer, packet)
 	return
 }
 
@@ -42,7 +38,7 @@ func (this *PacketConnCodec) ReadConn(packetHandler PacketHandler) {
 		if this.timeout != -1 {
 			this.conn.SetReadDeadline(time.Now().Add(this.timeout))
 		}
-		packet, err := this.packetCodec.Decode(this.reader, this.readUtil)
+		packet, err := this.packetCodec.Decode(this.reader)
 		if err != nil {
 			packetHandler.ErrorCaught(err)
 			return

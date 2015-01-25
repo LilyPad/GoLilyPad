@@ -23,9 +23,9 @@ type packetClientStatusPingCodec struct {
 
 }
 
-func (this *packetClientStatusPingCodec) Decode(reader io.Reader, util []byte) (decode packet.Packet, err error) {
+func (this *packetClientStatusPingCodec) Decode(reader io.Reader) (decode packet.Packet, err error) {
 	packetClientStatusPing := new(PacketClientStatusPing)
-	packetClientStatusPing.Time, err = packet.ReadInt64(reader, util)
+	packetClientStatusPing.Time, err = packet.ReadInt64(reader)
 	if err != nil {
 		return
 	}
@@ -33,8 +33,8 @@ func (this *packetClientStatusPingCodec) Decode(reader io.Reader, util []byte) (
 	return
 }
 
-func (this *packetClientStatusPingCodec) Encode(writer io.Writer, util []byte, encode packet.Packet) (err error) {
+func (this *packetClientStatusPingCodec) Encode(writer io.Writer, encode packet.Packet) (err error) {
 	packetClientStatusPing := encode.(*PacketClientStatusPing)
-	err = packet.WriteInt64(writer, util, packetClientStatusPing.Time)
+	err = packet.WriteInt64(writer, packetClientStatusPing.Time)
 	return
 }

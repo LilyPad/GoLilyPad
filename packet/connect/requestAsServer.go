@@ -25,13 +25,13 @@ type requestAsServerCodec struct {
 
 }
 
-func (this *requestAsServerCodec) Decode(reader io.Reader, util []byte) (request Request, err error) {
+func (this *requestAsServerCodec) Decode(reader io.Reader) (request Request, err error) {
 	requestAsServer := new(RequestAsServer)
-	requestAsServer.Address, err = packet.ReadString(reader, util)
+	requestAsServer.Address, err = packet.ReadString(reader)
 	if err != nil {
 		return
 	}
-	requestAsServer.Port, err = packet.ReadUint16(reader, util)
+	requestAsServer.Port, err = packet.ReadUint16(reader)
 	if err != nil {
 		return
 	}
@@ -39,13 +39,13 @@ func (this *requestAsServerCodec) Decode(reader io.Reader, util []byte) (request
 	return
 }
 
-func (this *requestAsServerCodec) Encode(writer io.Writer, util []byte, request Request) (err error) {
+func (this *requestAsServerCodec) Encode(writer io.Writer, request Request) (err error) {
 	requestAsServer := request.(*RequestAsServer)
-	err = packet.WriteString(writer, util, requestAsServer.Address)
+	err = packet.WriteString(writer, requestAsServer.Address)
 	if err != nil {
 		return
 	}
-	err = packet.WriteUint16(writer, util, requestAsServer.Port)
+	err = packet.WriteUint16(writer, requestAsServer.Port)
 	return
 }
 
@@ -67,9 +67,9 @@ type resultAsServerCodec struct {
 
 }
 
-func (this *resultAsServerCodec) Decode(reader io.Reader, util []byte) (result Result, err error) {
+func (this *resultAsServerCodec) Decode(reader io.Reader) (result Result, err error) {
 	resultAsServer := new(ResultAsServer)
-	resultAsServer.SecurityKey, err = packet.ReadString(reader, util)
+	resultAsServer.SecurityKey, err = packet.ReadString(reader)
 	if err != nil {
 		return
 	}
@@ -77,7 +77,7 @@ func (this *resultAsServerCodec) Decode(reader io.Reader, util []byte) (result R
 	return
 }
 
-func (this *resultAsServerCodec) Encode(writer io.Writer, util []byte, result Result) (err error) {
-	err = packet.WriteString(writer, util, result.(*ResultAsServer).SecurityKey)
+func (this *resultAsServerCodec) Encode(writer io.Writer, result Result) (err error) {
+	err = packet.WriteString(writer, result.(*ResultAsServer).SecurityKey)
 	return
 }

@@ -29,21 +29,21 @@ type packetClientRespawnCodec struct {
 
 }
 
-func (this *packetClientRespawnCodec) Decode(reader io.Reader, util []byte) (decode packet.Packet, err error) {
+func (this *packetClientRespawnCodec) Decode(reader io.Reader) (decode packet.Packet, err error) {
 	packetClientRespawn := new(PacketClientRespawn)
-	packetClientRespawn.Dimension, err = packet.ReadInt32(reader, util)
+	packetClientRespawn.Dimension, err = packet.ReadInt32(reader)
 	if err != nil {
 		return
 	}
-	packetClientRespawn.Difficulty, err = packet.ReadInt8(reader, util)
+	packetClientRespawn.Difficulty, err = packet.ReadInt8(reader)
 	if err != nil {
 		return
 	}
-	packetClientRespawn.Gamemode, err = packet.ReadInt8(reader, util)
+	packetClientRespawn.Gamemode, err = packet.ReadInt8(reader)
 	if err != nil {
 		return
 	}
-	packetClientRespawn.LevelType, err = packet.ReadString(reader, util)
+	packetClientRespawn.LevelType, err = packet.ReadString(reader)
 	if err != nil {
 		return
 	}
@@ -51,20 +51,20 @@ func (this *packetClientRespawnCodec) Decode(reader io.Reader, util []byte) (dec
 	return
 }
 
-func (this *packetClientRespawnCodec) Encode(writer io.Writer, util []byte, encode packet.Packet) (err error) {
+func (this *packetClientRespawnCodec) Encode(writer io.Writer, encode packet.Packet) (err error) {
 	packetClientRespawn := encode.(*PacketClientRespawn)
-	err = packet.WriteInt32(writer, util, packetClientRespawn.Dimension)
+	err = packet.WriteInt32(writer, packetClientRespawn.Dimension)
 	if err != nil {
 		return
 	}
-	err = packet.WriteInt8(writer, util, packetClientRespawn.Difficulty)
+	err = packet.WriteInt8(writer, packetClientRespawn.Difficulty)
 	if err != nil {
 		return
 	}
-	err = packet.WriteInt8(writer, util, packetClientRespawn.Gamemode)
+	err = packet.WriteInt8(writer, packetClientRespawn.Gamemode)
 	if err != nil {
 		return
 	}
-	err = packet.WriteString(writer, util, packetClientRespawn.LevelType)
+	err = packet.WriteString(writer, packetClientRespawn.LevelType)
 	return
 }

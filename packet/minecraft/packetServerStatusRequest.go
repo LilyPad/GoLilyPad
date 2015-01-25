@@ -22,11 +22,11 @@ type packetServerStatusRequestCodec struct {
 
 }
 
-func (this *packetServerStatusRequestCodec) Decode(reader io.Reader, util []byte) (decode packet.Packet, err error) {
+func (this *packetServerStatusRequestCodec) Decode(reader io.Reader) (decode packet.Packet, err error) {
 	decode = new(PacketServerStatusRequest)
 	return
 }
 
-func (this *packetServerStatusRequestCodec) Encode(writer io.Writer, util []byte, encode packet.Packet) (err error) {
+func (this *packetServerStatusRequestCodec) Encode(writer io.Writer, encode packet.Packet) (err error) {
 	return
 }

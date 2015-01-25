@@ -26,9 +26,9 @@ func NewPacketCodecZlibLevel(threshold int, level int) (this *PacketCodecZlib) {
 	return
 }
 
-func (this *PacketCodecZlib) Decode(reader io.Reader, util []byte) (packet Packet, err error) {
+func (this *PacketCodecZlib) Decode(reader io.Reader) (packet Packet, err error) {
 	rawBytes := reader.(Byteser).Bytes() // FIXME assuming the caller is a Byteser is a bad idea
-	length, err := ReadVarInt(reader, util)
+	length, err := ReadVarInt(reader)
 	if err != nil {
 		return
 	}
@@ -37,7 +37,7 @@ func (this *PacketCodecZlib) Decode(reader io.Reader, util []byte) (packet Packe
 		return
 	}
 	if length == 0 {
-		packet, err = this.codec.Decode(reader, util)
+		packet, err = this.codec.Decode(reader)
 	} else {
 		zlibBytes := reader.(Byteser).Bytes() // FIXME assuming the caller is a Byteser is a bad idea
 		var zlibReader io.ReadCloser
@@ -45,7 +45,7 @@ func (this *PacketCodecZlib) Decode(reader io.Reader, util []byte) (packet Packe
 		if err != nil {
 			return
 		}
-		packet, err = this.codec.Decode(zlibReader, util)
+		packet, err = this.codec.Decode(zlibReader)
 		if err != nil {
 			return
 		}
@@ -54,22 +54,22 @@ func (this *PacketCodecZlib) Decode(reader io.Reader, util []byte) (packet Packe
 	return
 }
 
-func (this *PacketCodecZlib) Encode(writer io.Writer, util []byte, packet Packet) (err error) {
+func (this *PacketCodecZlib) Encode(writer io.Writer, packet Packet) (err error) {
 	buffer := new(bytes.Buffer)
-	err = this.codec.Encode(buffer, util, packet)
+	err = this.codec.Encode(buffer, packet)
 	if err != nil {
 		return
 	}
 	if raw, ok := packet.(PacketRaw); ok && raw.Raw() {
 		_, err = buffer.WriteTo(writer)
 	} else if buffer.Len() < this.threshold {
-		err = WriteVarInt(writer, util, 0)
+		err = WriteVarInt(writer, 0)
 		if err != nil {
 			return
 		}
 		_, err = buffer.WriteTo(writer)
 	} else {
-		err = WriteVarInt(writer, util, buffer.Len())
+		err = WriteVarInt(writer, buffer.Len())
 		if err != nil {
 			return
 		}

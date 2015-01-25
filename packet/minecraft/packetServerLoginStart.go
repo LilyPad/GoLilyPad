@@ -23,9 +23,9 @@ type packetServerLoginStartCodec struct {
 
 }
 
-func (this *packetServerLoginStartCodec) Decode(reader io.Reader, util []byte) (decode packet.Packet, err error) {
+func (this *packetServerLoginStartCodec) Decode(reader io.Reader) (decode packet.Packet, err error) {
 	packetServerLoginStart := new(PacketServerLoginStart)
-	packetServerLoginStart.Name, err = packet.ReadString(reader, util)
+	packetServerLoginStart.Name, err = packet.ReadString(reader)
 	if err != nil {
 		return
 	}
@@ -33,8 +33,8 @@ func (this *packetServerLoginStartCodec) Decode(reader io.Reader, util []byte) (
 	return
 }
 
-func (this *packetServerLoginStartCodec) Encode(writer io.Writer, util []byte, encode packet.Packet) (err error) {
+func (this *packetServerLoginStartCodec) Encode(writer io.Writer, encode packet.Packet) (err error) {
 	packetServerLoginStart := encode.(*PacketServerLoginStart)
-	err = packet.WriteString(writer, util, packetServerLoginStart.Name)
+	err = packet.WriteString(writer, packetServerLoginStart.Name)
 	return
 }

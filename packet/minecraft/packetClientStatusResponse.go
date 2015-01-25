@@ -23,9 +23,9 @@ type packetClientStatusResponseCodec struct {
 
 }
 
-func (this *packetClientStatusResponseCodec) Decode(reader io.Reader, util []byte) (decode packet.Packet, err error) {
+func (this *packetClientStatusResponseCodec) Decode(reader io.Reader) (decode packet.Packet, err error) {
 	packetClientStatusResponse := new(PacketClientStatusResponse)
-	packetClientStatusResponse.Json, err = packet.ReadString(reader, util)
+	packetClientStatusResponse.Json, err = packet.ReadString(reader)
 	if err != nil {
 		return
 	}
@@ -33,8 +33,8 @@ func (this *packetClientStatusResponseCodec) Decode(reader io.Reader, util []byt
 	return
 }
 
-func (this *packetClientStatusResponseCodec) Encode(writer io.Writer, util []byte, encode packet.Packet) (err error) {
+func (this *packetClientStatusResponseCodec) Encode(writer io.Writer, encode packet.Packet) (err error) {
 	packetClientStatusResponse := encode.(*PacketClientStatusResponse)
-	err = packet.WriteString(writer, util, packetClientStatusResponse.Json)
+	err = packet.WriteString(writer, packetClientStatusResponse.Json)
 	return
 }

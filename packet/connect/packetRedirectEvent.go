@@ -25,13 +25,13 @@ type packetRedirectEventCodec struct {
 
 }
 
-func (this *packetRedirectEventCodec) Decode(reader io.Reader, util []byte) (decode packet.Packet, err error) {
+func (this *packetRedirectEventCodec) Decode(reader io.Reader) (decode packet.Packet, err error) {
 	packetRedirectEvent := new(PacketRedirectEvent)
-	packetRedirectEvent.Server, err = packet.ReadString(reader, util)
+	packetRedirectEvent.Server, err = packet.ReadString(reader)
 	if err != nil {
 		return
 	}
-	packetRedirectEvent.Player, err = packet.ReadString(reader, util)
+	packetRedirectEvent.Player, err = packet.ReadString(reader)
 	if err != nil {
 		return
 	}
@@ -39,12 +39,12 @@ func (this *packetRedirectEventCodec) Decode(reader io.Reader, util []byte) (dec
 	return
 }
 
-func (this *packetRedirectEventCodec) Encode(writer io.Writer, util []byte, encode packet.Packet) (err error) {
+func (this *packetRedirectEventCodec) Encode(writer io.Writer, encode packet.Packet) (err error) {
 	packetRedirectEvent := encode.(*PacketRedirectEvent)
-	err = packet.WriteString(writer, util, packetRedirectEvent.Server)
+	err = packet.WriteString(writer, packetRedirectEvent.Server)
 	if err != nil {
 		return
 	}
-	err = packet.WriteString(writer, util, packetRedirectEvent.Player)
+	err = packet.WriteString(writer, packetRedirectEvent.Player)
 	return
 }

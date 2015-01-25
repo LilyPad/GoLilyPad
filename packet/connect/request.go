@@ -9,8 +9,8 @@ type Request interface {
 }
 
 type RequestCodec interface {
-	Decode(reader io.Reader, util []byte) (request Request, err error)
-	Encode(writer io.Writer, util []byte, request Request) (err error)
+	Decode(reader io.Reader) (request Request, err error)
+	Encode(writer io.Writer, request Request) (err error)
 }
 
 type Result interface {
@@ -18,6 +18,6 @@ type Result interface {
 }
 
 type ResultCodec interface {
-	Decode(reader io.Reader, util []byte) (result Result, err error)
-	Encode(writer io.Writer, util []byte, result Result) (err error)
+	Decode(reader io.Reader) (result Result, err error)
+	Encode(writer io.Writer, result Result) (err error)
 }

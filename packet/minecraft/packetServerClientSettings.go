@@ -32,25 +32,25 @@ type packetServerClientSettingsCodec struct {
 
 }
 
-func (this *packetServerClientSettingsCodec) Decode(reader io.Reader, util []byte) (decode packet.Packet, err error) {
+func (this *packetServerClientSettingsCodec) Decode(reader io.Reader) (decode packet.Packet, err error) {
 	packetServerClientSettings := new(PacketServerClientSettings)
-	packetServerClientSettings.Locale, err = packet.ReadString(reader, util)
+	packetServerClientSettings.Locale, err = packet.ReadString(reader)
 	if err != nil {
 		return
 	}
-	packetServerClientSettings.ViewDistance, err = packet.ReadUint8(reader, util)
+	packetServerClientSettings.ViewDistance, err = packet.ReadUint8(reader)
 	if err != nil {
 		return
 	}
-	packetServerClientSettings.ChatFlags, err = packet.ReadUint8(reader, util)
+	packetServerClientSettings.ChatFlags, err = packet.ReadUint8(reader)
 	if err != nil {
 		return
 	}
-	packetServerClientSettings.ChatColours, err = packet.ReadBool(reader, util)
+	packetServerClientSettings.ChatColours, err = packet.ReadBool(reader)
 	if err != nil {
 		return
 	}
-	packetServerClientSettings.SkinParts, err = packet.ReadUint8(reader, util)
+	packetServerClientSettings.SkinParts, err = packet.ReadUint8(reader)
 	if err != nil {
 		return
 	}
@@ -58,24 +58,24 @@ func (this *packetServerClientSettingsCodec) Decode(reader io.Reader, util []byt
 	return
 }
 
-func (this *packetServerClientSettingsCodec) Encode(writer io.Writer, util []byte, encode packet.Packet) (err error) {
+func (this *packetServerClientSettingsCodec) Encode(writer io.Writer, encode packet.Packet) (err error) {
 	packetServerClientSettings := encode.(*PacketServerClientSettings)
-	err = packet.WriteString(writer, util, packetServerClientSettings.Locale)
+	err = packet.WriteString(writer, packetServerClientSettings.Locale)
 	if err != nil {
 		return
 	}
-	err = packet.WriteUint8(writer, util, packetServerClientSettings.ViewDistance)
+	err = packet.WriteUint8(writer, packetServerClientSettings.ViewDistance)
 	if err != nil {
 		return
 	}
-	err = packet.WriteUint8(writer, util, packetServerClientSettings.ChatFlags)
+	err = packet.WriteUint8(writer, packetServerClientSettings.ChatFlags)
 	if err != nil {
 		return
 	}
-	err = packet.WriteBool(writer, util, packetServerClientSettings.ChatColours)
+	err = packet.WriteBool(writer, packetServerClientSettings.ChatColours)
 	if err != nil {
 		return
 	}
-	err = packet.WriteUint8(writer, util, packetServerClientSettings.SkinParts)
+	err = packet.WriteUint8(writer, packetServerClientSettings.SkinParts)
 	return
 }

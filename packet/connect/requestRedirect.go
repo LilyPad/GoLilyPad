@@ -25,13 +25,13 @@ type requestRedirectCodec struct {
 
 }
 
-func (this *requestRedirectCodec) Decode(reader io.Reader, util []byte) (request Request, err error) {
+func (this *requestRedirectCodec) Decode(reader io.Reader) (request Request, err error) {
 	requestRedirect := new(RequestRedirect)
-	requestRedirect.Server, err = packet.ReadString(reader, util)
+	requestRedirect.Server, err = packet.ReadString(reader)
 	if err != nil {
 		return
 	}
-	requestRedirect.Player, err = packet.ReadString(reader, util)
+	requestRedirect.Player, err = packet.ReadString(reader)
 	if err != nil {
 		return
 	}
@@ -39,13 +39,13 @@ func (this *requestRedirectCodec) Decode(reader io.Reader, util []byte) (request
 	return
 }
 
-func (this *requestRedirectCodec) Encode(writer io.Writer, util []byte, request Request) (err error) {
+func (this *requestRedirectCodec) Encode(writer io.Writer, request Request) (err error) {
 	requestRedirect := request.(*RequestRedirect)
-	err = packet.WriteString(writer, util, requestRedirect.Server)
+	err = packet.WriteString(writer, requestRedirect.Server)
 	if err != nil {
 		return
 	}
-	err = packet.WriteString(writer, util, requestRedirect.Player)
+	err = packet.WriteString(writer, requestRedirect.Player)
 	return
 }
 
@@ -66,11 +66,11 @@ type resultRedirectCodec struct {
 
 }
 
-func (this *resultRedirectCodec) Decode(reader io.Reader, util []byte) (result Result, err error) {
+func (this *resultRedirectCodec) Decode(reader io.Reader) (result Result, err error) {
 	result = new(ResultRedirect)
 	return
 }
 
-func (this *resultRedirectCodec) Encode(writer io.Writer, util []byte, result Result) (err error) {
+func (this *resultRedirectCodec) Encode(writer io.Writer, result Result) (err error) {
 	return
 }
