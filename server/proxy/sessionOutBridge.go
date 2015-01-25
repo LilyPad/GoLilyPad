@@ -37,6 +37,13 @@ func NewSessionOutBridge(session *Session, server *connect.Server, conn net.Conn
 }
 
 func (this *SessionOutBridge) Serve() {
+	this.session.activeServersLock.Lock()
+	if _, ok := this.session.activeServers[this.server.Name]; ok {
+		this.conn.Close()
+	}
+	this.session.activeServers[this.server.Name] = struct{}{}
+	this.session.activeServersLock.Unlock()
+
 	this.pipeline = packet.NewPacketPipeline()
 	this.pipeline.AddLast("varIntLength", packet.NewPacketCodecVarIntLength())
 	this.pipeline.AddLast("registry", minecraft.HandshakePacketClientCodec)
@@ -252,6 +259,9 @@ func (this *SessionOutBridge) HandlePacket(packet packet.Packet) (err error) {
 }
 
 func (this *SessionOutBridge) ErrorCaught(err error) {
+	this.session.activeServersLock.Lock()
+	delete(this.session.activeServers, this.server.Name)
+	this.session.activeServersLock.Unlock()
 	if this.state == STATE_INIT {
 		this.session.redirecting = false
 		this.session.redirectMutex.Unlock()

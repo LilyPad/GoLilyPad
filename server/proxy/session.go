@@ -26,10 +26,13 @@ type Session struct {
 	pipeline *packet.PacketPipeline
 	outBridge *SessionOutBridge
 	compressionThreshold int
-	active bool
 
-	redirectMutex sync.Mutex
+	active bool
+	activeServers map[string]struct{}
+	activeServersLock sync.Mutex
+
 	redirecting bool
+	redirectMutex sync.Mutex
 
 	protocolVersion int
 	protocol17 bool
@@ -58,6 +61,7 @@ func NewSession(server *Server, conn net.Conn) (this *Session) {
 	this.conn = conn
 	this.compressionThreshold = -1
 	this.active = true
+	this.activeServers = make(map[string]struct{})
 	this.redirecting = false
 	this.pluginChannels = make(map[string]struct{})
 	this.playerList = make(map[string]struct{})
