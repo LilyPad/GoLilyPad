@@ -40,6 +40,8 @@ func (this *SessionOutBridge) Serve() {
 	this.session.activeServersLock.Lock()
 	if _, ok := this.session.activeServers[this.server.Name]; ok {
 		this.conn.Close()
+		this.session.activeServersLock.Unlock()
+		return
 	}
 	this.session.activeServers[this.server.Name] = struct{}{}
 	this.session.activeServersLock.Unlock()
