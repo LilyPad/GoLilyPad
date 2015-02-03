@@ -13,6 +13,7 @@ import (
 	"time"
 	"strings"
 	"sync"
+	uuid "code.google.com/p/go-uuid/uuid"
 	"github.com/LilyPad/GoLilyPad/packet"
 	"github.com/LilyPad/GoLilyPad/packet/minecraft"
 	"github.com/LilyPad/GoLilyPad/server/proxy/connect"
@@ -38,6 +39,7 @@ type Session struct {
 	protocol17 bool
 	serverAddress string
 	name string
+	uuid uuid.UUID
 	profile auth.GameProfile
 	serverId string
 	verifyToken []byte
@@ -103,7 +105,12 @@ func (this *Session) SetAuthenticated(result bool) {
 		this.Disconnect("Error: Authentication to Minecraft.net Failed")
 		return
 	}
+	this.uuid = uuid.Parse(FormatUUID(this.profile.Id))
 	if this.server.SessionRegistry.HasName(this.name) {
+		this.Disconnect(minecraft.Colorize(this.server.localizer.LocaleLoggedIn()))
+		return
+	}
+	if this.server.SessionRegistry.HasUuid(this.uuid) {
 		this.Disconnect(minecraft.Colorize(this.server.localizer.LocaleLoggedIn()))
 		return
 	}
@@ -129,7 +136,7 @@ func (this *Session) SetAuthenticated(result bool) {
 		this.Disconnect("Error: Outbound Server Mismatch: " + serverName)
 		return
 	}
-	addResult := this.server.connect.AddLocalPlayer(this.name)
+	addResult := this.server.connect.AddLocalPlayer(this.name, this.uuid)
 	if addResult == 0 {
 		this.Disconnect(minecraft.Colorize(this.server.localizer.LocaleLoggedIn()))
 		return
@@ -412,7 +419,7 @@ func (this *Session) HandlePacket(packet packet.Packet) (err error) {
 
 func (this *Session) ErrorCaught(err error) {
 	if this.Authenticated() {
-		this.server.connect.RemoveLocalPlayer(this.name)
+		this.server.connect.RemoveLocalPlayer(this.name, this.uuid)
 		this.server.SessionRegistry.Unregister(this)
 		if this.outBridge == nil {
 			fmt.Println("Proxy server, name:", this.name, "ip:", this.remoteIp, "disconnected, err:", err)

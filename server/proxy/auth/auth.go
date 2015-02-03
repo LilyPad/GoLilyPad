@@ -27,10 +27,10 @@ func Authenticate(name string, serverId string, sharedSecret []byte, publicKey [
 	if err != nil {
 		return
 	}
-	defer response.Body.Close()
 	jsonDecoder := json.NewDecoder(response.Body)
 	profile = GameProfile{}
 	err = jsonDecoder.Decode(&profile)
+	response.Body.Close()
 	if err != nil {
 		return
 	}

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net"
 	"time"
+	uuid "code.google.com/p/go-uuid/uuid"
 	"github.com/LilyPad/GoLilyPad/packet"
 	"github.com/LilyPad/GoLilyPad/packet/connect"
 )
@@ -26,7 +27,7 @@ type Session struct {
 	serverSecurityKey string
 	proxyMotd string
 	proxyVersion string
-	proxyPlayers map[string]struct{}
+	proxyPlayers map[string]uuid.UUID
 	proxyMaxPlayers uint16
 
 	remoteIp string
@@ -91,7 +92,7 @@ func (this *Session) RegisterProxy(address string, port uint16, motd string, ver
 	this.rolePort = port
 	this.proxyMotd = motd
 	this.proxyVersion = version
-	this.proxyPlayers = make(map[string]struct{})
+	this.proxyPlayers = make(map[string]uuid.UUID)
 	this.proxyMaxPlayers = maxPlayers
 	this.server.SessionRegistry(ROLE_AUTHORIZED).Register(this)
 	this.server.SessionRegistry(ROLE_PROXY).Register(this)
@@ -271,15 +272,16 @@ func (this *Session) HandlePacket(packet packet.Packet) (err error) {
 			if this.Authorized() && this.role == ROLE_PROXY {
 				add := request.(*connect.RequestNotifyPlayer).Add
 				player := request.(*connect.RequestNotifyPlayer).Player
+				uuid := request.(*connect.RequestNotifyPlayer).Uuid
 				if add {
-					if !this.server.networkCache.AddPlayer(player, this) {
+					if !this.server.networkCache.AddPlayer(player, uuid, this) {
 						statusCode = connect.STATUS_ERROR_GENERIC
 						break
 					}
-					this.proxyPlayers[player] = struct{}{}
+					this.proxyPlayers[player] = uuid
 				} else {
-					if _, ok := this.proxyPlayers[player]; ok {
-						this.server.networkCache.RemovePlayer(player)
+					if uuid, ok := this.proxyPlayers[player]; ok {
+						this.server.networkCache.RemovePlayer(player, uuid)
 						delete(this.proxyPlayers, player)
 					}
 				}

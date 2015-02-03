@@ -6,60 +6,60 @@ import (
 
 type SessionRegistry struct {
 	sync.RWMutex
-	sessions map[string]*Session
+	sessionsByName map[string]*Session
 }
 
 func NewSessionRegistry() (this *SessionRegistry) {
 	this = new(SessionRegistry)
-	this.sessions = make(map[string]*Session)
+	this.Clear()
 	return
 }
 
 func (this *SessionRegistry) Register(session *Session) {
 	this.Lock()
-	defer this.Unlock()
-	this.sessions[session.Id()] = session
+	this.sessionsByName[session.Id()] = session
+	this.Unlock()
 }
 
 func (this *SessionRegistry) Unregister(session *Session) {
 	this.Lock()
-	defer this.Unlock()
-	delete(this.sessions, session.Id())
+	delete(this.sessionsByName, session.Id())
+	this.Unlock()
 }
 
 func (this *SessionRegistry) HasId(id string) (val bool) {
 	this.RLock()
-	defer this.RUnlock()
-	val = this.sessions[id] != nil
+	_, val = this.sessionsByName[id]
+	this.RUnlock()
 	return
 }
 
 func (this *SessionRegistry) GetById(id string) (session *Session) {
 	this.RLock()
-	defer this.RUnlock()
-	session = this.sessions[id]
+	session = this.sessionsByName[id]
+	this.RUnlock()
 	return
 }
 
 func (this *SessionRegistry) GetAll() (sessions []*Session) {
 	this.RLock()
-	defer this.RUnlock()
-	sessions = make([]*Session, 0, len(this.sessions))
-	for  _, session := range this.sessions {
+	sessions = make([]*Session, 0, len(this.sessionsByName))
+	for  _, session := range this.sessionsByName {
 		sessions = append(sessions, session)
 	}
+	this.RUnlock()
 	return
 }
 
 func (this *SessionRegistry) Len() (val int) {
 	this.RLock()
-	defer this.RUnlock()
-	val = len(this.sessions)
+	val = len(this.sessionsByName)
+	this.RUnlock()
 	return
 }
 
 func (this *SessionRegistry) Clear() {
 	this.Lock()
-	defer this.Unlock()
-	this.sessions = make(map[string]*Session)
+	this.sessionsByName = make(map[string]*Session)
+	this.Unlock()
 }

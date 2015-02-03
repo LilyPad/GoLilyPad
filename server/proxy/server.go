@@ -56,7 +56,6 @@ func NewServer(motd *string, maxPlayers *uint16, syncMaxPlayers *bool, authentic
 }
 
 func (this *Server) ListenAndServe(addr string) (err error) {
-	defer this.Close()
 	this.listener, err = net.Listen("tcp", addr)
 	if err != nil {
 		return
@@ -69,6 +68,7 @@ func (this *Server) ListenAndServe(addr string) (err error) {
 		}
 		go NewSession(this, conn).Serve()
 	}
+	this.Close()
 	return
 }
 

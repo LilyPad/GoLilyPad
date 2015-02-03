@@ -28,8 +28,8 @@ func NewPacketConnCodec(conn net.Conn, packetCodec PacketCodec, timeout time.Dur
 
 func (this *PacketConnCodec) Write(packet Packet) (err error) {
 	this.writeMutex.Lock()
-	defer this.writeMutex.Unlock()
 	err = this.packetCodec.Encode(this.writer, packet)
+	this.writeMutex.Unlock()
 	return
 }
 
