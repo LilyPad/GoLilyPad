@@ -18,12 +18,15 @@ $ go get code.google.com/p/go-uuid
 ```
 
 ### Error? ###
-If you get an error similar to :
-`can't load package: package .: no buildable Go source files in /home/pnap18587/go/pkg/linux_amd64/github.com/LilyPad/GoLilyPad/server/connect/main`
+If you get an error similar to:
+
+```
+can't load package: package .: no buildable Go source files in /home/pnap18587/go/pkg/linux_amd64/github.com/LilyPad/GoLilyPad/server/connect/main
+```
 Then try:
-`bash
+```bash
 $ go get -d github.com/LilyPad/GoLilyPad
-`
+```
 
 ### Server Connect ###
 
