@@ -5,6 +5,7 @@ import (
 	"crypto/rsa"
 	"crypto/x509"
 	"net"
+	"time"
 	"github.com/LilyPad/GoLilyPad/server/proxy/connect"
 )
 
@@ -64,6 +65,10 @@ func (this *Server) ListenAndServe(addr string) (err error) {
 	for {
 		conn, err = this.listener.Accept()
 		if err != nil {
+			if neterr, ok := err.(net.Error); ok && neterr.Temporary() {
+				time.Sleep(time.Second)
+				continue
+			}
 			return
 		}
 		go NewSession(this, conn).Serve()

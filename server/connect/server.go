@@ -2,6 +2,7 @@ package connect
 
 import (
 	"net"
+	"time"
 )
 
 type Server struct {
@@ -32,6 +33,10 @@ func (this *Server) ListenAndServe(addr string) (err error) {
 	for {
 		conn, err = this.listener.Accept()
 		if err != nil {
+			if neterr, ok := err.(net.Error); ok && neterr.Temporary() {
+				time.Sleep(time.Second)
+				continue
+			}
 			return
 		}
 		go NewSession(this, conn).Serve()
@@ -57,3 +62,4 @@ func (this *Server) SessionRegistry(sessionRole SessionRole) (sessionRegistry *S
 	}
 	return
 }
+
