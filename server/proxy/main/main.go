@@ -83,6 +83,8 @@ func main() {
 				if err != nil {
 					fmt.Println("Error during reloading config", err)
 					continue
+				} else {
+					fmt.Println("Reloaded config")
 				}
 				*cfg = *newCfg
 			} else if str == "debug" {
