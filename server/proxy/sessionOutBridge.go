@@ -55,7 +55,7 @@ func (this *SessionOutBridge) Serve() {
 	outRemotePort, _ := strconv.ParseUint(this.remotePort, 10, 16)
 	loginPayload := LoginPayload{
 		SecurityKey: this.server.SecurityKey,
-		Host: this.session.serverAddress,
+		Host: this.session.rawServerAddress,
 		RealIp: this.session.remoteIp,
 		RealPort: int(inRemotePort),
 		Name: this.session.name,

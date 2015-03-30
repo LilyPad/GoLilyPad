@@ -38,6 +38,7 @@ type Session struct {
 	protocolVersion int
 	protocol17 bool
 	serverAddress string
+	rawServerAddress string
 	name string
 	uuid uuid.UUID
 	profile auth.GameProfile
@@ -214,7 +215,13 @@ func (this *Session) HandlePacket(packet packet.Packet) (err error) {
 		if packet.Id() == minecraft.PACKET_SERVER_HANDSHAKE {
 			handshakePacket := packet.(*minecraft.PacketServerHandshake)
 			this.protocolVersion = handshakePacket.ProtocolVersion
-			this.serverAddress = handshakePacket.ServerAddress
+			this.rawServerAddress = handshakePacket.ServerAddress
+			idx := strings.Index(this.rawServerAddress, "\x00")
+			if idx == -1 {
+				this.serverAddress = this.rawServerAddress
+			} else {
+				this.serverAddress = this.rawServerAddress[:idx]
+			}
 			supportedVersion := false
 			for _, version := range minecraft.Versions {
 				if version != this.protocolVersion {
