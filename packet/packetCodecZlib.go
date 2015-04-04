@@ -12,6 +12,7 @@ type PacketCodecZlib struct {
 	codec PacketCodec
 	threshold int
 	level int
+	zlibWriter *zlib.Writer
 }
 
 func NewPacketCodecZlib(threshold int) (this *PacketCodecZlib) {
@@ -23,6 +24,7 @@ func NewPacketCodecZlibLevel(threshold int, level int) (this *PacketCodecZlib) {
 	this = new(PacketCodecZlib)
 	this.threshold = threshold
 	this.level = level
+	this.zlibWriter, _ = zlib.NewWriterLevel(nil, level)
 	return
 }
 
@@ -73,16 +75,12 @@ func (this *PacketCodecZlib) Encode(writer io.Writer, packet Packet) (err error)
 		if err != nil {
 			return
 		}
-		var zlibWriter io.WriteCloser
-		zlibWriter, err = zlib.NewWriterLevel(writer, this.level)
+		this.zlibWriter.Reset(writer)
+		_, err = buffer.WriteTo(this.zlibWriter)
 		if err != nil {
 			return
 		}
-		_, err = buffer.WriteTo(zlibWriter)
-		if err != nil {
-			return
-		}
-		err = zlibWriter.Close()
+		err = this.zlibWriter.Flush()
 	}
 	return
 }
