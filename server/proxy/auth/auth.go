@@ -19,11 +19,7 @@ type GameProfileProperty struct {
 }
 
 func Authenticate(name string, serverId string, sharedSecret []byte, publicKey []byte) (profile GameProfile, err error) {
-	transport := new(http.Transport)
-	transport.TLSClientConfig = TLSConfig
-	client := new(http.Client)
-	client.Transport = transport
-	response, err := client.Get(fmt.Sprintf(URL, name, MojangSha1Hex([]byte(serverId), sharedSecret, publicKey)))
+	response, err := http.Get(fmt.Sprintf(URL, name, MojangSha1Hex([]byte(serverId), sharedSecret, publicKey)))
 	if err != nil {
 		return
 	}
