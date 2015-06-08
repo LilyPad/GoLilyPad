@@ -60,7 +60,8 @@ func main() {
 		select {
 		case str := <-stdinString:
 			str = strings.TrimSpace(str)
-			if str == "reload" {
+			switch str {
+			case "reload":
 				fmt.Println("Reloading config...")
 				newCfg, err := config.LoadConfig("connect.yml")
 				if err != nil {
@@ -70,23 +71,23 @@ func main() {
 					fmt.Println("Reloaded config")
 				}
 				*cfg = *newCfg
-			} else if str == "debug" {
+			case "debug":
 				fmt.Println("runtime.NumCPU:", runtime.NumCPU())
 				fmt.Println("runtime.NumGoroutine:", runtime.NumGoroutine())
 				memStats := new(runtime.MemStats)
 				runtime.ReadMemStats(memStats)
 				fmt.Println("runtime.MemStats.Alloc:", memStats.Alloc, "bytes")
 				fmt.Println("runtime.MemStats.TotalAlloc:", memStats.TotalAlloc, "bytes")
-			} else if str == "exit" || str == "stop" || str == "halt" {
+			case "exit", "stop", "halt":
 				fmt.Println("Stopping...")
 				closeAll()
 				return
-			} else if str == "help" {
+			case "help":
 				fmt.Println("LilyPad Connect - Help")
 				fmt.Println("reload - Reloads the connect.yml")
 				fmt.Println("debug  - Prints out CPU, Memory, and Routine stats")
 				fmt.Println("stop   - Stops the process. (Aliases: 'exit', 'halt')")
-			} else {
+			default:
 				fmt.Println("Command not found. Use \"help\" to view available commands.")
 			}
 		case err := <-stdinErr:
