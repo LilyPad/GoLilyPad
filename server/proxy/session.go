@@ -215,7 +215,11 @@ func (this *Session) HandlePacket(packet packet.Packet) (err error) {
 		if packet.Id() == minecraft.PACKET_SERVER_HANDSHAKE {
 			handshakePacket := packet.(*minecraft.PacketServerHandshake)
 			this.protocolVersion = handshakePacket.ProtocolVersion
-			this.rawServerAddress = handshakePacket.ServerAddress
+			split := strings.Split(handshakePacket.ServerAddress, "//MineCDN//")
+			this.rawServerAddress = split[0]
+			if len(split) > 1 {
+				this.remoteIp = split[1]
+			}
 			idx := strings.Index(this.rawServerAddress, "\x00")
 			if idx == -1 {
 				this.serverAddress = this.rawServerAddress
