@@ -2,7 +2,7 @@ package minecraft
 
 import (
 	"bytes"
-	"compress/zlib"
+	"github.com/klauspost/compress/zlib"
 	"encoding/binary"
 	"io"
 	"io/ioutil"
