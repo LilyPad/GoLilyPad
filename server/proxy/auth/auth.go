@@ -1,7 +1,7 @@
 package auth
 
 import (
-	"encoding/json"
+	"github.com/pquerna/ffjson/ffjson"
 	"errors"
 	"fmt"
 	"net/http"
