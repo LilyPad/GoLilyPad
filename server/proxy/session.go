@@ -5,7 +5,7 @@ import (
 	cryptoRand "crypto/rand"
 	"crypto/rsa"
 	"encoding/base64"
-	"github.com/pquerna/ffjson/ffjson"
+	json "github.com/pquerna/ffjson/ffjson"
 	"errors"
 	"fmt"
 	"io/ioutil"
