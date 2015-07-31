@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"github.com/LilyPad/GoLilyPad/packet"
+	"github.com/suedadam/GoLilyPad/packet"
 )
 
 type PacketClientLoginEncryptRequest struct {

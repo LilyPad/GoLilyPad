@@ -6,7 +6,7 @@ import (
 	"crypto/x509"
 	"net"
 	"time"
-	"github.com/LilyPad/GoLilyPad/server/proxy/connect"
+	"github.com/suedadam/GoLilyPad/server/proxy/connect"
 )
 
 type Server struct {

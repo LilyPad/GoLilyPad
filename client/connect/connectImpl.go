@@ -7,8 +7,8 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
-	"github.com/LilyPad/GoLilyPad/packet"
-	"github.com/LilyPad/GoLilyPad/packet/connect"
+	"github.com/suedadam/GoLilyPad/packet"
+	"github.com/suedadam/GoLilyPad/packet/connect"
 )
 
 type ConnectImpl struct {

@@ -6,7 +6,7 @@ import (
 	"encoding/binary"
 	"io"
 	"io/ioutil"
-	"github.com/LilyPad/GoLilyPad/packet"
+	"github.com/suedadam/GoLilyPad/packet"
 )
 
 type PacketGeneric struct {

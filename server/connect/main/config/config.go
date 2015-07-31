@@ -4,7 +4,7 @@ import (
 	"io/ioutil"
 	"regexp"
 	yaml "launchpad.net/goyaml"
-	"github.com/LilyPad/GoLilyPad/server/connect"
+	"github.com/suedadam/GoLilyPad/server/connect"
 )
 
 type Config struct {

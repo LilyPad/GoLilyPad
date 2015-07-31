@@ -7,7 +7,7 @@ import (
 	"crypto/sha1"
 	"encoding/hex"
 	"io"
-	"github.com/LilyPad/GoLilyPad/packet/minecraft"
+	"github.com/suedadam/GoLilyPad/packet/minecraft"
 )
 
 func MinecraftVersion() string {

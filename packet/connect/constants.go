@@ -1,7 +1,7 @@
 package connect
 
 import (
-	"github.com/LilyPad/GoLilyPad/packet"
+	"github.com/suedadam/GoLilyPad/packet"
 )
 
 const (

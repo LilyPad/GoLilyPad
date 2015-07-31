@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"io"
 	uuid "code.google.com/p/go-uuid/uuid"
-	"github.com/LilyPad/GoLilyPad/packet"
+	"github.com/suedadam/GoLilyPad/packet"
 )
 
 const (

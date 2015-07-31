@@ -2,7 +2,7 @@ package connect
 
 import (
 	"io"
-	"github.com/LilyPad/GoLilyPad/packet"
+	"github.com/suedadam/GoLilyPad/packet"
 )
 
 type PacketServerEvent struct {

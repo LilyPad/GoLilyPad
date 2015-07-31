@@ -4,19 +4,24 @@ import (
 	"bufio"
 	"io"
 	"fmt"
+	"os/signal"
 	"os"
 	"runtime"
 	"strconv"
 	"strings"
 	"time"
-	"github.com/LilyPad/GoLilyPad/server/proxy"
-	"github.com/LilyPad/GoLilyPad/server/proxy/connect"
-	"github.com/LilyPad/GoLilyPad/server/proxy/main/config"
+	"syscall"
+	"github.com/suedadam/GoLilyPad/server/proxy"
+	"github.com/suedadam/GoLilyPad/server/proxy/connect"
+	"github.com/suedadam/GoLilyPad/server/proxy/main/config"
 )
 
 var VERSION string
 
 func main() {
+    c := make(chan os.Signal, 1)
+	signal.Notify(c, syscall.SIGHUP)
+
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
 	cfg, err := config.LoadConfig("proxy.yml")
@@ -73,6 +78,21 @@ func main() {
 	}
 
 	fmt.Println("Proxy server started, version:", VERSION)
+
+	go func(){
+		for sig := range c {
+			fmt.Println("Received reload command, reloading config...")
+				newCfg, err := config.LoadConfig("proxy.yml")
+				if err != nil {
+					fmt.Println("Error during reloading config", err)
+					continue
+				} else {
+					fmt.Println("Reloaded config")
+				}
+				*cfg = *newCfg
+		}
+	}()
+
 	for {
 		select {
 		case str := <-stdinString:
