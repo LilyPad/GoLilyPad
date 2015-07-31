@@ -1,10 +1,11 @@
 package auth
 
 import (
-	"github.com/pquerna/ffjson/ffjson"
+	json "github.com/pquerna/ffjson/ffjson"
 	"errors"
 	"fmt"
 	"net/http"
+	"bytes"
 )
 
 type GameProfile struct {
@@ -23,9 +24,12 @@ func Authenticate(name string, serverId string, sharedSecret []byte, publicKey [
 	if err != nil {
 		return
 	}
-	jsonDecoder := json.NewDecoder(response.Body)
+	jsonDecoder := json.NewDecoder()
 	profile = GameProfile{}
-	err = jsonDecoder.Decode(&profile)
+	buf := new(bytes.Buffer)
+	buf.ReadFrom(response.Body)
+	s := buf.Bytes()
+	err = jsonDecoder.Decode(s, &profile)
 	response.Body.Close()
 	if err != nil {
 		return

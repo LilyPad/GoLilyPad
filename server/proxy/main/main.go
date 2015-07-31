@@ -19,8 +19,10 @@ import (
 var VERSION string
 
 func main() {
-    c := make(chan os.Signal, 1)
-	signal.Notify(c, syscall.SIGHUP)
+	signal_chan := make(chan os.Signal, 1)
+	signal.Notify(signal_chan, syscall.SIGHUP)
+
+	exit_chan := make(chan int)
 
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
@@ -79,9 +81,13 @@ func main() {
 
 	fmt.Println("Proxy server started, version:", VERSION)
 
-	go func(){
-		for sig := range c {
-			fmt.Println("Received reload command, reloading config...")
+	go func() {
+		for {
+			s := <-signal_chan
+			switch s {
+			// kill -SIGHUP XXXX
+			case syscall.SIGHUP:
+				fmt.Println("Received signal, reloading config...")
 				newCfg, err := config.LoadConfig("proxy.yml")
 				if err != nil {
 					fmt.Println("Error during reloading config", err)
@@ -89,9 +95,16 @@ func main() {
 				} else {
 					fmt.Println("Reloaded config")
 				}
-				*cfg = *newCfg
+				*cfg = *newCfg	
+			default:
+				fmt.Println("Unknown signal.")
+				exit_chan <- 1
+			}
 		}
 	}()
+
+	code := <-exit_chan
+	os.Exit(code)
 
 	for {
 		select {
