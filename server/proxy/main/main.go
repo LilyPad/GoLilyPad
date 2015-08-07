@@ -110,8 +110,7 @@ func main() {
 		select {
 		case str := <-stdinString:
 			str = strings.TrimSpace(str)
-			switch str {
-			case "reload":
+			if str == "reload" {
 				fmt.Println("Reloading config...")
 				newCfg, err := config.LoadConfig("proxy.yml")
 				if err != nil {
@@ -121,23 +120,23 @@ func main() {
 					fmt.Println("Reloaded config")
 				}
 				*cfg = *newCfg
-			case "debug":
+			} else if str == "debug" {
 				fmt.Println("runtime.NumCPU:", runtime.NumCPU())
 				fmt.Println("runtime.NumGoroutine:", runtime.NumGoroutine())
 				memStats := new(runtime.MemStats)
 				runtime.ReadMemStats(memStats)
 				fmt.Println("runtime.MemStats.Alloc:", memStats.Alloc, "bytes")
 				fmt.Println("runtime.MemStats.TotalAlloc:", memStats.TotalAlloc, "bytes")
-			case "exit", "stop", "halt":
+			} else if str == "exit" || str == "stop" || str == "halt" {
 				fmt.Println("Stopping...")
 				closeAll()
 				return
-			case "help":
+			} else if str == "help" {
 				fmt.Println("LilyPad Proxy - Help")
 				fmt.Println("reload - Reloads the proxy.yml")
 				fmt.Println("debug  - Prints out CPU, Memory, and Routine stats")
 				fmt.Println("stop   - Stops the process. (Aliases: 'exit', 'halt')")
-			default:
+			} else {
 				fmt.Println("Command not found. Use \"help\" to view available commands.")
 			}
 		case err := <-stdinErr:
