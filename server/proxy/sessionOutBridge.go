@@ -31,7 +31,7 @@ func NewSessionOutBridge(session *Session, server *connect.Server, conn net.Conn
 	this.server = server
 	this.conn = conn
 	this.compressionThreshold = -1
-	this.remoteIp, this.remotePort, _ = net.SplitHostPort(conn.RemoteAddr().String())
+	this.remoteIp, this.remotePort, _ = strings.Split(conn.RemoteAddr().Sting, ":")
 	this.state = STATE_DISCONNECTED
 	return
 }
