@@ -287,6 +287,7 @@ var PlayPacketClientEntityVarIntPositions = []bool {
 	PACKET_CLIENT_BLOCK_BREAK_ANIMATION: true,
 	// TODO combat event
 	PACKET_CLIENT_UPDATE_ENTITY_NBT: true,
+	PACKET_CLIENT_CAMERA: true,
 }
 var PlayPacketServerEntityIntPositions = [][]int {
 
