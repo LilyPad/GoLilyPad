@@ -51,7 +51,7 @@ func (this *PacketCodecZlib) Decode(reader io.Reader) (packet Packet, err error)
 		if err != nil {
 			return
 		}
-		err = zlibReader.Close()
+		zlibReader.Close()
 	}
 	return
 }
