@@ -3,7 +3,7 @@ package connect
 import (
 	"fmt"
 	"time"
-	"github.com/LilyPad/GoLilyPad/packet/connect"
+	"github.com/suedadam/GoLilyPad/packet/connect"
 )
 
 func AutoConnect(connectClient Connect, addr *string, done chan bool) {

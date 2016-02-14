@@ -6,8 +6,8 @@ import (
 	"strconv"
 	"sync"
 	uuid "code.google.com/p/go-uuid/uuid"
-	clientConnect "github.com/LilyPad/GoLilyPad/client/connect"
-	packetConnect "github.com/LilyPad/GoLilyPad/packet/connect"
+	clientConnect "github.com/suedadam/GoLilyPad/client/connect"
+	packetConnect "github.com/suedadam/GoLilyPad/packet/connect"
 )
 
 type ProxyConnect struct {

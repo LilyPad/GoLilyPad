@@ -1,8 +1,8 @@
 package connect
 
 import (
-	"github.com/LilyPad/GoLilyPad/packet"
-	"github.com/LilyPad/GoLilyPad/packet/connect"
+	"github.com/suedadam/GoLilyPad/packet"
+	"github.com/suedadam/GoLilyPad/packet/connect"
 )
 
 func NewCodecRegistry(connectClient Connect) (codec *packet.PacketCodecRegistry) {

@@ -1,8 +1,8 @@
 package proxy
 
-import (
-	"encoding/json"
-)
+import json "github.com/pquerna/ffjson/ffjson"
+
+
 
 type LoginPayload struct {
 	SecurityKey string `json:"s"`

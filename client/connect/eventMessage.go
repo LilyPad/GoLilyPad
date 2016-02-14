@@ -1,7 +1,7 @@
 package connect
 
 import (
-	"github.com/LilyPad/GoLilyPad/packet/connect"
+	"github.com/suedadam/GoLilyPad/packet/connect"
 )
 
 type EventMessage struct {

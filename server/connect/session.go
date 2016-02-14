@@ -6,8 +6,8 @@ import (
 	"net"
 	"time"
 	uuid "code.google.com/p/go-uuid/uuid"
-	"github.com/LilyPad/GoLilyPad/packet"
-	"github.com/LilyPad/GoLilyPad/packet/connect"
+	"github.com/suedadam/GoLilyPad/packet"
+	"github.com/suedadam/GoLilyPad/packet/connect"
 )
 
 type Session struct {

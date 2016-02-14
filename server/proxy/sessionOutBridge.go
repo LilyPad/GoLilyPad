@@ -6,9 +6,9 @@ import (
 	"time"
 	"strconv"
 	uuid "code.google.com/p/go-uuid/uuid"
-	"github.com/LilyPad/GoLilyPad/packet"
-	"github.com/LilyPad/GoLilyPad/packet/minecraft"
-	"github.com/LilyPad/GoLilyPad/server/proxy/connect"
+	"github.com/suedadam/GoLilyPad/packet"
+	"github.com/suedadam/GoLilyPad/packet/minecraft"
+	"github.com/suedadam/GoLilyPad/server/proxy/connect"
 )
 
 type SessionOutBridge struct {
@@ -31,7 +31,7 @@ func NewSessionOutBridge(session *Session, server *connect.Server, conn net.Conn
 	this.server = server
 	this.conn = conn
 	this.compressionThreshold = -1
-	this.remoteIp, this.remotePort, _ = net.SplitHostPort(conn.RemoteAddr().String())
+	this.remoteIp, this.remotePort, _ = strings.Split(conn.RemoteAddr().Sting, ":")
 	this.state = STATE_DISCONNECTED
 	return
 }

@@ -3,7 +3,7 @@ package minecraft
 import (
 	"io"
 	"io/ioutil"
-	"github.com/LilyPad/GoLilyPad/packet"
+	"github.com/suedadam/GoLilyPad/packet"
 )
 
 type PacketServerPluginMessage struct {

@@ -2,11 +2,11 @@ package minecraft
 
 import (
 	"bytes"
-	"compress/zlib"
+	"github.com/klauspost/compress/zlib"
 	"encoding/binary"
 	"io"
 	"io/ioutil"
-	"github.com/LilyPad/GoLilyPad/packet"
+	"github.com/suedadam/GoLilyPad/packet"
 )
 
 type PacketGeneric struct {

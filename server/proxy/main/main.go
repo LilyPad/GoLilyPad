@@ -4,19 +4,26 @@ import (
 	"bufio"
 	"io"
 	"fmt"
+	"os/signal"
 	"os"
 	"runtime"
 	"strconv"
 	"strings"
 	"time"
-	"github.com/LilyPad/GoLilyPad/server/proxy"
-	"github.com/LilyPad/GoLilyPad/server/proxy/connect"
-	"github.com/LilyPad/GoLilyPad/server/proxy/main/config"
+	"syscall"
+	"github.com/suedadam/GoLilyPad/server/proxy"
+	"github.com/suedadam/GoLilyPad/server/proxy/connect"
+	"github.com/suedadam/GoLilyPad/server/proxy/main/config"
 )
 
 var VERSION string
 
 func main() {
+	signal_chan := make(chan os.Signal, 1)
+	signal.Notify(signal_chan, syscall.SIGHUP)
+
+	exit_chan := make(chan int)
+
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
 	cfg, err := config.LoadConfig("proxy.yml")
@@ -73,12 +80,37 @@ func main() {
 	}
 
 	fmt.Println("Proxy server started, version:", VERSION)
+
+	go func() {
+		for {
+			s := <-signal_chan
+			switch s {
+			// kill -SIGHUP XXXX
+			case syscall.SIGHUP:
+				fmt.Println("Received signal, reloading config...")
+				newCfg, err := config.LoadConfig("proxy.yml")
+				if err != nil {
+					fmt.Println("Error during reloading config", err)
+					continue
+				} else {
+					fmt.Println("Reloaded config")
+				}
+				*cfg = *newCfg	
+			default:
+				fmt.Println("Unknown signal.")
+				exit_chan <- 1
+			}
+		}
+	}()
+
+	code := <-exit_chan
+	os.Exit(code)
+
 	for {
 		select {
 		case str := <-stdinString:
 			str = strings.TrimSpace(str)
-			switch str {
-			case "reload":
+			if str == "reload" {
 				fmt.Println("Reloading config...")
 				newCfg, err := config.LoadConfig("proxy.yml")
 				if err != nil {
@@ -88,23 +120,23 @@ func main() {
 					fmt.Println("Reloaded config")
 				}
 				*cfg = *newCfg
-			case "debug":
+			} else if str == "debug" {
 				fmt.Println("runtime.NumCPU:", runtime.NumCPU())
 				fmt.Println("runtime.NumGoroutine:", runtime.NumGoroutine())
 				memStats := new(runtime.MemStats)
 				runtime.ReadMemStats(memStats)
 				fmt.Println("runtime.MemStats.Alloc:", memStats.Alloc, "bytes")
 				fmt.Println("runtime.MemStats.TotalAlloc:", memStats.TotalAlloc, "bytes")
-			case "exit", "stop", "halt":
+			} else if str == "exit" || str == "stop" || str == "halt" {
 				fmt.Println("Stopping...")
 				closeAll()
 				return
-			case "help":
+			} else if str == "help" {
 				fmt.Println("LilyPad Proxy - Help")
 				fmt.Println("reload - Reloads the proxy.yml")
 				fmt.Println("debug  - Prints out CPU, Memory, and Routine stats")
 				fmt.Println("stop   - Stops the process. (Aliases: 'exit', 'halt')")
-			default:
+			} else {
 				fmt.Println("Command not found. Use \"help\" to view available commands.")
 			}
 		case err := <-stdinErr:

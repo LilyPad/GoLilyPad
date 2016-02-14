@@ -2,7 +2,7 @@ package packet
 
 import (
 	"bytes"
-	"compress/zlib"
+	"github.com/klauspost/compress/zlib"
 	"io"
 )
 

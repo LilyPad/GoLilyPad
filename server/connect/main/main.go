@@ -8,8 +8,8 @@ import (
 	"runtime"
 	"time"
 	"strings"
-	"github.com/LilyPad/GoLilyPad/server/connect"
-	"github.com/LilyPad/GoLilyPad/server/connect/main/config"
+	"github.com/suedadam/GoLilyPad/server/connect"
+	"github.com/suedadam/GoLilyPad/server/connect/main/config"
 )
 
 var VERSION string
