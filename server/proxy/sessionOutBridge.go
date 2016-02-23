@@ -2,8 +2,10 @@ package proxy
 
 import (
 	"bytes"
+	"fmt"
 	"github.com/LilyPad/GoLilyPad/packet"
 	"github.com/LilyPad/GoLilyPad/packet/minecraft"
+	mc17 "github.com/LilyPad/GoLilyPad/packet/minecraft/v17"
 	"github.com/LilyPad/GoLilyPad/server/proxy/connect"
 	uuid "github.com/satori/go.uuid"
 	"net"
@@ -13,6 +15,7 @@ import (
 
 type SessionOutBridge struct {
 	session              *Session
+	protocol             *minecraft.Version
 	server               *connect.Server
 	conn                 net.Conn
 	connCodec            *packet.PacketConnCodec
@@ -28,6 +31,7 @@ type SessionOutBridge struct {
 func NewSessionOutBridge(session *Session, server *connect.Server, conn net.Conn) (this *SessionOutBridge) {
 	this = new(SessionOutBridge)
 	this.session = session
+	this.protocol = this.session.protocol
 	this.server = server
 	this.conn = conn
 	this.compressionThreshold = -1
@@ -67,12 +71,8 @@ func (this *SessionOutBridge) Serve() {
 	}
 	this.Write(minecraft.NewPacketServerHandshake(this.session.protocolVersion, EncodeLoginPayload(loginPayload), uint16(outRemotePort), 2))
 
-	if this.session.protocol17 {
-		this.pipeline.Replace("registry", minecraft.LoginPacketClientCodec17)
-	} else {
-		this.pipeline.Replace("registry", minecraft.LoginPacketClientCodec)
-	}
-	this.Write(minecraft.NewPacketServerLoginStart(this.session.name))
+	this.pipeline.Replace("registry", this.protocol.LoginClientCodec)
+	this.Write(minecraft.NewPacketServerLoginStart(this.protocol.IdMap, this.session.name))
 
 	this.state = STATE_LOGIN
 	go this.connCodec.ReadConn(this)
@@ -115,29 +115,25 @@ func (this *SessionOutBridge) HandlePacket(packet packet.Packet) (err error) {
 	}
 	switch this.state {
 	case STATE_LOGIN:
-		if packet.Id() == minecraft.PACKET_CLIENT_LOGIN_SUCCESS {
+		if packet.Id() == this.protocol.IdMap.PacketClientLoginSuccess {
 			this.session.redirectMutex.Lock()
 			this.state = STATE_INIT
 			this.session.redirecting = true
 			this.EnsureCompression()
-			if this.session.protocol17 {
-				this.pipeline.Replace("registry", minecraft.PlayPacketClientCodec17)
-			} else {
-				this.pipeline.Replace("registry", minecraft.PlayPacketClientCodec)
-			}
-		} else if packet.Id() == minecraft.PACKET_CLIENT_LOGIN_DISCONNECT {
+			this.pipeline.Replace("registry", this.protocol.PlayClientCodec)
+		} else if packet.Id() == this.protocol.IdMap.PacketClientLoginDisconnect {
 			this.session.DisconnectJson(packet.(*minecraft.PacketClientLoginDisconnect).Json)
 			this.conn.Close()
-		} else if packet.Id() == minecraft.PACKET_CLIENT_LOGIN_SET_COMPRESSION {
+		} else if packet.Id() == this.protocol.IdMap.PacketClientLoginSetCompression {
 			this.SetCompression(packet.(*minecraft.PacketClientLoginSetCompression).Threshold)
 		} else {
 			if this.session.Initializing() {
-				this.session.Disconnect("Error: Outbound Protocol Mismatch")
+				this.session.Disconnect(fmt.Sprintf("Error: Outbound Protocol Mismatch: %d", packet.Id()))
 			}
 			this.conn.Close()
 		}
 	case STATE_INIT:
-		if packet.Id() == minecraft.PACKET_CLIENT_PLAYER_POSITION_AND_LOOK {
+		if packet.Id() == this.protocol.IdMap.PacketClientPlayerPositionandLook {
 			this.session.outBridge = this
 			this.session.redirecting = false
 			this.session.state = STATE_CONNECTED
@@ -156,8 +152,8 @@ func (this *SessionOutBridge) HandlePacket(packet packet.Packet) (err error) {
 			}
 			this.session.redirectMutex.Unlock()
 		}
-		switch packet.Id() {
-		case minecraft.PACKET_CLIENT_JOIN_GAME:
+		id := packet.Id()
+		if id == this.protocol.IdMap.PacketClientJoinGame {
 			joinGamePacket := packet.(*minecraft.PacketClientJoinGame)
 			if this.session.clientSettings != nil {
 				this.Write(this.session.clientSettings)
@@ -172,12 +168,12 @@ func (this *SessionOutBridge) HandlePacket(packet packet.Packet) (err error) {
 				} else {
 					swapDimension = 0
 				}
-				this.session.Write(minecraft.NewPacketClientRespawn(swapDimension, 2, 0, "DEFAULT"))
-				this.session.Write(minecraft.NewPacketClientRespawn(int32(joinGamePacket.Dimension), joinGamePacket.Difficulty, joinGamePacket.Gamemode, joinGamePacket.LevelType))
+				this.session.Write(minecraft.NewPacketClientRespawn(this.protocol.IdMap, swapDimension, 2, 0, "DEFAULT"))
+				this.session.Write(minecraft.NewPacketClientRespawn(this.protocol.IdMap, int32(joinGamePacket.Dimension), joinGamePacket.Difficulty, joinGamePacket.Gamemode, joinGamePacket.LevelType))
 				if len(this.session.playerList) > 0 {
-					if this.session.protocol17 {
+					if this.session.protocolVersion <= mc17.VersionNum {
 						for player, _ := range this.session.playerList {
-							this.session.Write(minecraft.NewPacketClientPlayerList17Remove(player))
+							this.session.Write(mc17.NewPacketClientPlayerListRemove(player))
 						}
 					} else {
 						items := make([]minecraft.PacketClientPlayerListItem, 0, len(this.session.playerList))
@@ -185,19 +181,19 @@ func (this *SessionOutBridge) HandlePacket(packet packet.Packet) (err error) {
 							uuid, _ := uuid.FromBytes([]byte(uuidString))
 							items = append(items, minecraft.PacketClientPlayerListItem{UUID: uuid})
 						}
-						this.session.Write(minecraft.NewPacketClientPlayerList(minecraft.PACKET_CLIENT_PLAYER_LIST_ACTION_REMOVE, items))
+						this.session.Write(minecraft.NewPacketClientPlayerList(this.protocol.IdMap, minecraft.PACKET_CLIENT_PLAYER_LIST_ACTION_REMOVE, items))
 					}
 					this.session.playerList = make(map[string]struct{})
 				}
 				if len(this.session.scoreboards) > 0 {
 					for scoreboard, _ := range this.session.scoreboards {
-						this.session.Write(minecraft.NewPacketClientScoreboardObjectiveRemove(scoreboard))
+						this.session.Write(minecraft.NewPacketClientScoreboardObjectiveRemove(this.protocol.IdMap, scoreboard))
 					}
 					this.session.scoreboards = make(map[string]struct{})
 				}
 				if len(this.session.teams) > 0 {
 					for team, _ := range this.session.teams {
-						this.session.Write(minecraft.NewPacketClientTeamsRemove(team))
+						this.session.Write(minecraft.NewPacketClientTeamsRemove(this.protocol.IdMap, team))
 					}
 					this.session.teams = make(map[string]struct{})
 				}
@@ -206,13 +202,13 @@ func (this *SessionOutBridge) HandlePacket(packet packet.Packet) (err error) {
 					for channel, _ := range this.session.pluginChannels {
 						channels = append(channels, []byte(channel))
 					}
-					this.Write(minecraft.NewPacketServerPluginMessage("REGISTER", bytes.Join(channels, []byte{0})))
+					this.Write(minecraft.NewPacketServerPluginMessage(this.protocol.IdMap, "REGISTER", bytes.Join(channels, []byte{0})))
 				}
 				return
 			}
-		case minecraft.PACKET_CLIENT_PLAYER_LIST:
-			if this.session.protocol17 {
-				playerListPacket := packet.(*minecraft.PacketClientPlayerList17)
+		} else if id == this.protocol.IdMap.PacketClientPlayerList {
+			if this.session.protocolVersion <= mc17.VersionNum {
+				playerListPacket := packet.(*mc17.PacketClientPlayerList)
 				if playerListPacket.Online {
 					this.session.playerList[playerListPacket.Name] = struct{}{}
 				} else {
@@ -230,30 +226,30 @@ func (this *SessionOutBridge) HandlePacket(packet packet.Packet) (err error) {
 					}
 				}
 			}
-		case minecraft.PACKET_CLIENT_SCOREBOARD_OBJECTIVE:
+		} else if id == this.protocol.IdMap.PacketClientScoreboardObjective {
 			scoreboardPacket := packet.(*minecraft.PacketClientScoreboardObjective)
 			if scoreboardPacket.Action == minecraft.PACKET_CLIENT_SCOREBOARD_OBJECTIVE_ACTION_ADD {
 				this.session.scoreboards[scoreboardPacket.Name] = struct{}{}
 			} else if scoreboardPacket.Action == minecraft.PACKET_CLIENT_SCOREBOARD_OBJECTIVE_ACTION_REMOVE {
 				delete(this.session.scoreboards, scoreboardPacket.Name)
 			}
-		case minecraft.PACKET_CLIENT_TEAMS:
+		} else if id == this.protocol.IdMap.PacketClientTeams {
 			teamPacket := packet.(*minecraft.PacketClientTeams)
 			if teamPacket.Action == minecraft.PACKET_CLIENT_TEAMS_ACTION_ADD {
 				this.session.teams[teamPacket.Name] = struct{}{}
 			} else if teamPacket.Action == minecraft.PACKET_CLIENT_TEAMS_ACTION_REMOVE {
 				delete(this.session.teams, teamPacket.Name)
 			}
-		case minecraft.PACKET_CLIENT_DISCONNECT:
+		} else if id == this.protocol.IdMap.PacketClientDisconnect {
 			this.state = STATE_DISCONNECTED
 			this.session.DisconnectJson(packet.(*minecraft.PacketClientDisconnect).Json)
 			return
-		case minecraft.PACKET_CLIENT_SET_COMPRESSION:
+		} else if id == this.protocol.IdMap.PacketClientSetCompression {
 			this.SetCompression(packet.(*minecraft.PacketClientSetCompression).Threshold)
 			return
-		default:
+		} else {
 			if genericPacket, ok := packet.(*minecraft.PacketGeneric); ok {
-				genericPacket.SwapEntities(this.session.clientEntityId, this.session.serverEntityId, true, this.session.protocol17)
+				genericPacket.SwapEntities(this.session.clientEntityId, this.session.serverEntityId, true)
 			}
 		}
 		this.session.Write(packet)

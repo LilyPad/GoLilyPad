@@ -10,6 +10,9 @@ import (
 	"fmt"
 	"github.com/LilyPad/GoLilyPad/packet"
 	"github.com/LilyPad/GoLilyPad/packet/minecraft"
+	mc17 "github.com/LilyPad/GoLilyPad/packet/minecraft/v17"
+	mc18 "github.com/LilyPad/GoLilyPad/packet/minecraft/v18"
+	mc19 "github.com/LilyPad/GoLilyPad/packet/minecraft/v19"
 	"github.com/LilyPad/GoLilyPad/server/proxy/auth"
 	"github.com/LilyPad/GoLilyPad/server/proxy/connect"
 	uuid "github.com/satori/go.uuid"
@@ -35,8 +38,8 @@ type Session struct {
 	redirecting   bool
 	redirectMutex sync.Mutex
 
+	protocol         *minecraft.Version
 	protocolVersion  int
-	protocol17       bool
 	serverAddress    string
 	rawServerAddress string
 	name             string
@@ -146,16 +149,13 @@ func (this *Session) SetAuthenticated(result bool) {
 		return
 	}
 	this.state = STATE_INIT
+	this.SetCompression(256)
 	if this.protocolVersion >= 5 {
-		this.Write(minecraft.NewPacketClientLoginSuccess(FormatUUID(this.profile.Id), this.name))
+		this.Write(minecraft.NewPacketClientLoginSuccess(this.protocol.IdMap, FormatUUID(this.profile.Id), this.name))
 	} else {
-		this.Write(minecraft.NewPacketClientLoginSuccess(this.profile.Id, this.name))
+		this.Write(minecraft.NewPacketClientLoginSuccess(this.protocol.IdMap, this.profile.Id, this.name))
 	}
-	if this.protocol17 {
-		this.pipeline.Replace("registry", minecraft.PlayPacketServerCodec17)
-	} else {
-		this.pipeline.Replace("registry", minecraft.PlayPacketServerCodec)
-	}
+	this.pipeline.Replace("registry", this.protocol.PlayServerCodec)
 	this.connCodec.SetTimeout(20 * time.Second)
 	this.server.SessionRegistry.Register(this)
 	this.Redirect(server)
@@ -176,10 +176,11 @@ func (this *Session) SetCompression(threshold int) {
 	}
 	this.compressionThreshold = threshold
 	registry := this.pipeline.Get("registry")
-	if registry == minecraft.LoginPacketServerCodec {
-		this.Write(minecraft.NewPacketClientLoginSetCompression(threshold))
-	} else if registry == minecraft.PlayPacketServerCodec {
-		this.Write(minecraft.NewPacketClientSetCompression(threshold))
+	if registry == mc18.LoginPacketServerCodec || registry == mc17.LoginPacketServerCodec {
+		this.Write(minecraft.NewPacketClientLoginSetCompression(this.protocol.IdMap, threshold))
+	} else if registry == mc18.PlayPacketServerCodec || registry == mc17.PlayPacketServerCodec {
+		// FIXME 1.9 does not have set compression during play, so we fix compression at 256
+		this.Write(minecraft.NewPacketClientSetCompression(this.protocol.IdMap, threshold))
 	}
 	if threshold == -1 {
 		this.pipeline.Remove("zlib")
@@ -201,10 +202,10 @@ func (this *Session) Disconnect(reason string) {
 
 func (this *Session) DisconnectJson(json string) {
 	registry := this.pipeline.Get("registry")
-	if registry == minecraft.LoginPacketServerCodec || registry == minecraft.LoginPacketServerCodec17 {
-		this.Write(minecraft.NewPacketClientLoginDisconnect(json))
-	} else if registry == minecraft.PlayPacketServerCodec || registry == minecraft.PlayPacketServerCodec17 {
-		this.Write(minecraft.NewPacketClientDisconnect(json))
+	if registry == mc18.LoginPacketServerCodec || registry == mc17.LoginPacketServerCodec {
+		this.Write(minecraft.NewPacketClientLoginDisconnect(this.protocol.IdMap, json))
+	} else if registry == mc19.PlayPacketServerCodec || registry == mc18.PlayPacketServerCodec || registry == mc17.PlayPacketServerCodec {
+		this.Write(minecraft.NewPacketClientDisconnect(this.protocol.IdMap, json))
 	}
 	this.conn.Close()
 }
@@ -212,8 +213,7 @@ func (this *Session) DisconnectJson(json string) {
 func (this *Session) HandlePacket(packet packet.Packet) (err error) {
 	switch this.state {
 	case STATE_DISCONNECTED:
-		if packet.Id() == minecraft.PACKET_SERVER_HANDSHAKE {
-			handshakePacket := packet.(*minecraft.PacketServerHandshake)
+		if handshakePacket, ok := packet.(*minecraft.PacketServerHandshake); ok {
 			this.protocolVersion = handshakePacket.ProtocolVersion
 			this.rawServerAddress = handshakePacket.ServerAddress
 			idx := strings.Index(this.rawServerAddress, "\x00")
@@ -238,26 +238,28 @@ func (this *Session) HandlePacket(packet packet.Packet) (err error) {
 				this.state = STATE_STATUS
 			} else if handshakePacket.State == 2 {
 				if !supportedVersion {
-					err = errors.New("Protocol version does not match")
+					err = errors.New(fmt.Sprintf("Protocol version does not match: %d", this.protocolVersion))
 					return
 				}
-				this.protocol17 = this.protocolVersion < minecraft.Versions[0]
-				if this.protocol17 {
-					this.pipeline.Replace("registry", minecraft.LoginPacketServerCodec17)
+				if this.protocolVersion >= mc19.VersionNum {
+					this.protocol = mc19.Version
+				} else if this.protocolVersion >= mc18.VersionNum {
+					this.protocol = mc18.Version
 				} else {
-					this.pipeline.Replace("registry", minecraft.LoginPacketServerCodec)
+					this.protocol = mc17.Version
 				}
+				this.pipeline.Replace("registry", this.protocol.LoginServerCodec)
 				this.state = STATE_LOGIN
 			} else {
 				err = errors.New("Unexpected state")
 				return
 			}
 		} else {
-			err = errors.New("Unexpected packet")
+			err = errors.New("Unexpected packet: handshake expected")
 			return
 		}
 	case STATE_STATUS:
-		if packet.Id() == minecraft.PACKET_SERVER_STATUS_REQUEST {
+		if _, ok := packet.(*minecraft.PacketServerStatusRequest); ok {
 			samplePath := this.server.router.RouteSample(this.serverAddress)
 			sampleTxt, sampleErr := ioutil.ReadFile(samplePath)
 			sample := make([]map[string]interface{}, 0)
@@ -314,23 +316,24 @@ func (this *Session) HandlePacket(packet packet.Packet) (err error) {
 			}
 			this.state = STATE_STATUS_PING
 		} else {
-			err = errors.New("Unexpected packet")
+			err = errors.New("Unexpected packet: status request expected")
 			return
 		}
 	case STATE_STATUS_PING:
-		if packet.Id() == minecraft.PACKET_SERVER_STATUS_PING {
-			err = this.Write(minecraft.NewPacketClientStatusPing(packet.(*minecraft.PacketServerStatusPing).Time))
+		if statusPing, ok := packet.(*minecraft.PacketServerStatusPing); ok {
+			fmt.Println("Got ping")
+			err = this.Write(minecraft.NewPacketClientStatusPing(statusPing.Time))
 			if err != nil {
 				return
 			}
 			this.conn.Close()
 		} else {
-			err = errors.New("Unexpected packet")
+			err = errors.New("Unexpected packet: status ping expected")
 			return
 		}
 	case STATE_LOGIN:
-		if packet.Id() == minecraft.PACKET_SERVER_LOGIN_START {
-			this.name = packet.(*minecraft.PacketServerLoginStart).Name
+		if loginStart, ok := packet.(*minecraft.PacketServerLoginStart); ok {
+			this.name = loginStart.Name
 			if this.server.Authenticate() {
 				this.serverId, err = GenSalt()
 				if err != nil {
@@ -340,7 +343,7 @@ func (this *Session) HandlePacket(packet packet.Packet) (err error) {
 				if err != nil {
 					return
 				}
-				err = this.Write(minecraft.NewPacketClientLoginEncryptRequest(this.serverId, this.server.publicKey, this.verifyToken))
+				err = this.Write(minecraft.NewPacketClientLoginEncryptRequest(this.protocol.IdMap, this.serverId, this.server.publicKey, this.verifyToken))
 				if err != nil {
 					return
 				}
@@ -353,19 +356,18 @@ func (this *Session) HandlePacket(packet packet.Packet) (err error) {
 				this.SetAuthenticated(true)
 			}
 		} else {
-			err = errors.New("Unexpected packet")
+			err = errors.New("Unexpected packet: login start expected")
 			return
 		}
 	case STATE_LOGIN_ENCRYPT:
-		if packet.Id() == minecraft.PACKET_SERVER_LOGIN_ENCRYPT_RESPONSE {
-			loginEncryptResponsePacket := packet.(*minecraft.PacketServerLoginEncryptResponse)
+		if loginEncryptResponse, ok := packet.(*minecraft.PacketServerLoginEncryptResponse); ok {
 			var sharedSecret []byte
-			sharedSecret, err = rsa.DecryptPKCS1v15(cryptoRand.Reader, this.server.privateKey, loginEncryptResponsePacket.SharedSecret)
+			sharedSecret, err = rsa.DecryptPKCS1v15(cryptoRand.Reader, this.server.privateKey, loginEncryptResponse.SharedSecret)
 			if err != nil {
 				return
 			}
 			var verifyToken []byte
-			verifyToken, err = rsa.DecryptPKCS1v15(cryptoRand.Reader, this.server.privateKey, loginEncryptResponsePacket.VerifyToken)
+			verifyToken, err = rsa.DecryptPKCS1v15(cryptoRand.Reader, this.server.privateKey, loginEncryptResponse.VerifyToken)
 			if err != nil {
 				return
 			}
@@ -387,16 +389,15 @@ func (this *Session) HandlePacket(packet packet.Packet) (err error) {
 				fmt.Println("Proxy server, authorized:", this.name, "ip:", this.remoteIp)
 			}
 		} else {
-			err = errors.New("Unexpected packet")
+			err = errors.New("Unexpected packet: login encrypt expected")
 			return
 		}
 	case STATE_CONNECTED:
-		if packet.Id() == minecraft.PACKET_SERVER_CLIENT_SETTINGS {
+		if _, ok := packet.(*minecraft.PacketServerClientSettings); ok {
 			this.clientSettings = packet
-		} else if packet.Id() == minecraft.PACKET_SERVER_PLUGIN_MESSAGE {
-			pluginMessagePacket := packet.(*minecraft.PacketServerPluginMessage)
-			if pluginMessagePacket.Channel == "REGISTER" {
-				for _, channelBytes := range bytes.Split(pluginMessagePacket.Data[:], []byte{0}) {
+		} else if pluginMessage, ok := packet.(*minecraft.PacketServerPluginMessage); ok {
+			if pluginMessage.Channel == "REGISTER" {
+				for _, channelBytes := range bytes.Split(pluginMessage.Data[:], []byte{0}) {
 					channel := string(channelBytes)
 					if _, ok := this.pluginChannels[channel]; ok {
 						continue
@@ -406,8 +407,8 @@ func (this *Session) HandlePacket(packet packet.Packet) (err error) {
 					}
 					this.pluginChannels[channel] = struct{}{}
 				}
-			} else if pluginMessagePacket.Channel == "UNREGISTER" {
-				for _, channelBytes := range bytes.Split(pluginMessagePacket.Data[:], []byte{0}) {
+			} else if pluginMessage.Channel == "UNREGISTER" {
+				for _, channelBytes := range bytes.Split(pluginMessage.Data[:], []byte{0}) {
 					channel := string(channelBytes)
 					delete(this.pluginChannels, channel)
 				}
@@ -417,7 +418,7 @@ func (this *Session) HandlePacket(packet packet.Packet) (err error) {
 			break
 		}
 		if genericPacket, ok := packet.(*minecraft.PacketGeneric); ok {
-			genericPacket.SwapEntities(this.clientEntityId, this.serverEntityId, false, this.protocol17)
+			genericPacket.SwapEntities(this.clientEntityId, this.serverEntityId, false)
 		}
 		this.outBridge.Write(packet)
 	}
@@ -434,6 +435,7 @@ func (this *Session) ErrorCaught(err error) {
 			fmt.Println("Proxy server, name:", this.name, "ip:", this.remoteIp, "disconnected, err:", err, "outBridgeErr:", this.outBridge.disconnectErr)
 		}
 	}
+
 	this.state = STATE_DISCONNECTED
 	this.conn.Close()
 	return

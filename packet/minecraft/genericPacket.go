@@ -1,0 +1,183 @@
+package minecraft
+
+import (
+	"bytes"
+	"compress/zlib"
+	"encoding/binary"
+	"github.com/LilyPad/GoLilyPad/packet"
+	"io"
+	"io/ioutil"
+)
+
+type PacketGeneric struct {
+	id         int
+	Bytes      []byte
+	compressed bool
+	swappers   *PacketGenericSwappers
+}
+
+type PacketGenericSwappers struct {
+	ClientInt    [][]int
+	ClientVarInt []bool
+	ServerInt    [][]int
+	ServerVarInt []bool
+}
+
+func NewPacketGeneric(id int, bytes []byte, compressed bool, swappers *PacketGenericSwappers) (this *PacketGeneric) {
+	this = new(PacketGeneric)
+	this.id = id
+	this.Bytes = bytes
+	this.compressed = compressed
+	this.swappers = swappers
+	return
+}
+
+func (this *PacketGeneric) Decompress() (err error) {
+	if !this.compressed {
+		return
+	}
+	buffer := bytes.NewReader(this.Bytes)
+	_, err = packet.ReadVarInt(buffer) // compression length
+	if err != nil {
+		return
+	}
+	zlibReader, err := zlib.NewReader(buffer)
+	if err != nil {
+		return
+	}
+	_, err = packet.ReadVarInt(zlibReader) // id
+	if err != nil {
+		return
+	}
+	bytes, err := ioutil.ReadAll(zlibReader)
+	if err != nil {
+		return
+	}
+	this.Bytes = bytes
+	this.compressed = false
+	return
+}
+
+func (this *PacketGeneric) SwapEntities(a int32, b int32, clientServer bool) {
+	if a == b {
+		return
+	}
+	// FIXME spawn object / destroy entities / combat event
+	this.swapEntitiesInt(a, b, clientServer)
+	this.swapEntitiesVarInt(a, b, clientServer)
+}
+
+func (this *PacketGeneric) swapEntitiesInt(a int32, b int32, clientServer bool) {
+	var positions [][]int
+	if clientServer {
+		positions = this.swappers.ClientInt
+	} else {
+		positions = this.swappers.ServerInt
+	}
+	if this.id < 0 {
+		return
+	}
+	if this.id >= len(positions) {
+		return
+	}
+	idPositions := positions[this.id]
+	if idPositions == nil {
+		return
+	}
+	this.Decompress()
+	var id int32
+	for _, position := range idPositions {
+		if len(this.Bytes) < position+4 {
+			continue
+		}
+		id = int32(binary.BigEndian.Uint32(this.Bytes[position : position+4]))
+		if id == a {
+			binary.BigEndian.PutUint32(this.Bytes[position:position+4], uint32(b))
+		} else if id == b {
+			binary.BigEndian.PutUint32(this.Bytes[position:position+4], uint32(a))
+		}
+	}
+}
+
+func (this *PacketGeneric) swapEntitiesVarInt(a int32, b int32, clientServer bool) {
+	var positions []bool
+	if clientServer {
+		positions = this.swappers.ClientVarInt
+	} else {
+		positions = this.swappers.ServerVarInt
+	}
+	if this.id < 0 {
+		return
+	}
+	if this.id >= len(positions) {
+		return
+	}
+	if positions[this.id] == false {
+		return
+	}
+	this.Decompress()
+	// Read the old Id
+	buffer := bytes.NewBuffer(this.Bytes)
+	id, err := packet.ReadVarInt(buffer)
+	if err != nil {
+		return
+	}
+	// Check the Id
+	var newId int
+	if id == int(a) {
+		newId = int(b)
+	} else if id == int(b) {
+		newId = int(a)
+	} else {
+		return
+	}
+	// Apply the new Id
+	newBuffer := new(bytes.Buffer)
+	err = packet.WriteVarInt(newBuffer, newId)
+	if err != nil {
+		return
+	}
+	buffer.WriteTo(newBuffer)
+	this.Bytes = newBuffer.Bytes()
+}
+
+func (this *PacketGeneric) Raw() bool {
+	return this.compressed
+}
+
+func (this *PacketGeneric) Id() int {
+	return this.id
+}
+
+type packetGenericCodec struct {
+	Id       int
+	swappers *PacketGenericSwappers
+}
+
+func NewPacketGenericCodec(id int, swappers *PacketGenericSwappers) (this *packetGenericCodec) {
+	this = new(packetGenericCodec)
+	this.Id = id
+	this.swappers = swappers
+	return
+}
+
+func (this *packetGenericCodec) Decode(reader io.Reader) (decode packet.Packet, err error) {
+	packetGeneric := new(PacketGeneric)
+	packetGeneric.id = this.Id
+	packetGeneric.swappers = this.swappers
+	if zlibReader, ok := reader.(*packet.ZlibToggleReader); ok {
+		zlibReader.SetRaw(true)
+		packetGeneric.compressed = true
+	}
+	packetGeneric.Bytes, err = ioutil.ReadAll(reader)
+	if err != nil {
+		return
+	}
+	decode = packetGeneric
+	return
+}
+
+func (this *packetGenericCodec) Encode(writer io.Writer, encode packet.Packet) (err error) {
+	_, err = writer.Write(encode.(*PacketGeneric).Bytes)
+	return
+}
