@@ -1,8 +1,8 @@
 package connect
 
 import (
-	"io"
 	"github.com/LilyPad/GoLilyPad/packet"
+	"io"
 )
 
 type RequestRedirect struct {
@@ -22,7 +22,6 @@ func (this *RequestRedirect) Id() int {
 }
 
 type requestRedirectCodec struct {
-
 }
 
 func (this *requestRedirectCodec) Decode(reader io.Reader) (request Request, err error) {
@@ -50,7 +49,6 @@ func (this *requestRedirectCodec) Encode(writer io.Writer, request Request) (err
 }
 
 type ResultRedirect struct {
-
 }
 
 func NewResultRedirect() (this *ResultRedirect) {
@@ -63,7 +61,6 @@ func (this *ResultRedirect) Id() int {
 }
 
 type resultRedirectCodec struct {
-
 }
 
 func (this *resultRedirectCodec) Decode(reader io.Reader) (result Result, err error) {

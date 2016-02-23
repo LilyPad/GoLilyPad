@@ -1,8 +1,8 @@
 package minecraft
 
 import (
-	"io"
 	"github.com/LilyPad/GoLilyPad/packet"
+	"io"
 )
 
 type PacketClientLoginSuccess struct {
@@ -22,7 +22,6 @@ func (this *PacketClientLoginSuccess) Id() int {
 }
 
 type packetClientLoginSuccessCodec struct {
-
 }
 
 func (this *packetClientLoginSuccessCodec) Decode(reader io.Reader) (decode packet.Packet, err error) {

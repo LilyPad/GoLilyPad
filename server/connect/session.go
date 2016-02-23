@@ -3,34 +3,34 @@ package connect
 import (
 	"errors"
 	"fmt"
-	"net"
-	"time"
-	uuid "code.google.com/p/go-uuid/uuid"
 	"github.com/LilyPad/GoLilyPad/packet"
 	"github.com/LilyPad/GoLilyPad/packet/connect"
+	uuid "github.com/satori/go.uuid"
+	"net"
+	"time"
 )
 
 type Session struct {
-	server *Server
-	conn net.Conn
+	server    *Server
+	conn      net.Conn
 	connCodec *packet.PacketConnCodec
-	pipeline *packet.PacketPipeline
+	pipeline  *packet.PacketPipeline
 
-	uuid string
-	salt string
-	username string
+	uuid      string
+	salt      string
+	username  string
 	keepalive *int32
-	role SessionRole
+	role      SessionRole
 
-	roleAddress string
-	rolePort uint16
+	roleAddress       string
+	rolePort          uint16
 	serverSecurityKey string
-	proxyMotd string
-	proxyVersion string
-	proxyPlayers map[string]uuid.UUID
-	proxyMaxPlayers uint16
+	proxyMotd         string
+	proxyVersion      string
+	proxyPlayers      map[string]uuid.UUID
+	proxyMaxPlayers   uint16
 
-	remoteIp string
+	remoteIp   string
 	remotePort string
 }
 
@@ -49,7 +49,7 @@ func (this *Session) Serve() {
 	this.pipeline = packet.NewPacketPipeline()
 	this.pipeline.AddLast("varIntLength", packet.NewPacketCodecVarIntLength())
 	this.pipeline.AddLast("registry", connect.PacketCodec)
-	this.connCodec = packet.NewPacketConnCodec(this.conn, this.pipeline, 10 * time.Second)
+	this.connCodec = packet.NewPacketConnCodec(this.conn, this.pipeline, 10*time.Second)
 	this.connCodec.ReadConn(this)
 }
 
@@ -333,7 +333,7 @@ func (this *Session) Id() (id string) {
 	if this.role == ROLE_UNAUTHORIZED {
 		id = ""
 	} else if this.role == ROLE_AUTHORIZED {
-		id =  this.username + "." + this.uuid
+		id = this.username + "." + this.uuid
 	} else {
 		id = this.username
 	}

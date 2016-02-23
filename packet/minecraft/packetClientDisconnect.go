@@ -1,8 +1,8 @@
 package minecraft
 
 import (
-	"io"
 	"github.com/LilyPad/GoLilyPad/packet"
+	"io"
 )
 
 type PacketClientDisconnect struct {
@@ -20,7 +20,6 @@ func (this *PacketClientDisconnect) Id() int {
 }
 
 type packetClientDisconnectCodec struct {
-
 }
 
 func (this *packetClientDisconnectCodec) Decode(reader io.Reader) (decode packet.Packet, err error) {

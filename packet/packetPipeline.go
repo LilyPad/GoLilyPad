@@ -1,14 +1,14 @@
 package packet
 
 import (
-	"io"
 	"errors"
 	"fmt"
+	"io"
 )
 
 type PacketPipeline struct {
 	childrenMap map[string]PacketPipelineChild
-	children []PacketPipelineChild
+	children    []PacketPipelineChild
 }
 
 func NewPacketPipeline() (this *PacketPipeline) {
@@ -161,7 +161,7 @@ func (this *PacketPipeline) HasName(name string) (ok bool) {
 }
 
 func (this *PacketPipeline) rebuild() {
-	for i := 0; i < len(this.children) - 1; i++ {
+	for i := 0; i < len(this.children)-1; i++ {
 		this.children[i].SetCodec(this.children[i+1])
 	}
 }

@@ -20,7 +20,6 @@ func (this *RequestAuthenticate) Id() int {
 }
 
 type requestAuthenticateCodec struct {
-
 }
 
 func (this *requestAuthenticateCodec) Decode(reader io.Reader) (request Request, err error) {
@@ -48,7 +47,6 @@ func (this *requestAuthenticateCodec) Encode(writer io.Writer, request Request) 
 }
 
 type ResultAuthenticate struct {
-
 }
 
 func NewResultAuthenticate() (this *ResultAuthenticate) {
@@ -61,7 +59,6 @@ func (this *ResultAuthenticate) Id() int {
 }
 
 type resultAuthenticateCodec struct {
-
 }
 
 func (this *resultAuthenticateCodec) Decode(reader io.Reader) (result Result, err error) {

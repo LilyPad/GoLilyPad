@@ -8,54 +8,54 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
-	"net"
-	"time"
-	"strings"
-	"sync"
-	uuid "code.google.com/p/go-uuid/uuid"
 	"github.com/LilyPad/GoLilyPad/packet"
 	"github.com/LilyPad/GoLilyPad/packet/minecraft"
-	"github.com/LilyPad/GoLilyPad/server/proxy/connect"
 	"github.com/LilyPad/GoLilyPad/server/proxy/auth"
+	"github.com/LilyPad/GoLilyPad/server/proxy/connect"
+	uuid "github.com/satori/go.uuid"
+	"io/ioutil"
+	"net"
+	"strings"
+	"sync"
+	"time"
 )
 
 type Session struct {
-	server *Server
-	conn net.Conn
-	connCodec *packet.PacketConnCodec
-	pipeline *packet.PacketPipeline
-	outBridge *SessionOutBridge
+	server               *Server
+	conn                 net.Conn
+	connCodec            *packet.PacketConnCodec
+	pipeline             *packet.PacketPipeline
+	outBridge            *SessionOutBridge
 	compressionThreshold int
 
-	active bool
-	activeServers map[string]struct{}
+	active            bool
+	activeServers     map[string]struct{}
 	activeServersLock sync.Mutex
 
-	redirecting bool
+	redirecting   bool
 	redirectMutex sync.Mutex
 
-	protocolVersion int
-	protocol17 bool
-	serverAddress string
+	protocolVersion  int
+	protocol17       bool
+	serverAddress    string
 	rawServerAddress string
-	name string
-	uuid uuid.UUID
-	profile auth.GameProfile
-	serverId string
-	verifyToken []byte
+	name             string
+	uuid             uuid.UUID
+	profile          auth.GameProfile
+	serverId         string
+	verifyToken      []byte
 
 	clientSettings packet.Packet
 	clientEntityId int32
 	serverEntityId int32
 	pluginChannels map[string]struct{}
-	playerList map[string]struct{}
-	scoreboards map[string]struct{}
-	teams map[string]struct{}
+	playerList     map[string]struct{}
+	scoreboards    map[string]struct{}
+	teams          map[string]struct{}
 
-	remoteIp string
+	remoteIp   string
 	remotePort string
-	state SessionState
+	state      SessionState
 }
 
 func NewSession(server *Server, conn net.Conn) (this *Session) {
@@ -79,7 +79,7 @@ func (this *Session) Serve() {
 	this.pipeline = packet.NewPacketPipeline()
 	this.pipeline.AddLast("varIntLength", packet.NewPacketCodecVarIntLength())
 	this.pipeline.AddLast("registry", minecraft.HandshakePacketServerCodec)
-	this.connCodec = packet.NewPacketConnCodec(this.conn, this.pipeline, 10 * time.Second)
+	this.connCodec = packet.NewPacketConnCodec(this.conn, this.pipeline, 10*time.Second)
 	this.connCodec.ReadConn(this)
 }
 
@@ -106,7 +106,7 @@ func (this *Session) SetAuthenticated(result bool) {
 		this.Disconnect("Error: Authentication to Minecraft.net Failed")
 		return
 	}
-	this.uuid = uuid.Parse(FormatUUID(this.profile.Id))
+	this.uuid, _ = uuid.FromString(FormatUUID(this.profile.Id))
 	if this.server.SessionRegistry.HasName(this.name) {
 		this.Disconnect(minecraft.Colorize(this.server.localizer.LocaleLoggedIn()))
 		return
@@ -265,7 +265,7 @@ func (this *Session) HandlePacket(packet packet.Packet) (err error) {
 				lines := strings.Split(string(sampleTxt), "\n")
 				for _, line := range lines {
 					line = strings.Replace(line, "\r", "", -1)
-					if(len(strings.TrimSpace(line)) == 0) {
+					if len(strings.TrimSpace(line)) == 0 {
 						continue
 					}
 					entry := make(map[string]interface{})
@@ -347,7 +347,7 @@ func (this *Session) HandlePacket(packet packet.Packet) (err error) {
 				this.state = STATE_LOGIN_ENCRYPT
 			} else {
 				this.profile = auth.GameProfile{
-					Id: GenNameUUID("OfflinePlayer:" + this.name),
+					Id:         GenNameUUID("OfflinePlayer:" + this.name),
 					Properties: make([]auth.GameProfileProperty, 0),
 				}
 				this.SetAuthenticated(true)

@@ -1,13 +1,13 @@
 package proxy
 
 import (
-	cryptoRand "crypto/rand"
-	"math/rand"
 	"crypto/md5"
+	cryptoRand "crypto/rand"
 	"crypto/sha1"
 	"encoding/hex"
-	"io"
 	"github.com/LilyPad/GoLilyPad/packet/minecraft"
+	"io"
+	"math/rand"
 )
 
 func MinecraftVersion() string {

@@ -4,24 +4,24 @@ import (
 	cryptoRand "crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
+	"github.com/LilyPad/GoLilyPad/server/proxy/connect"
 	"net"
 	"time"
-	"github.com/LilyPad/GoLilyPad/server/proxy/connect"
 )
 
 type Server struct {
-	listener net.Listener
+	listener        net.Listener
 	SessionRegistry *SessionRegistry
 
-	motd *string
-	maxPlayers *uint16
+	motd           *string
+	maxPlayers     *uint16
 	syncMaxPlayers *bool
-	authenticate *bool
-	router Router
-	localizer Localizer
-	connect *connect.ProxyConnect
-	privateKey *rsa.PrivateKey
-	publicKey []byte
+	authenticate   *bool
+	router         Router
+	localizer      Localizer
+	connect        *connect.ProxyConnect
+	privateKey     *rsa.PrivateKey
+	publicKey      []byte
 }
 
 func NewServer(motd *string, maxPlayers *uint16, syncMaxPlayers *bool, authenticate *bool, router Router, localizer Localizer, connect *connect.ProxyConnect) (this *Server, err error) {

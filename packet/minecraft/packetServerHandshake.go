@@ -1,15 +1,15 @@
 package minecraft
 
 import (
-	"io"
 	"github.com/LilyPad/GoLilyPad/packet"
+	"io"
 )
 
 type PacketServerHandshake struct {
 	ProtocolVersion int
-	ServerAddress string
-	ServerPort uint16
-	State int
+	ServerAddress   string
+	ServerPort      uint16
+	State           int
 }
 
 func NewPacketServerHandshake(protocolVersion int, serverAddress string, serverPort uint16, state int) (this *PacketServerHandshake) {
@@ -26,7 +26,6 @@ func (this *PacketServerHandshake) Id() int {
 }
 
 type packetServerHandshakeCodec struct {
-
 }
 
 func (this *packetServerHandshakeCodec) Decode(reader io.Reader) (decode packet.Packet, err error) {

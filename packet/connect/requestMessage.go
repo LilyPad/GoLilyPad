@@ -1,14 +1,14 @@
 package connect
 
 import (
-	"io"
 	"github.com/LilyPad/GoLilyPad/packet"
+	"io"
 )
 
 type RequestMessage struct {
 	Recipients []string
-	Channel string
-	Message []byte
+	Channel    string
+	Message    []byte
 }
 
 func NewRequestMessage(recipients []string, channel string, message []byte) (this *RequestMessage) {
@@ -24,7 +24,6 @@ func (this *RequestMessage) Id() int {
 }
 
 type requestMessageCodec struct {
-
 }
 
 func (this *requestMessageCodec) Decode(reader io.Reader) (request Request, err error) {
@@ -83,7 +82,6 @@ func (this *requestMessageCodec) Encode(writer io.Writer, request Request) (err 
 }
 
 type ResultMessage struct {
-
 }
 
 func NewResultMessage() (this *ResultMessage) {
@@ -96,7 +94,6 @@ func (this *ResultMessage) Id() int {
 }
 
 type resultMessageCodec struct {
-
 }
 
 func (this *resultMessageCodec) Decode(reader io.Reader) (result Result, err error) {

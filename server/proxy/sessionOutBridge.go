@@ -2,26 +2,26 @@ package proxy
 
 import (
 	"bytes"
-	"net"
-	"time"
-	"strconv"
-	uuid "code.google.com/p/go-uuid/uuid"
 	"github.com/LilyPad/GoLilyPad/packet"
 	"github.com/LilyPad/GoLilyPad/packet/minecraft"
 	"github.com/LilyPad/GoLilyPad/server/proxy/connect"
+	uuid "github.com/satori/go.uuid"
+	"net"
+	"strconv"
+	"time"
 )
 
 type SessionOutBridge struct {
-	session *Session
-	server *connect.Server
-	conn net.Conn
-	connCodec *packet.PacketConnCodec
-	pipeline *packet.PacketPipeline
+	session              *Session
+	server               *connect.Server
+	conn                 net.Conn
+	connCodec            *packet.PacketConnCodec
+	pipeline             *packet.PacketPipeline
 	compressionThreshold int
 
-	remoteIp string
-	remotePort string
-	state SessionState
+	remoteIp      string
+	remotePort    string
+	state         SessionState
 	disconnectErr error
 }
 
@@ -49,18 +49,18 @@ func (this *SessionOutBridge) Serve() {
 	this.pipeline = packet.NewPacketPipeline()
 	this.pipeline.AddLast("varIntLength", packet.NewPacketCodecVarIntLength())
 	this.pipeline.AddLast("registry", minecraft.HandshakePacketClientCodec)
-	this.connCodec = packet.NewPacketConnCodec(this.conn, this.pipeline, 30 * time.Second)
+	this.connCodec = packet.NewPacketConnCodec(this.conn, this.pipeline, 30*time.Second)
 
 	inRemotePort, _ := strconv.ParseUint(this.session.remotePort, 10, 16)
 	outRemotePort, _ := strconv.ParseUint(this.remotePort, 10, 16)
 	loginPayload := LoginPayload{
 		SecurityKey: this.server.SecurityKey,
-		Host: this.session.rawServerAddress,
-		RealIp: this.session.remoteIp,
-		RealPort: int(inRemotePort),
-		Name: this.session.name,
-		UUID: this.session.profile.Id,
-		Properties: make([]LoginPayloadProperty, 0),
+		Host:        this.session.rawServerAddress,
+		RealIp:      this.session.remoteIp,
+		RealPort:    int(inRemotePort),
+		Name:        this.session.name,
+		UUID:        this.session.profile.Id,
+		Properties:  make([]LoginPayloadProperty, 0),
 	}
 	for _, property := range this.session.profile.Properties {
 		loginPayload.Properties = append(loginPayload.Properties, LoginPayloadProperty{property.Name, property.Value, property.Signature})
@@ -182,7 +182,8 @@ func (this *SessionOutBridge) HandlePacket(packet packet.Packet) (err error) {
 					} else {
 						items := make([]minecraft.PacketClientPlayerListItem, 0, len(this.session.playerList))
 						for uuidString, _ := range this.session.playerList {
-							items = append(items, minecraft.PacketClientPlayerListItem{UUID: uuid.UUID(uuidString)})
+							uuid, _ := uuid.FromBytes([]byte(uuidString))
+							items = append(items, minecraft.PacketClientPlayerListItem{UUID: uuid})
 						}
 						this.session.Write(minecraft.NewPacketClientPlayerList(minecraft.PACKET_CLIENT_PLAYER_LIST_ACTION_REMOVE, items))
 					}
@@ -221,11 +222,11 @@ func (this *SessionOutBridge) HandlePacket(packet packet.Packet) (err error) {
 				playerListPacket := packet.(*minecraft.PacketClientPlayerList)
 				if playerListPacket.Action == minecraft.PACKET_CLIENT_PLAYER_LIST_ACTION_ADD {
 					for _, item := range playerListPacket.Items {
-						this.session.playerList[string(item.UUID)] = struct{}{}
+						this.session.playerList[string(item.UUID[:])] = struct{}{}
 					}
 				} else if playerListPacket.Action == minecraft.PACKET_CLIENT_PLAYER_LIST_ACTION_REMOVE {
 					for _, item := range playerListPacket.Items {
-						delete(this.session.playerList, string(item.UUID))
+						delete(this.session.playerList, string(item.UUID[:]))
 					}
 				}
 			}

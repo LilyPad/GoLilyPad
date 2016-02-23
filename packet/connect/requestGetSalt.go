@@ -1,12 +1,11 @@
 package connect
 
 import (
-	"io"
 	"github.com/LilyPad/GoLilyPad/packet"
+	"io"
 )
 
 type RequestGetSalt struct {
-
 }
 
 func NewRequestGetSalt() (this *RequestGetSalt) {
@@ -19,7 +18,6 @@ func (this *RequestGetSalt) Id() int {
 }
 
 type requestGetSaltCodec struct {
-
 }
 
 func (this *requestGetSaltCodec) Decode(reader io.Reader) (request Request, err error) {
@@ -46,7 +44,6 @@ func (this *ResultGetSalt) Id() int {
 }
 
 type resultGetSaltCodec struct {
-
 }
 
 func (this *resultGetSaltCodec) Decode(reader io.Reader) (result Result, err error) {

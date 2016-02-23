@@ -1,8 +1,8 @@
 package proxy
 
 import (
+	uuid "github.com/satori/go.uuid"
 	"sync"
-	uuid "code.google.com/p/go-uuid/uuid"
 )
 
 type SessionRegistry struct {
@@ -21,14 +21,14 @@ func NewSessionRegistry() (this *SessionRegistry) {
 func (this *SessionRegistry) Register(session *Session) {
 	this.Lock()
 	this.sessionsByName[session.name] = session
-	this.sessionsByUuid[string(session.uuid)] = session
+	this.sessionsByUuid[string(session.uuid[:])] = session
 	this.Unlock()
 }
 
 func (this *SessionRegistry) Unregister(session *Session) {
 	this.Lock()
 	delete(this.sessionsByName, session.name)
-	delete(this.sessionsByUuid, string(session.uuid))
+	delete(this.sessionsByUuid, string(session.uuid[:]))
 	this.Unlock()
 }
 
@@ -41,7 +41,7 @@ func (this *SessionRegistry) HasName(name string) (val bool) {
 
 func (this *SessionRegistry) HasUuid(uuid uuid.UUID) (val bool) {
 	this.RLock()
-	_, val = this.sessionsByUuid[string(uuid)]
+	_, val = this.sessionsByUuid[string(uuid[:])]
 	this.RUnlock()
 	return
 }
@@ -55,7 +55,7 @@ func (this *SessionRegistry) GetByName(name string) (session *Session) {
 
 func (this *SessionRegistry) GetByUuid(uuid uuid.UUID) (session *Session) {
 	this.RLock()
-	session = this.sessionsByUuid[string(uuid)]
+	session = this.sessionsByUuid[string(uuid[:])]
 	this.RUnlock()
 	return
 }
@@ -63,7 +63,7 @@ func (this *SessionRegistry) GetByUuid(uuid uuid.UUID) (session *Session) {
 func (this *SessionRegistry) GetAll() (sessions []*Session) {
 	this.RLock()
 	sessions = make([]*Session, 0, len(this.sessionsByName))
-	for  _, session := range this.sessionsByName {
+	for _, session := range this.sessionsByName {
 		sessions = append(sessions, session)
 	}
 	this.RUnlock()

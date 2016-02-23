@@ -1,8 +1,8 @@
 package connect
 
 import (
-	"io"
 	"github.com/LilyPad/GoLilyPad/packet"
+	"io"
 )
 
 type PacketRedirectEvent struct {
@@ -22,7 +22,6 @@ func (this *PacketRedirectEvent) Id() int {
 }
 
 type packetRedirectEventCodec struct {
-
 }
 
 func (this *packetRedirectEventCodec) Decode(reader io.Reader) (decode packet.Packet, err error) {

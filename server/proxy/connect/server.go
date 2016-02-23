@@ -1,7 +1,7 @@
 package connect
 
 type Server struct {
-	Name string
-	Addr string
+	Name        string
+	Addr        string
 	SecurityKey string
 }

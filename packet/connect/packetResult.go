@@ -4,14 +4,14 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"io"
 	"github.com/LilyPad/GoLilyPad/packet"
+	"io"
 )
 
 type PacketResult struct {
 	SequenceId int32
 	StatusCode uint8
-	Result Result
+	Result     Result
 }
 
 func NewPacketResult(sequenceId int32, statusCode uint8, result Result) (this *PacketResult) {

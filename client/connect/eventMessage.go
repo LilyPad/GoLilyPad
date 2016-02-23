@@ -5,7 +5,7 @@ import (
 )
 
 type EventMessage struct {
-	Sender string
+	Sender  string
 	Channel string
 	Payload []byte
 }

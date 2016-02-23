@@ -1,12 +1,11 @@
 package minecraft
 
 import (
-	"io"
 	"github.com/LilyPad/GoLilyPad/packet"
+	"io"
 )
 
 type packetServerLoginEncryptResponseCodec17 struct {
-
 }
 
 func (this *packetServerLoginEncryptResponseCodec17) Decode(reader io.Reader) (decode packet.Packet, err error) {

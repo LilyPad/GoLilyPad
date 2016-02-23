@@ -1,8 +1,8 @@
 package minecraft
 
 import (
-	"io"
 	"github.com/LilyPad/GoLilyPad/packet"
+	"io"
 )
 
 type PacketClientStatusResponse struct {
@@ -20,7 +20,6 @@ func (this *PacketClientStatusResponse) Id() int {
 }
 
 type packetClientStatusResponseCodec struct {
-
 }
 
 func (this *packetClientStatusResponseCodec) Decode(reader io.Reader) (decode packet.Packet, err error) {

@@ -4,8 +4,8 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
+	uuid "github.com/satori/go.uuid"
 	"io"
-	uuid "code.google.com/p/go-uuid/uuid"
 )
 
 func WriteString(writer io.Writer, val string) (err error) {
@@ -42,7 +42,7 @@ func ReadString(reader io.Reader) (val string, err error) {
 
 func WriteVarInt(writer io.Writer, val int) (err error) {
 	for val >= 0x80 {
-		err = WriteUint8(writer, byte(val) | 0x80)
+		err = WriteUint8(writer, byte(val)|0x80)
 		if err != nil {
 			return
 		}
@@ -60,7 +60,7 @@ func ReadVarInt(reader io.Reader) (result int, err error) {
 		if err != nil {
 			return
 		}
-		result |= int(uint(b & 0x7F) << uint(bytes * 7))
+		result |= int(uint(b&0x7F) << uint(bytes*7))
 		bytes++
 		if bytes > 5 {
 			err = errors.New("Decode, VarInt is too long")
@@ -75,7 +75,7 @@ func ReadVarInt(reader io.Reader) (result int, err error) {
 }
 
 func WriteUUID(writer io.Writer, val uuid.UUID) (err error) {
-	_, err = writer.Write(val)
+	_, err = writer.Write(val[:])
 	return
 }
 
@@ -85,7 +85,7 @@ func ReadUUID(reader io.Reader) (result uuid.UUID, err error) {
 	if err != nil {
 		return
 	}
-	result = uuid.UUID(bytes)
+	result, _ = uuid.FromBytes(bytes)
 	return
 }
 

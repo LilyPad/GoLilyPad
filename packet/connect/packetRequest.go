@@ -4,13 +4,13 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"io"
 	"github.com/LilyPad/GoLilyPad/packet"
+	"io"
 )
 
 type PacketRequest struct {
 	SequenceId int32
-	Request Request
+	Request    Request
 }
 
 func NewPacketRequest(sequenceId int32, request Request) (this *PacketRequest) {
@@ -25,7 +25,6 @@ func (this *PacketRequest) Id() int {
 }
 
 type packetRequestCodec struct {
-
 }
 
 func (this *packetRequestCodec) Decode(reader io.Reader) (decode packet.Packet, err error) {

@@ -2,16 +2,16 @@ package main
 
 import (
 	"bufio"
-	"io"
 	"fmt"
+	"github.com/LilyPad/GoLilyPad/server/proxy"
+	"github.com/LilyPad/GoLilyPad/server/proxy/connect"
+	"github.com/LilyPad/GoLilyPad/server/proxy/main/config"
+	"io"
 	"os"
 	"runtime"
 	"strconv"
 	"strings"
 	"time"
-	"github.com/LilyPad/GoLilyPad/server/proxy"
-	"github.com/LilyPad/GoLilyPad/server/proxy/connect"
-	"github.com/LilyPad/GoLilyPad/server/proxy/main/config"
 )
 
 var VERSION string
@@ -36,7 +36,7 @@ func main() {
 		for {
 			str, err := reader.ReadString('\n')
 			if err == io.EOF {
-				time.Sleep(100*time.Millisecond)
+				time.Sleep(100 * time.Millisecond)
 				continue
 			}
 			if err != nil {

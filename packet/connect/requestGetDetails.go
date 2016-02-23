@@ -1,12 +1,11 @@
 package connect
 
 import (
-	"io"
 	"github.com/LilyPad/GoLilyPad/packet"
+	"io"
 )
 
 type RequestGetDetails struct {
-
 }
 
 func NewRequestGetDetails() (this *RequestGetDetails) {
@@ -19,7 +18,6 @@ func (this *RequestGetDetails) Id() int {
 }
 
 type requestGetDetailsCodec struct {
-
 }
 
 func (this *requestGetDetailsCodec) Decode(reader io.Reader) (request Request, err error) {
@@ -32,9 +30,9 @@ func (this *requestGetDetailsCodec) Encode(writer io.Writer, request Request) (e
 }
 
 type ResultGetDetails struct {
-	Ip string
-	Port uint16
-	Motd string
+	Ip      string
+	Port    uint16
+	Motd    string
 	Version string
 }
 
@@ -52,7 +50,6 @@ func (this *ResultGetDetails) Id() int {
 }
 
 type resultGetDetailsCodec struct {
-
 }
 
 func (this *resultGetDetailsCodec) Decode(reader io.Reader) (result Result, err error) {

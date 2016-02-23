@@ -1,15 +1,15 @@
 package connect
 
 import (
-	"io"
-	uuid "code.google.com/p/go-uuid/uuid"
 	"github.com/LilyPad/GoLilyPad/packet"
+	uuid "github.com/satori/go.uuid"
+	"io"
 )
 
 type RequestNotifyPlayer struct {
-	Add bool
+	Add    bool
 	Player string
-	Uuid uuid.UUID
+	Uuid   uuid.UUID
 }
 
 func NewRequestNotifyPlayerAdd(player string, uuid uuid.UUID) (this *RequestNotifyPlayer) {
@@ -33,7 +33,6 @@ func (this *RequestNotifyPlayer) Id() int {
 }
 
 type requestNotifyPlayerCodec struct {
-
 }
 
 func (this *requestNotifyPlayerCodec) Decode(reader io.Reader) (request Request, err error) {
@@ -69,7 +68,6 @@ func (this *requestNotifyPlayerCodec) Encode(writer io.Writer, request Request) 
 }
 
 type ResultNotifyPlayer struct {
-
 }
 
 func NewResultNotifyPlayer() (this *ResultNotifyPlayer) {
@@ -82,7 +80,6 @@ func (this *ResultNotifyPlayer) Id() int {
 }
 
 type resultNotifyPlayerCodec struct {
-
 }
 
 func (this *resultNotifyPlayerCodec) Decode(reader io.Reader) (result Result, err error) {

@@ -3,23 +3,23 @@ package connect
 import (
 	"errors"
 	"fmt"
+	"github.com/LilyPad/GoLilyPad/packet"
+	"github.com/LilyPad/GoLilyPad/packet/connect"
 	"net"
 	"sync"
 	"sync/atomic"
 	"time"
-	"github.com/LilyPad/GoLilyPad/packet"
-	"github.com/LilyPad/GoLilyPad/packet/connect"
 )
 
 type ConnectImpl struct {
 	EventDispatcher
-	conn net.Conn
+	conn      net.Conn
 	connCodec *packet.PacketConnCodec
-	pipeline *packet.PacketPipeline
+	pipeline  *packet.PacketPipeline
 
-	records map[int32]*RequestRecord
+	records      map[int32]*RequestRecord
 	recordsMutex sync.Mutex
-	sequenceId int32
+	sequenceId   int32
 }
 
 func NewConnectImpl() (this *ConnectImpl) {
@@ -39,7 +39,7 @@ func (this *ConnectImpl) Connect(addr string) (err error) {
 	this.pipeline = packet.NewPacketPipeline()
 	this.pipeline.AddLast("varIntLength", packet.NewPacketCodecVarIntLength())
 	this.pipeline.AddLast("registry", NewCodecRegistry(this))
-	this.connCodec = packet.NewPacketConnCodec(this.conn, this.pipeline, 10 * time.Second)
+	this.connCodec = packet.NewPacketConnCodec(this.conn, this.pipeline, 10*time.Second)
 	go this.connCodec.ReadConn(this)
 	return
 }

@@ -1,8 +1,8 @@
 package minecraft
 
 import (
-	"io"
 	"github.com/LilyPad/GoLilyPad/packet"
+	"io"
 )
 
 type PacketClientSetCompression struct {
@@ -20,7 +20,6 @@ func (this *PacketClientSetCompression) Id() int {
 }
 
 type packetClientSetCompressionCodec struct {
-
 }
 
 func (this *packetClientSetCompressionCodec) Decode(reader io.Reader) (decode packet.Packet, err error) {

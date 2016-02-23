@@ -1,14 +1,14 @@
 package config
 
 import (
+	"github.com/LilyPad/GoLilyPad/server/connect"
+	yaml "gopkg.in/yaml.v2"
 	"io/ioutil"
 	"regexp"
-	yaml "launchpad.net/goyaml"
-	"github.com/LilyPad/GoLilyPad/server/connect"
 )
 
 type Config struct {
-	Bind string `yaml:"bind"`
+	Bind   string        `yaml:"bind"`
 	Logins []ConfigLogin `yaml:"logins"`
 }
 
@@ -44,8 +44,8 @@ func (this *Config) Authenticate(username string, password string, passwordSalt 
 
 type ConfigLogin struct {
 	Username string `yaml:"username,omitempty"`
-	Regexp string `yaml:"regexp,omitempty"`
-	regexp *regexp.Regexp
+	Regexp   string `yaml:"regexp,omitempty"`
+	regexp   *regexp.Regexp
 	Password string `yaml:"password"`
 }
 

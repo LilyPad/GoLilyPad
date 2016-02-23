@@ -1,8 +1,8 @@
 package minecraft
 
 import (
-	"io"
 	"github.com/LilyPad/GoLilyPad/packet"
+	"io"
 )
 
 type PacketServerLoginStart struct {
@@ -20,7 +20,6 @@ func (this *PacketServerLoginStart) Id() int {
 }
 
 type packetServerLoginStartCodec struct {
-
 }
 
 func (this *packetServerLoginStartCodec) Decode(reader io.Reader) (decode packet.Packet, err error) {

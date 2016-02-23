@@ -1,12 +1,12 @@
 package connect
 
 import (
-	"io"
 	"github.com/LilyPad/GoLilyPad/packet"
+	"io"
 )
 
 type PacketMessageEvent struct {
-	Sender string
+	Sender  string
 	Channel string
 	Payload []byte
 }
@@ -24,7 +24,6 @@ func (this *PacketMessageEvent) Id() int {
 }
 
 type packetMessageEventCodec struct {
-
 }
 
 func (this *packetMessageEventCodec) Decode(reader io.Reader) (decode packet.Packet, err error) {

@@ -1,14 +1,14 @@
 package minecraft
 
 import (
+	"github.com/LilyPad/GoLilyPad/packet"
 	"io"
 	"io/ioutil"
-	"github.com/LilyPad/GoLilyPad/packet"
 )
 
 type PacketServerPluginMessage struct {
 	Channel string
-	Data []byte
+	Data    []byte
 }
 
 func NewPacketServerPluginMessage(channel string, data []byte) (this *PacketServerPluginMessage) {
@@ -23,7 +23,6 @@ func (this *PacketServerPluginMessage) Id() int {
 }
 
 type packetServerPluginMessageCodec struct {
-
 }
 
 func (this *packetServerPluginMessageCodec) Decode(reader io.Reader) (decode packet.Packet, err error) {

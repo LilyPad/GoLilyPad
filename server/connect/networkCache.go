@@ -1,25 +1,25 @@
 package connect
 
 import (
+	uuid "github.com/satori/go.uuid"
 	"sync"
-	uuid "code.google.com/p/go-uuid/uuid"
 )
 
 type NetworkCache struct {
-	playerToProxy map[string]*Session
+	playerToProxy      map[string]*Session
 	playerUuidsToProxy map[string]*Session
-	playerToProxyLock sync.RWMutex
-	addresses []string
-	ports []uint16
-	motds []string
-	versions []string
-	maxPlayers []uint16
-	shownAddress string
-	shownPort uint16
-	shownMotd string
-	shownVersion string
-	shownMaxPlayers uint16
-	rebuildLock sync.RWMutex
+	playerToProxyLock  sync.RWMutex
+	addresses          []string
+	ports              []uint16
+	motds              []string
+	versions           []string
+	maxPlayers         []uint16
+	shownAddress       string
+	shownPort          uint16
+	shownMotd          string
+	shownVersion       string
+	shownMaxPlayers    uint16
+	rebuildLock        sync.RWMutex
 }
 
 func NewNetworkCache() (this *NetworkCache) {
@@ -86,9 +86,9 @@ func (this *NetworkCache) UnregisterProxy(session *Session) {
 func (this *NetworkCache) AddPlayer(player string, uuid uuid.UUID, session *Session) (ok bool) {
 	this.playerToProxyLock.Lock()
 	if _, ok = this.playerToProxy[player]; !ok {
-		if _, ok = this.playerUuidsToProxy[string(uuid)]; !ok {
+		if _, ok = this.playerUuidsToProxy[string(uuid[:])]; !ok {
 			this.playerToProxy[player] = session
-			this.playerUuidsToProxy[string(uuid)] = session
+			this.playerUuidsToProxy[string(uuid[:])] = session
 		}
 	}
 	this.playerToProxyLock.Unlock()
@@ -99,7 +99,7 @@ func (this *NetworkCache) AddPlayer(player string, uuid uuid.UUID, session *Sess
 func (this *NetworkCache) RemovePlayer(player string, uuid uuid.UUID) {
 	this.playerToProxyLock.Lock()
 	delete(this.playerToProxy, player)
-	delete(this.playerUuidsToProxy, string(uuid))
+	delete(this.playerUuidsToProxy, string(uuid[:]))
 	this.playerToProxyLock.Unlock()
 }
 

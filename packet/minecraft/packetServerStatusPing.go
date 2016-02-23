@@ -1,8 +1,8 @@
 package minecraft
 
 import (
-	"io"
 	"github.com/LilyPad/GoLilyPad/packet"
+	"io"
 )
 
 type PacketServerStatusPing struct {
@@ -20,7 +20,6 @@ func (this *PacketServerStatusPing) Id() int {
 }
 
 type packetServerStatusPingCodec struct {
-
 }
 
 func (this *packetServerStatusPingCodec) Decode(reader io.Reader) (decode packet.Packet, err error) {

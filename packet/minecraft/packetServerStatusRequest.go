@@ -1,12 +1,11 @@
 package minecraft
 
 import (
-	"io"
 	"github.com/LilyPad/GoLilyPad/packet"
+	"io"
 )
 
 type PacketServerStatusRequest struct {
-
 }
 
 func NewPacketServerStatusRequest() (this *PacketServerStatusRequest) {
@@ -19,7 +18,6 @@ func (this *PacketServerStatusRequest) Id() int {
 }
 
 type packetServerStatusRequestCodec struct {
-
 }
 
 func (this *packetServerStatusRequestCodec) Decode(reader io.Reader) (decode packet.Packet, err error) {

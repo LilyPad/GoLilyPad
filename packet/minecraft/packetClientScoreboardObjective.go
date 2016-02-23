@@ -3,21 +3,21 @@ package minecraft
 import (
 	"errors"
 	"fmt"
-	"io"
 	"github.com/LilyPad/GoLilyPad/packet"
+	"io"
 )
 
 const (
-	PACKET_CLIENT_SCOREBOARD_OBJECTIVE_ACTION_ADD = int8(0)
+	PACKET_CLIENT_SCOREBOARD_OBJECTIVE_ACTION_ADD    = int8(0)
 	PACKET_CLIENT_SCOREBOARD_OBJECTIVE_ACTION_REMOVE = int8(1)
 	PACKET_CLIENT_SCOREBOARD_OBJECTIVE_ACTION_UPDATE = int8(2)
 )
 
 type PacketClientScoreboardObjective struct {
-	Name string
+	Name   string
 	Action int8
-	Value string
-	Type string
+	Value  string
+	Type   string
 }
 
 func NewPacketClientScoreboardObjectiveAdd(name string, value string, stype string) (this *PacketClientScoreboardObjective) {
@@ -50,7 +50,6 @@ func (this *PacketClientScoreboardObjective) Id() int {
 }
 
 type packetClientScoreboardObjectiveCodec struct {
-
 }
 
 func (this *packetClientScoreboardObjectiveCodec) Decode(reader io.Reader) (decode packet.Packet, err error) {

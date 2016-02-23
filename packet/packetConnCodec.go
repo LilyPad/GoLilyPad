@@ -3,17 +3,17 @@ package packet
 import (
 	"io"
 	"net"
-	"time"
 	"sync"
+	"time"
 )
 
 type PacketConnCodec struct {
-	reader io.Reader
-	writer io.Writer
-	conn net.Conn
+	reader      io.Reader
+	writer      io.Writer
+	conn        net.Conn
 	packetCodec PacketCodec
-	timeout time.Duration
-	writeMutex sync.Mutex
+	timeout     time.Duration
+	writeMutex  sync.Mutex
 }
 
 func NewPacketConnCodec(conn net.Conn, packetCodec PacketCodec, timeout time.Duration) (this *PacketConnCodec) {

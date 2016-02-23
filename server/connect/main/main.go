@@ -2,14 +2,14 @@ package main
 
 import (
 	"bufio"
-	"io"
 	"fmt"
-	"os"
-	"runtime"
-	"time"
-	"strings"
 	"github.com/LilyPad/GoLilyPad/server/connect"
 	"github.com/LilyPad/GoLilyPad/server/connect/main/config"
+	"io"
+	"os"
+	"runtime"
+	"strings"
+	"time"
 )
 
 var VERSION string
@@ -34,7 +34,7 @@ func main() {
 		for {
 			str, err := reader.ReadString('\n')
 			if err == io.EOF {
-				time.Sleep(100*time.Millisecond)
+				time.Sleep(100 * time.Millisecond)
 				continue
 			}
 			if err != nil {

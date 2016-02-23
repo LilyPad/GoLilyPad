@@ -5,11 +5,11 @@ import (
 )
 
 type EventServer struct {
-	Add bool
-	Server string
+	Add         bool
+	Server      string
 	SecurityKey string
-	Address string
-	Port uint16
+	Address     string
+	Port        uint16
 }
 
 func WrapEventServer(packet *connect.PacketServerEvent) (this *EventServer) {

@@ -1,17 +1,17 @@
 package minecraft
 
 import (
-	"io"
 	"github.com/LilyPad/GoLilyPad/packet"
+	"io"
 )
 
 type PacketServerClientSettings struct {
-	Locale string
+	Locale       string
 	ViewDistance byte
-	ChatFlags byte
-	ChatColours bool
+	ChatFlags    byte
+	ChatColours  bool
 	difficulty17 byte
-	SkinParts byte
+	SkinParts    byte
 }
 
 func NewPacketServerClientSettings(locale string, viewDistance byte, chatFlags byte, chatColours bool, skinParts byte) (this *PacketServerClientSettings) {
@@ -29,7 +29,6 @@ func (this *PacketServerClientSettings) Id() int {
 }
 
 type packetServerClientSettingsCodec struct {
-
 }
 
 func (this *packetServerClientSettingsCodec) Decode(reader io.Reader) (decode packet.Packet, err error) {

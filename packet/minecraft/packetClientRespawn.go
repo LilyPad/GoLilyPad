@@ -1,15 +1,15 @@
 package minecraft
 
 import (
-	"io"
 	"github.com/LilyPad/GoLilyPad/packet"
+	"io"
 )
 
 type PacketClientRespawn struct {
-	Dimension int32
+	Dimension  int32
 	Difficulty int8
-	Gamemode int8
-	LevelType string
+	Gamemode   int8
+	LevelType  string
 }
 
 func NewPacketClientRespawn(dimension int32, difficulty int8, gamemode int8, levelType string) (this *PacketClientRespawn) {
@@ -26,7 +26,6 @@ func (this *PacketClientRespawn) Id() int {
 }
 
 type packetClientRespawnCodec struct {
-
 }
 
 func (this *packetClientRespawnCodec) Decode(reader io.Reader) (decode packet.Packet, err error) {

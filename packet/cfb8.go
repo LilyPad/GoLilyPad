@@ -5,11 +5,12 @@ import (
 )
 
 type cfb8 struct {
-	Block cipher.Block
-	Iv []byte
-	Tmp []byte
+	Block   cipher.Block
+	Iv      []byte
+	Tmp     []byte
 	Decrypt bool
 }
+
 func newCFB8(block cipher.Block, iv []byte, decrypt bool) (stream cipher.Stream) {
 	cfb8 := new(cfb8)
 	cfb8.Block = block

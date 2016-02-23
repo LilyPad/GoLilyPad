@@ -2,8 +2,8 @@ package connect
 
 import (
 	"fmt"
-	"time"
 	"github.com/LilyPad/GoLilyPad/packet/connect"
+	"time"
 )
 
 func AutoConnect(connectClient Connect, addr *string, done chan bool) {

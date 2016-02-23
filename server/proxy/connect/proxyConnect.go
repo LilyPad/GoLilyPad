@@ -1,23 +1,23 @@
 package connect
 
 import (
-	"net"
-	"time"
-	"strconv"
-	"sync"
-	uuid "code.google.com/p/go-uuid/uuid"
 	clientConnect "github.com/LilyPad/GoLilyPad/client/connect"
 	packetConnect "github.com/LilyPad/GoLilyPad/packet/connect"
+	uuid "github.com/satori/go.uuid"
+	"net"
+	"strconv"
+	"sync"
+	"time"
 )
 
 type ProxyConnect struct {
-	client clientConnect.Connect
-	servers map[string]*Server
-	serversMutex sync.RWMutex
-	localPlayers map[string]uuid.UUID
+	client            clientConnect.Connect
+	servers           map[string]*Server
+	serversMutex      sync.RWMutex
+	localPlayers      map[string]uuid.UUID
 	localPlayersMutex sync.RWMutex
-	players uint16
-	maxPlayers uint16
+	players           uint16
+	maxPlayers        uint16
 }
 
 func NewProxyConnect(addr *string, user *string, pass *string, proxy *ProxyConfig, done chan bool) (this *ProxyConnect) {

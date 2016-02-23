@@ -8,13 +8,13 @@ import (
 )
 
 type GameProfile struct {
-	Id string `json:"id"`
+	Id         string                `json:"id"`
 	Properties []GameProfileProperty `json:"properties"`
 }
 
 type GameProfileProperty struct {
-	Name string `json:"name"`
-	Value string `json:"value"`
+	Name      string `json:"name"`
+	Value     string `json:"value"`
 	Signature string `json:"signature"`
 }
 

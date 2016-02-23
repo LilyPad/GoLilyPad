@@ -3,22 +3,22 @@ package minecraft
 import (
 	"errors"
 	"fmt"
-	"io"
-	uuid "code.google.com/p/go-uuid/uuid"
 	"github.com/LilyPad/GoLilyPad/packet"
+	uuid "github.com/satori/go.uuid"
+	"io"
 )
 
 const (
-	PACKET_CLIENT_PLAYER_LIST_ACTION_ADD = 0
-	PACKET_CLIENT_PLAYER_LIST_ACTION_UPDATE_GAMEMODE = 1
-	PACKET_CLIENT_PLAYER_LIST_ACTION_UPDATE_LATENCY = 2
+	PACKET_CLIENT_PLAYER_LIST_ACTION_ADD                 = 0
+	PACKET_CLIENT_PLAYER_LIST_ACTION_UPDATE_GAMEMODE     = 1
+	PACKET_CLIENT_PLAYER_LIST_ACTION_UPDATE_LATENCY      = 2
 	PACKET_CLIENT_PLAYER_LIST_ACTION_UPDATE_DISPLAY_NAME = 3
-	PACKET_CLIENT_PLAYER_LIST_ACTION_REMOVE = 4
+	PACKET_CLIENT_PLAYER_LIST_ACTION_REMOVE              = 4
 )
 
 type PacketClientPlayerList struct {
 	Action int
-	Items []PacketClientPlayerListItem
+	Items  []PacketClientPlayerListItem
 }
 
 type PacketClientPlayerListItem struct {
@@ -27,16 +27,16 @@ type PacketClientPlayerListItem struct {
 }
 
 type PacketClientPlayerListAddPlayer struct {
-	Name string
-	Properties []PacketClientPlayerListAddPlayerProperty
-	Gamemode int
-	Latency int
+	Name        string
+	Properties  []PacketClientPlayerListAddPlayerProperty
+	Gamemode    int
+	Latency     int
 	DisplayName string
 }
 
 type PacketClientPlayerListAddPlayerProperty struct {
-	Name string
-	Value string
+	Name      string
+	Value     string
 	Signature string
 }
 
@@ -64,7 +64,6 @@ func (this *PacketClientPlayerList) Id() int {
 }
 
 type packetClientPlayerListCodec struct {
-
 }
 
 func (this *packetClientPlayerListCodec) Decode(reader io.Reader) (decode packet.Packet, err error) {

@@ -3,28 +3,28 @@ package minecraft
 import (
 	"errors"
 	"fmt"
-	"io"
 	"github.com/LilyPad/GoLilyPad/packet"
+	"io"
 )
 
 const (
-	PACKET_CLIENT_TEAMS_ACTION_ADD = int8(0)
-	PACKET_CLIENT_TEAMS_ACTION_REMOVE = int8(1)
-	PACKET_CLIENT_TEAMS_ACTION_INFO_UPDATE = int8(2)
-	PACKET_CLIENT_TEAMS_ACTION_PLAYERS_ADD = int8(3)
+	PACKET_CLIENT_TEAMS_ACTION_ADD            = int8(0)
+	PACKET_CLIENT_TEAMS_ACTION_REMOVE         = int8(1)
+	PACKET_CLIENT_TEAMS_ACTION_INFO_UPDATE    = int8(2)
+	PACKET_CLIENT_TEAMS_ACTION_PLAYERS_ADD    = int8(3)
 	PACKET_CLIENT_TEAMS_ACTION_PLAYERS_REMOVE = int8(4)
 )
 
 type PacketClientTeams struct {
-	Name string
-	Action int8
-	DisplayName string
-	Prefix string
-	Suffix string
-	FriendlyFire int8
+	Name              string
+	Action            int8
+	DisplayName       string
+	Prefix            string
+	Suffix            string
+	FriendlyFire      int8
 	NameTagVisibility string
-	Color int8
-	Players []string
+	Color             int8
+	Players           []string
 }
 
 func NewPacketClientTeamsAdd(name string, displayName string, prefix string, suffix string, friendlyFire int8, nameTagVisibility string, color int8, players []string) (this *PacketClientTeams) {
@@ -82,7 +82,6 @@ func (this *PacketClientTeams) Id() int {
 }
 
 type packetClientTeamsCodec struct {
-
 }
 
 func (this *packetClientTeamsCodec) Decode(reader io.Reader) (decode packet.Packet, err error) {

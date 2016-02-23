@@ -5,7 +5,7 @@ import (
 )
 
 type RequestRecord struct {
-	request connect.Request
+	request  connect.Request
 	callback RequestCallback
 }
 

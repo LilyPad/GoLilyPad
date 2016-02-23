@@ -1,8 +1,8 @@
 package connect
 
 import (
-	"io"
 	"github.com/LilyPad/GoLilyPad/packet"
+	"io"
 )
 
 type PacketKeepalive struct {
@@ -20,7 +20,6 @@ func (this *PacketKeepalive) Id() int {
 }
 
 type packetKeepaliveCodec struct {
-
 }
 
 func (this *packetKeepaliveCodec) Decode(reader io.Reader) (decode packet.Packet, err error) {

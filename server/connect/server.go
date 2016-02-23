@@ -6,12 +6,12 @@ import (
 )
 
 type Server struct {
-	listener net.Listener
+	listener      net.Listener
 	keepaliveDone chan bool
 
-	authenticator Authenticator
+	authenticator     Authenticator
 	sessionRegistries map[SessionRole]*SessionRegistry
-	networkCache *NetworkCache
+	networkCache      *NetworkCache
 }
 
 func NewServer(authenticator Authenticator) (this *Server) {
@@ -62,4 +62,3 @@ func (this *Server) SessionRegistry(sessionRole SessionRole) (sessionRegistry *S
 	}
 	return
 }
-

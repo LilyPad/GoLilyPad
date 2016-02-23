@@ -4,14 +4,14 @@ import (
 	"bytes"
 	"compress/zlib"
 	"encoding/binary"
+	"github.com/LilyPad/GoLilyPad/packet"
 	"io"
 	"io/ioutil"
-	"github.com/LilyPad/GoLilyPad/packet"
 )
 
 type PacketGeneric struct {
-	id int
-	Bytes []byte
+	id         int
+	Bytes      []byte
 	compressed bool
 }
 
@@ -58,10 +58,10 @@ func (this *PacketGeneric) SwapEntities(a int32, b int32, clientServer bool, pro
 		buffer := bytes.NewBuffer(this.Bytes)
 		_, err := packet.ReadVarInt(buffer)
 		varIntLength := len(this.Bytes) - buffer.Len()
-		if err == nil && len(this.Bytes) > varIntLength + 19 {
+		if err == nil && len(this.Bytes) > varIntLength+19 {
 			objectType := this.Bytes[varIntLength]
 			if objectType == 60 || objectType == 61 || objectType == 62 || objectType == 63 || objectType == 64 || objectType == 65 || objectType == 66 || objectType == 90 {
-				id := int32(binary.BigEndian.Uint32(this.Bytes[varIntLength+15:varIntLength+19]))
+				id := int32(binary.BigEndian.Uint32(this.Bytes[varIntLength+15 : varIntLength+19]))
 				if id == a {
 					binary.BigEndian.PutUint32(this.Bytes[varIntLength+15:varIntLength+19], uint32(b))
 				} else if id == b {
@@ -105,10 +105,10 @@ func (this *PacketGeneric) swapEntitiesInt(a int32, b int32, clientServer bool, 
 	this.Decompress()
 	var id int32
 	for _, position := range idPositions {
-		if len(this.Bytes) < position + 4 {
+		if len(this.Bytes) < position+4 {
 			continue
 		}
-		id = int32(binary.BigEndian.Uint32(this.Bytes[position:position+4]))
+		id = int32(binary.BigEndian.Uint32(this.Bytes[position : position+4]))
 		if id == a {
 			binary.BigEndian.PutUint32(this.Bytes[position:position+4], uint32(b))
 		} else if id == b {

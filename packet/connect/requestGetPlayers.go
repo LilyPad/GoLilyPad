@@ -1,8 +1,8 @@
 package connect
 
 import (
-	"io"
 	"github.com/LilyPad/GoLilyPad/packet"
+	"io"
 )
 
 type RequestGetPlayers struct {
@@ -26,7 +26,6 @@ func (this *RequestGetPlayers) Id() int {
 }
 
 type requestGetPlayersCodec struct {
-
 }
 
 func (this *requestGetPlayersCodec) Decode(reader io.Reader) (request Request, err error) {
@@ -45,10 +44,10 @@ func (this *requestGetPlayersCodec) Encode(writer io.Writer, request Request) (e
 }
 
 type ResultGetPlayers struct {
-	List bool
+	List           bool
 	CurrentPlayers uint16
-	MaxPlayers uint16
-	Players []string
+	MaxPlayers     uint16
+	Players        []string
 }
 
 func NewResultGetPlayers(currentPlayers uint16, maxPlayers uint16) (this *ResultGetPlayers) {
@@ -73,7 +72,6 @@ func (this *ResultGetPlayers) Id() int {
 }
 
 type resultGetPlayersCodec struct {
-
 }
 
 func (this *resultGetPlayersCodec) Decode(reader io.Reader) (result Result, err error) {

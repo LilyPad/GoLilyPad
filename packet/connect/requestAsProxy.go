@@ -1,15 +1,15 @@
 package connect
 
 import (
-	"io"
 	"github.com/LilyPad/GoLilyPad/packet"
+	"io"
 )
 
 type RequestAsProxy struct {
-	Address string
-	Port uint16
-	Motd string
-	Version string
+	Address    string
+	Port       uint16
+	Motd       string
+	Version    string
 	MaxPlayers uint16
 }
 
@@ -28,7 +28,6 @@ func (this *RequestAsProxy) Id() int {
 }
 
 type requestAsProxyCodec struct {
-
 }
 
 func (this *requestAsProxyCodec) Decode(reader io.Reader) (request Request, err error) {
@@ -80,7 +79,6 @@ func (this *requestAsProxyCodec) Encode(writer io.Writer, request Request) (err 
 }
 
 type ResultAsProxy struct {
-
 }
 
 func NewResultAsProxy() (this *ResultAsProxy) {
@@ -93,7 +91,6 @@ func (this *ResultAsProxy) Id() int {
 }
 
 type resultAsProxyCodec struct {
-
 }
 
 func (this *resultAsProxyCodec) Decode(reader io.Reader) (result Result, err error) {

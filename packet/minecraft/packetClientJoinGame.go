@@ -1,17 +1,17 @@
 package minecraft
 
 import (
-	"io"
 	"github.com/LilyPad/GoLilyPad/packet"
+	"io"
 )
 
 type PacketClientJoinGame struct {
-	EntityId int32
-	Gamemode int8
-	Dimension int8
-	Difficulty int8
-	MaxPlayers int8
-	LevelType string
+	EntityId         int32
+	Gamemode         int8
+	Dimension        int8
+	Difficulty       int8
+	MaxPlayers       int8
+	LevelType        string
 	ReducedDebugInfo bool
 }
 
@@ -32,7 +32,6 @@ func (this *PacketClientJoinGame) Id() int {
 }
 
 type packetClientJoinGameCodec struct {
-
 }
 
 func (this *packetClientJoinGameCodec) Decode(reader io.Reader) (decode packet.Packet, err error) {

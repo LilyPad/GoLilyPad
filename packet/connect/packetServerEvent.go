@@ -1,16 +1,16 @@
 package connect
 
 import (
-	"io"
 	"github.com/LilyPad/GoLilyPad/packet"
+	"io"
 )
 
 type PacketServerEvent struct {
-	Add bool
-	Server string
+	Add         bool
+	Server      string
 	SecurityKey string
-	Address string
-	Port uint16
+	Address     string
+	Port        uint16
 }
 
 func NewPacketServerEventAdd(server string, securityKey string, address string, port uint16) (this *PacketServerEvent) {
@@ -35,7 +35,6 @@ func (this *PacketServerEvent) Id() int {
 }
 
 type packetServerEventCodec struct {
-
 }
 
 func (this *packetServerEventCodec) Decode(reader io.Reader) (decode packet.Packet, err error) {

@@ -9,9 +9,9 @@ import (
 )
 
 type PacketCodecZlib struct {
-	codec PacketCodec
-	threshold int
-	level int
+	codec      PacketCodec
+	threshold  int
+	level      int
 	zlibWriter *zlib.Writer
 }
 

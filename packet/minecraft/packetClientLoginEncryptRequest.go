@@ -3,13 +3,13 @@ package minecraft
 import (
 	"errors"
 	"fmt"
-	"io"
 	"github.com/LilyPad/GoLilyPad/packet"
+	"io"
 )
 
 type PacketClientLoginEncryptRequest struct {
-	ServerId string
-	PublicKey []byte
+	ServerId    string
+	PublicKey   []byte
 	VerifyToken []byte
 }
 
@@ -26,7 +26,6 @@ func (this *PacketClientLoginEncryptRequest) Id() int {
 }
 
 type packetClientLoginEncryptRequestCodec struct {
-
 }
 
 func (this *packetClientLoginEncryptRequestCodec) Decode(reader io.Reader) (decode packet.Packet, err error) {

@@ -1,15 +1,15 @@
 package config
 
 import (
+	yaml "gopkg.in/yaml.v2"
 	"io/ioutil"
 	"strings"
 	"sync"
-	yaml "launchpad.net/goyaml"
 )
 
 type Config struct {
 	Connect ConfigConnect `yaml:"connect"`
-	Proxy ConfigProxy `yaml:"proxy"`
+	Proxy   ConfigProxy   `yaml:"proxy"`
 }
 
 func (this *Config) Route(domain string) (val []string) {
@@ -138,7 +138,7 @@ func (this *Config) LocaleShutdown() (val string) {
 }
 
 type ConfigConnect struct {
-	Address string `yaml:"address"`
+	Address     string                   `yaml:"address"`
 	Credentials ConfigConnectCredentials `yaml:"credentials"`
 }
 
@@ -148,34 +148,34 @@ type ConfigConnectCredentials struct {
 }
 
 type ConfigProxy struct {
-	Bind string `yaml:"bind"`
-	Routes []ConfigProxyRoute `yaml:"routes"`
-	routes map[string]ConfigProxyRoute
-	routesMutex sync.RWMutex
-	Locale ConfigProxyLocale `yaml:"locale"`
-	Motd string `yaml:"motd"`
-	MaxPlayers uint16 `yaml:"maxPlayers"`
-	SyncMaxPlayers bool `yaml:"syncMaxPlayers"`
-	Authenticate bool `yaml:"authenticate"`
+	Bind           string             `yaml:"bind"`
+	Routes         []ConfigProxyRoute `yaml:"routes"`
+	routes         map[string]ConfigProxyRoute
+	routesMutex    sync.RWMutex
+	Locale         ConfigProxyLocale `yaml:"locale"`
+	Motd           string            `yaml:"motd"`
+	MaxPlayers     uint16            `yaml:"maxPlayers"`
+	SyncMaxPlayers bool              `yaml:"syncMaxPlayers"`
+	Authenticate   bool              `yaml:"authenticate"`
 }
 
 type ConfigProxyLocale struct {
-	Full string `yaml:"full"`
-	Offline string `yaml:"offline"`
+	Full     string `yaml:"full"`
+	Offline  string `yaml:"offline"`
 	LoggedIn string `yaml:"loggedIn"`
 	LostConn string `yaml:"lostConn"`
 	Shutdown string `yaml:"shutdown"`
 }
 
 type ConfigProxyRoute struct {
-	Domain string `yaml:"domain"`
-	Server string `yaml:"server,omitempty"`
+	Domain  string   `yaml:"domain"`
+	Server  string   `yaml:"server,omitempty"`
 	Servers []string `yaml:"servers,omitempty"`
-	Motd string `yaml:"motd,omitempty"`
-	Motds []string `yaml:"motds,omitempty"`
-	Icon string `yaml:"icon,omitempty"`
-	Icons []string `yaml:"icons,omitempty"`
-	Sample string `yaml:"sample,omitempty"`
+	Motd    string   `yaml:"motd,omitempty"`
+	Motds   []string `yaml:"motds,omitempty"`
+	Icon    string   `yaml:"icon,omitempty"`
+	Icons   []string `yaml:"icons,omitempty"`
+	Sample  string   `yaml:"sample,omitempty"`
 }
 
 func DefaultConfig() (config *Config) {
@@ -196,14 +196,14 @@ func DefaultConfig() (config *Config) {
 			ConfigProxyRoute{"icon.example.com", "hub", nil, "", nil, "icon.png", []string{"icon1.png", "icon2.png", "icons/icon3.png"}, ""},
 		},
 		Locale: ConfigProxyLocale{
-			Full: "The server seems to be currently full. Try again later!",
-			Offline: "The requested server is currently offline. Try again later!",
+			Full:     "The server seems to be currently full. Try again later!",
+			Offline:  "The requested server is currently offline. Try again later!",
 			LoggedIn: "You seem to be logged in already. Try again later!",
 			LostConn: "Lost connection... Please try to reconnect",
 			Shutdown: "The server is being restarted. Please try to reconnect",
 		},
-		Motd: "A LilyPad Server",
-		MaxPlayers: 1,
+		Motd:         "A LilyPad Server",
+		MaxPlayers:   1,
 		Authenticate: true,
 	}
 	return

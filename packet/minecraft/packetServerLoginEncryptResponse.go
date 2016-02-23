@@ -3,13 +3,13 @@ package minecraft
 import (
 	"errors"
 	"fmt"
-	"io"
 	"github.com/LilyPad/GoLilyPad/packet"
+	"io"
 )
 
 type PacketServerLoginEncryptResponse struct {
 	SharedSecret []byte
-	VerifyToken []byte
+	VerifyToken  []byte
 }
 
 func NewPacketServerLoginEncryptResponse(sharedSecret []byte, verifyToken []byte) (this *PacketServerLoginEncryptResponse) {
@@ -24,7 +24,6 @@ func (this *PacketServerLoginEncryptResponse) Id() int {
 }
 
 type packetServerLoginEncryptResponseCodec struct {
-
 }
 
 func (this *packetServerLoginEncryptResponseCodec) Decode(reader io.Reader) (decode packet.Packet, err error) {

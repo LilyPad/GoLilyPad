@@ -7,10 +7,10 @@ import (
 )
 
 type ZlibToggleReader struct {
-	bytes []byte
-	rawReader io.Reader
-	zlibReader io.ReadCloser
-	compression bool
+	bytes         []byte
+	rawReader     io.Reader
+	zlibReader    io.ReadCloser
+	compression   bool
 	currentReader io.Reader
 }
 

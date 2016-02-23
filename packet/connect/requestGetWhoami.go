@@ -1,12 +1,11 @@
 package connect
 
 import (
-	"io"
 	"github.com/LilyPad/GoLilyPad/packet"
+	"io"
 )
 
 type RequestGetWhoami struct {
-
 }
 
 func NewRequestGetWhoami() (this *RequestGetWhoami) {
@@ -19,7 +18,6 @@ func (this *RequestGetWhoami) Id() int {
 }
 
 type requestGetWhoamiCodec struct {
-
 }
 
 func (this *requestGetWhoamiCodec) Decode(reader io.Reader) (request Request, err error) {
@@ -46,7 +44,6 @@ func (this *ResultGetWhoami) Id() int {
 }
 
 type resultGetWhoamiCodec struct {
-
 }
 
 func (this *resultGetWhoamiCodec) Decode(reader io.Reader) (result Result, err error) {

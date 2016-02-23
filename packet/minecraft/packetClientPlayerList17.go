@@ -1,14 +1,14 @@
 package minecraft
 
 import (
-	"io"
 	"github.com/LilyPad/GoLilyPad/packet"
+	"io"
 )
 
 type PacketClientPlayerList17 struct {
-	Name string
+	Name   string
 	Online bool
-	Ping int16
+	Ping   int16
 }
 
 func NewPacketClientPlayerList17Add(name string, ping int16) (this *PacketClientPlayerList17) {
@@ -31,7 +31,6 @@ func (this *PacketClientPlayerList17) Id() int {
 }
 
 type packetClientPlayerListCodec17 struct {
-
 }
 
 func (this *packetClientPlayerListCodec17) Decode(reader io.Reader) (decode packet.Packet, err error) {

@@ -7,7 +7,7 @@ import (
 )
 
 type PacketCodecCfb8 struct {
-	codec PacketCodec
+	codec  PacketCodec
 	writer *cipher.StreamWriter
 	reader *cipher.StreamReader
 }

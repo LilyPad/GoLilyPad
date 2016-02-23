@@ -44,7 +44,7 @@ func (this *SessionRegistry) GetById(id string) (session *Session) {
 func (this *SessionRegistry) GetAll() (sessions []*Session) {
 	this.RLock()
 	sessions = make([]*Session, 0, len(this.sessionsByName))
-	for  _, session := range this.sessionsByName {
+	for _, session := range this.sessionsByName {
 		sessions = append(sessions, session)
 	}
 	this.RUnlock()

@@ -1,13 +1,13 @@
 package connect
 
 import (
-	"io"
 	"github.com/LilyPad/GoLilyPad/packet"
+	"io"
 )
 
 type RequestAsServer struct {
 	Address string
-	Port uint16
+	Port    uint16
 }
 
 func NewRequestAsServer(address string, port uint16) (this *RequestAsServer) {
@@ -22,7 +22,6 @@ func (this *RequestAsServer) Id() int {
 }
 
 type requestAsServerCodec struct {
-
 }
 
 func (this *requestAsServerCodec) Decode(reader io.Reader) (request Request, err error) {
@@ -64,7 +63,6 @@ func (this *ResultAsServer) Id() int {
 }
 
 type resultAsServerCodec struct {
-
 }
 
 func (this *resultAsServerCodec) Decode(reader io.Reader) (result Result, err error) {
