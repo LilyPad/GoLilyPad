@@ -321,7 +321,6 @@ func (this *Session) HandlePacket(packet packet.Packet) (err error) {
 		}
 	case STATE_STATUS_PING:
 		if statusPing, ok := packet.(*minecraft.PacketServerStatusPing); ok {
-			fmt.Println("Got ping")
 			err = this.Write(minecraft.NewPacketClientStatusPing(statusPing.Time))
 			if err != nil {
 				return
