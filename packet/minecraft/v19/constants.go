@@ -403,4 +403,4 @@ var Version = &minecraft.Version{
 	IdMap:            IdMap,
 }
 
-var VersionNum = 104
+var VersionNum = 107

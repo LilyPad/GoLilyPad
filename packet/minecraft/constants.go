@@ -16,7 +16,7 @@ const (
 	PACKET_SERVER_STATUS_PING     = 0x01
 )
 
-var Versions = []int{104, 47, 5, 4}
+var Versions = []int{107, 47, 5, 4}
 
 var HandshakePacketServerCodec = packet.NewPacketCodecRegistryDual([]packet.PacketCodec{}, []packet.PacketCodec{
 	PACKET_SERVER_HANDSHAKE: new(CodecServerHandshake),
