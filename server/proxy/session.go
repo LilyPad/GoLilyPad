@@ -149,7 +149,9 @@ func (this *Session) SetAuthenticated(result bool) {
 		return
 	}
 	this.state = STATE_INIT
-	this.SetCompression(256)
+	if (this.protocolVersion >= mc19.VersionNum) {
+		this.SetCompression(256)
+	}
 	if this.protocolVersion >= 5 {
 		this.Write(minecraft.NewPacketClientLoginSuccess(this.protocol.IdMap, FormatUUID(this.profile.Id), this.name))
 	} else {
