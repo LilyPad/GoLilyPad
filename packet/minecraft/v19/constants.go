@@ -272,6 +272,7 @@ var Swappers = &minecraft.PacketGenericSwappers{
 		PACKET_SERVER_ENTITY_ACTION: true,
 		PACKET_SERVER_USE_ENTITY:    true,
 	},
+	IdMap: IdMap,
 }
 
 var IdMap = &minecraft.IdMap{

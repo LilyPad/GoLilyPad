@@ -257,6 +257,7 @@ var Swappers = &minecraft.PacketGenericSwappers{
 		PACKET_SERVER_ENTITY_ACTION: {0},
 	},
 	ServerVarInt: []bool{},
+	IdMap:        IdMap,
 }
 
 var IdMap = mc18.IdMap

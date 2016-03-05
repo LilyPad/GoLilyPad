@@ -21,6 +21,7 @@ type PacketGenericSwappers struct {
 	ClientVarInt []bool
 	ServerInt    [][]int
 	ServerVarInt []bool
+	IdMap        *IdMap
 }
 
 func NewPacketGeneric(id int, bytes []byte, compressed bool, swappers *PacketGenericSwappers) (this *PacketGeneric) {
@@ -62,7 +63,70 @@ func (this *PacketGeneric) SwapEntities(a int32, b int32, clientServer bool) {
 	if a == b {
 		return
 	}
-	// FIXME spawn object / destroy entities / combat event
+	if this.id == this.swappers.IdMap.PacketClientSpawnObject && clientServer {
+		this.Decompress()
+		buffer := bytes.NewReader(this.Bytes)
+		if this.id == 0x00 {
+			entityId, _ := packet.ReadVarInt(buffer)
+			entityUUID, _ := packet.ReadUUID(buffer)
+			entityType, _ := packet.ReadUint8(buffer)
+			entityX, _ := packet.ReadFloat64(buffer)
+			entityY, _ := packet.ReadFloat64(buffer)
+			entityZ, _ := packet.ReadFloat64(buffer)
+			entityPitch, _ := packet.ReadUint8(buffer)
+			entityYaw, _ := packet.ReadUint8(buffer)
+			entityData, _ := packet.ReadInt32(buffer)
+			if (entityType >= 60 && entityType <= 66) || entityType == 90 {
+				if entityData == a {
+					entityData = b
+				} else if entityData == b {
+					entityData = a
+				}
+			}
+			newBuffer := &bytes.Buffer{}
+			packet.WriteVarInt(newBuffer, entityId)
+			packet.WriteUUID(newBuffer, entityUUID)
+			packet.WriteUint8(newBuffer, entityType)
+			packet.WriteFloat64(newBuffer, entityX)
+			packet.WriteFloat64(newBuffer, entityY)
+			packet.WriteFloat64(newBuffer, entityZ)
+			packet.WriteUint8(newBuffer, entityPitch)
+			packet.WriteUint8(newBuffer, entityYaw)
+			packet.WriteInt32(newBuffer, entityData)
+			buffer.WriteTo(newBuffer)
+			this.Bytes = newBuffer.Bytes()
+		} else {
+			entityId, _ := packet.ReadVarInt(buffer)
+			entityType, _ := packet.ReadUint8(buffer)
+			entityX, _ := packet.ReadInt32(buffer)
+			entityY, _ := packet.ReadInt32(buffer)
+			entityZ, _ := packet.ReadInt32(buffer)
+			entityPitch, _ := packet.ReadUint8(buffer)
+			entityYaw, _ := packet.ReadUint8(buffer)
+			entityData, _ := packet.ReadInt32(buffer)
+			if (entityType >= 60 && entityType <= 66) || entityType == 90 {
+				if entityData == a {
+					entityData = b
+				} else if entityData == b {
+					entityData = a
+				}
+			}
+			newBuffer := &bytes.Buffer{}
+			packet.WriteVarInt(newBuffer, entityId)
+			packet.WriteUint8(newBuffer, entityType)
+			packet.WriteInt32(newBuffer, entityX)
+			packet.WriteInt32(newBuffer, entityY)
+			packet.WriteInt32(newBuffer, entityZ)
+			packet.WriteUint8(newBuffer, entityPitch)
+			packet.WriteUint8(newBuffer, entityYaw)
+			packet.WriteInt32(newBuffer, entityData)
+			buffer.WriteTo(newBuffer)
+			this.Bytes = newBuffer.Bytes()
+		}
+	} else if this.id == this.swappers.IdMap.PacketClientDestroyEntities && clientServer {
+		// FIXME
+	}
+	// FIXME combat event
 	this.swapEntitiesInt(a, b, clientServer)
 	this.swapEntitiesVarInt(a, b, clientServer)
 }
