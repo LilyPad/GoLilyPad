@@ -206,3 +206,23 @@ func WriteUint64(writer io.Writer, val uint64) (err error) {
 	_, err = writer.Write(util[:8])
 	return
 }
+
+func WriteFloat32(writer io.Writer, val float32) (err error) {
+	return WriteUint32(writer, math.Float32bits(val))
+}
+
+func ReadFloat32(reader io.Reader) (val float32, err error) {
+	ival, err := ReadUint32(reader)
+	val = math.Float32frombits(ival)
+	return
+}
+
+func WriteFloat64(writer io.Writer, val float64) (err error) {
+	return WriteUint64(writer, math.Float64bits(val))
+}
+
+func ReadFloat64(reader io.Reader) (val float64, err error) {
+	ival, err := ReadUint64(reader)
+	val = math.Float64frombits(ival)
+	return
+}
