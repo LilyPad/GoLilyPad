@@ -4,6 +4,7 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
+	"math"
 	uuid "github.com/satori/go.uuid"
 	"io"
 )
