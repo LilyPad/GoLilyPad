@@ -15,6 +15,7 @@ Pull the project and get the dependencies:
 $ go get github.com/LilyPad/GoLilyPad
 $ go get github.com/satori/go.uuid
 $ go get gopkg.in/yaml.v2
+$ go get github.com/klauspost/compress/zlib
 ```
 
 ### Server Connect ###
