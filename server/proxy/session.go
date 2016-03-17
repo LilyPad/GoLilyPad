@@ -74,6 +74,7 @@ func NewSession(server *Server, conn net.Conn) (this *Session) {
 	this.playerList = make(map[string]struct{})
 	this.scoreboards = make(map[string]struct{})
 	this.teams = make(map[string]struct{})
+	this.bossBars = make(map[string]struct{})
 	this.remoteIp, this.remotePort, _ = net.SplitHostPort(conn.RemoteAddr().String())
 	this.state = STATE_DISCONNECTED
 	return
