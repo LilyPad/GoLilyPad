@@ -6,6 +6,7 @@ import (
 	"github.com/LilyPad/GoLilyPad/packet"
 	"github.com/LilyPad/GoLilyPad/packet/minecraft"
 	mc17 "github.com/LilyPad/GoLilyPad/packet/minecraft/v17"
+	mc19 "github.com/LilyPad/GoLilyPad/packet/minecraft/v19"
 	"github.com/LilyPad/GoLilyPad/server/proxy/connect"
 	uuid "github.com/satori/go.uuid"
 	"net"
@@ -204,6 +205,12 @@ func (this *SessionOutBridge) HandlePacket(packet packet.Packet) (err error) {
 					}
 					this.Write(minecraft.NewPacketServerPluginMessage(this.protocol.IdMap, "REGISTER", bytes.Join(channels, []byte{0})))
 				}
+				if len(this.session.bossBars) > 0 {
+					for uuidString, _ := range this.session.bossBars {
+						uuid, _ := uuid.FromBytes([]byte(uuidString))
+						this.session.Write(mc19.NewPacketClientBossBarRemove(uuid))
+					}
+				}
 				return
 			}
 		} else if id == this.protocol.IdMap.PacketClientPlayerList {
@@ -239,6 +246,13 @@ func (this *SessionOutBridge) HandlePacket(packet packet.Packet) (err error) {
 				this.session.teams[teamPacket.Name] = struct{}{}
 			} else if teamPacket.Action == minecraft.PACKET_CLIENT_TEAMS_ACTION_REMOVE {
 				delete(this.session.teams, teamPacket.Name)
+			}
+		} else if id == this.protocol.IdMap.PacketClientBossBar {
+			bossBarPacket := packet.(*mc19.PacketClientBossBar)
+			if bossBarPacket.Action == mc19.PACKET_CLIENT_BOSS_BAR_ACTION_ADD {
+				this.session.bossBars[string(bossBarPacket.UUID[:])] = struct{}{}
+			} else if bossBarPacket.Action == mc19.PACKET_CLIENT_BOSS_BAR_ACTION_REMOVE {
+				delete(this.session.bossBars, string(bossBarPacket.UUID[:]))
 			}
 		} else if id == this.protocol.IdMap.PacketClientDisconnect {
 			this.state = STATE_DISCONNECTED

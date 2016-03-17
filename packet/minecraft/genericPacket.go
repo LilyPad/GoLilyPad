@@ -2,9 +2,9 @@ package minecraft
 
 import (
 	"bytes"
-	"github.com/klauspost/compress/zlib"
 	"encoding/binary"
 	"github.com/LilyPad/GoLilyPad/packet"
+	"github.com/klauspost/compress/zlib"
 	"io"
 	"io/ioutil"
 )
@@ -63,10 +63,11 @@ func (this *PacketGeneric) SwapEntities(a int32, b int32, clientServer bool) {
 	if a == b {
 		return
 	}
+	newBuffer := &bytes.Buffer{}
 	if this.id == this.swappers.IdMap.PacketClientSpawnObject && clientServer {
 		this.Decompress()
 		buffer := bytes.NewReader(this.Bytes)
-		if this.id == 0x00 {
+		if this.id == 0x00 { // v1.9
 			entityId, _ := packet.ReadVarInt(buffer)
 			entityUUID, _ := packet.ReadUUID(buffer)
 			entityType, _ := packet.ReadUint8(buffer)
@@ -83,7 +84,6 @@ func (this *PacketGeneric) SwapEntities(a int32, b int32, clientServer bool) {
 					entityData = a
 				}
 			}
-			newBuffer := &bytes.Buffer{}
 			packet.WriteVarInt(newBuffer, entityId)
 			packet.WriteUUID(newBuffer, entityUUID)
 			packet.WriteUint8(newBuffer, entityType)
@@ -93,8 +93,6 @@ func (this *PacketGeneric) SwapEntities(a int32, b int32, clientServer bool) {
 			packet.WriteUint8(newBuffer, entityPitch)
 			packet.WriteUint8(newBuffer, entityYaw)
 			packet.WriteInt32(newBuffer, entityData)
-			buffer.WriteTo(newBuffer)
-			this.Bytes = newBuffer.Bytes()
 		} else {
 			entityId, _ := packet.ReadVarInt(buffer)
 			entityType, _ := packet.ReadUint8(buffer)
@@ -111,7 +109,6 @@ func (this *PacketGeneric) SwapEntities(a int32, b int32, clientServer bool) {
 					entityData = a
 				}
 			}
-			newBuffer := &bytes.Buffer{}
 			packet.WriteVarInt(newBuffer, entityId)
 			packet.WriteUint8(newBuffer, entityType)
 			packet.WriteInt32(newBuffer, entityX)
@@ -120,13 +117,31 @@ func (this *PacketGeneric) SwapEntities(a int32, b int32, clientServer bool) {
 			packet.WriteUint8(newBuffer, entityPitch)
 			packet.WriteUint8(newBuffer, entityYaw)
 			packet.WriteInt32(newBuffer, entityData)
-			buffer.WriteTo(newBuffer)
-			this.Bytes = newBuffer.Bytes()
 		}
-	} else if this.id == this.swappers.IdMap.PacketClientDestroyEntities && clientServer {
-		// FIXME
+		buffer.WriteTo(newBuffer)
+		this.Bytes = newBuffer.Bytes()
+	} else if (this.id == this.swappers.IdMap.PacketClientSetPassengers || this.id == this.swappers.IdMap.PacketClientDestroyEntities) && clientServer {
+		this.Decompress()
+		buffer := bytes.NewReader(this.Bytes)
+		if this.id == this.swappers.IdMap.PacketClientSetPassengers {
+			entityId, _ := packet.ReadVarInt(buffer)
+			packet.WriteVarInt(newBuffer, entityId)
+		}
+		nEntities, _ := packet.ReadVarInt(buffer)
+		packet.WriteVarInt(newBuffer, nEntities)
+		for i := 0; i < nEntities; i++ {
+			entityId, _ := packet.ReadVarInt(buffer)
+			if entityId == int(a) {
+				entityId = int(b)
+			} else if entityId == int(b) {
+				entityId = int(a)
+			}
+			packet.WriteVarInt(newBuffer, entityId)
+		}
+		this.Bytes = newBuffer.Bytes()
 	}
 	// FIXME combat event
+	// FIXME collect item
 	this.swapEntitiesInt(a, b, clientServer)
 	this.swapEntitiesVarInt(a, b, clientServer)
 }

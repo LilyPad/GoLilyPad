@@ -375,6 +375,17 @@ var IdMap = &minecraft.IdMap{
 	PacketServerSpectate:                  PACKET_SERVER_SPECTATE,
 	PacketServerResourcePackStatus:        PACKET_SERVER_RESOURCE_PACK_STATUS,
 
+	// unsupported
+	PacketClientBossBar:         -1,
+	PacketClientSetCooldown:     -1,
+	PacketClientUnloadChunk:     -1,
+	PacketClientVehicleMove:     -1,
+	PacketClientSetPassengers:   -1,
+	PacketServerTeleportConfirm: -1,
+	PacketServerVehicleMove:     -1,
+	PacketServerSteerBoat:       -1,
+	PacketServerUseItem:         -1,
+
 	PacketClientLoginDisconnect:      PACKET_CLIENT_LOGIN_DISCONNECT,
 	PacketClientLoginEncryptRequest:  PACKET_CLIENT_LOGIN_ENCRYPT_REQUEST,
 	PacketClientLoginSuccess:         PACKET_CLIENT_LOGIN_SUCCESS,

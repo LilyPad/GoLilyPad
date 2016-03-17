@@ -55,6 +55,7 @@ type Session struct {
 	playerList     map[string]struct{}
 	scoreboards    map[string]struct{}
 	teams          map[string]struct{}
+	bossBars       map[string]struct{}
 
 	remoteIp   string
 	remotePort string
@@ -149,7 +150,7 @@ func (this *Session) SetAuthenticated(result bool) {
 		return
 	}
 	this.state = STATE_INIT
-	if (this.protocolVersion >= mc19.VersionNum) {
+	if this.protocolVersion >= mc19.VersionNum {
 		this.SetCompression(256)
 	}
 	if this.protocolVersion >= 5 {
