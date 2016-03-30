@@ -405,3 +405,22 @@ var Version = &minecraft.Version{
 }
 
 var VersionNum = 107
+var VersionNum01 = 108
+
+var PlayPacketServerCodec01 *packet.PacketCodecRegistry = nil
+var PlayPacketClientCodec01 *packet.PacketCodecRegistry = nil
+var Version01 *minecraft.Version = nil
+
+func init() {
+	PlayPacketServerCodec01 = PlayPacketServerCodec.Copy()
+	PlayPacketServerCodec01.EncodeCodecs[PACKET_CLIENT_JOIN_GAME] = &CodecClientJoinGame01{IdMap}
+	PlayPacketClientCodec01 = PlayPacketServerCodec01.Flip()
+	Version01 = &minecraft.Version{
+		Name:             "1.9",
+		LoginClientCodec: mc18.LoginPacketClientCodec,
+		LoginServerCodec: mc18.LoginPacketServerCodec,
+		PlayClientCodec:  PlayPacketClientCodec01,
+		PlayServerCodec:  PlayPacketServerCodec01,
+		IdMap:            IdMap,
+	}
+}
