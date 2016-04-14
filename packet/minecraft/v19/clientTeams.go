@@ -113,7 +113,7 @@ func (this *CodecClientTeams) Encode(writer io.Writer, encode packet.Packet) (er
 		if len(packetClientTeams.CollisionRule) == 0 {
 			err = packet.WriteString(writer, "never")
 		} else {
-			err = packet.WriteString(writer, packetClientTeams.NameTagVisibility)
+			err = packet.WriteString(writer, packetClientTeams.CollisionRule)
 		}
 		if err != nil {
 			return

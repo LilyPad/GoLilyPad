@@ -120,7 +120,7 @@ func (this *PacketGeneric) SwapEntities(a int32, b int32, clientServer bool) {
 		}
 		buffer.WriteTo(newBuffer)
 		this.Bytes = newBuffer.Bytes()
-	} else if (this.id == this.swappers.IdMap.PacketClientSetPassengers || this.id == this.swappers.IdMap.PacketClientDestroyEntities) && clientServer {
+	} else if (this.id == this.swappers.IdMap.PacketClientSetPassengers /* || this.id == this.swappers.IdMap.PacketClientDestroyEntities*/) && clientServer {
 		this.Decompress()
 		buffer := bytes.NewReader(this.Bytes)
 		if this.id == this.swappers.IdMap.PacketClientSetPassengers {
