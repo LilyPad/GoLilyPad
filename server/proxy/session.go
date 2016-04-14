@@ -180,7 +180,7 @@ func (this *Session) SetCompression(threshold int) {
 	}
 	this.compressionThreshold = threshold
 	registry := this.pipeline.Get("registry")
-	if registry == mc18.LoginPacketServerCodec || registry == mc17.LoginPacketServerCodec {
+	if registry == this.protocol.LoginServerCodec {
 		this.Write(minecraft.NewPacketClientLoginSetCompression(this.protocol.IdMap, threshold))
 	} else if registry == mc18.PlayPacketServerCodec || registry == mc17.PlayPacketServerCodec {
 		// FIXME 1.9 does not have set compression during play, so we fix compression at 256
@@ -206,9 +206,9 @@ func (this *Session) Disconnect(reason string) {
 
 func (this *Session) DisconnectJson(json string) {
 	registry := this.pipeline.Get("registry")
-	if registry == mc18.LoginPacketServerCodec || registry == mc17.LoginPacketServerCodec {
+	if registry == this.protocol.LoginServerCodec {
 		this.Write(minecraft.NewPacketClientLoginDisconnect(this.protocol.IdMap, json))
-	} else if registry == mc19.PlayPacketServerCodec || registry == mc18.PlayPacketServerCodec || registry == mc17.PlayPacketServerCodec {
+	} else if registry == this.protocol.PlayServerCodec {
 		this.Write(minecraft.NewPacketClientDisconnect(this.protocol.IdMap, json))
 	}
 	this.conn.Close()
