@@ -123,7 +123,12 @@ func (this *SessionOutBridge) HandlePacket(packet packet.Packet) (err error) {
 			this.EnsureCompression()
 			this.pipeline.Replace("registry", this.protocol.PlayClientCodec)
 		} else if packet.Id() == this.protocol.IdMap.PacketClientLoginDisconnect {
-			this.session.DisconnectJson(packet.(*minecraft.PacketClientLoginDisconnect).Json)
+			json := packet.(*minecraft.PacketClientLoginDisconnect).Json
+			if this.session.protocolVersion < mc19.VersionNum {
+				this.session.DisconnectJson(json)
+			} else {
+				this.session.Disconnect(json)
+			}
 			this.conn.Close()
 		} else if packet.Id() == this.protocol.IdMap.PacketClientLoginSetCompression {
 			this.SetCompression(packet.(*minecraft.PacketClientLoginSetCompression).Threshold)
