@@ -166,6 +166,9 @@ func (this *SessionOutBridge) HandlePacket(packet packet.Packet) (err error) {
 		id := packet.Id()
 		if id == this.protocol.IdMap.PacketClientJoinGame {
 			joinGamePacket := packet.(*minecraft.PacketClientJoinGame)
+			if this.session.mcBrand != nil {
+				this.Write(this.session.mcBrand)
+			}
 			if this.session.clientSettings != nil {
 				this.Write(this.session.clientSettings)
 			}

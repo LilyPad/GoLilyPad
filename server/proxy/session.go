@@ -48,6 +48,7 @@ type Session struct {
 	serverId         string
 	verifyToken      []byte
 
+	mcBrand        packet.Packet
 	clientSettings packet.Packet
 	clientEntityId int32
 	serverEntityId int32
@@ -402,7 +403,11 @@ func (this *Session) HandlePacket(packet packet.Packet) (err error) {
 			this.clientSettings = packet
 		} else if pluginMessage, ok := packet.(*minecraft.PacketServerPluginMessage); ok {
 			if pluginMessage.Channel == "REGISTER" {
-				for _, channelBytes := range bytes.Split(pluginMessage.Data[:], []byte{0}) {
+				channelBytesSplit := bytes.Split(pluginMessage.Data[:], []byte{0})
+				if len(channelBytesSplit) >= 128 || len(this.pluginChannels) >= 128 {
+					break
+				}
+				for _, channelBytes := range channelBytesSplit {
 					channel := string(channelBytes)
 					if _, ok := this.pluginChannels[channel]; ok {
 						continue
@@ -417,6 +422,8 @@ func (this *Session) HandlePacket(packet packet.Packet) (err error) {
 					channel := string(channelBytes)
 					delete(this.pluginChannels, channel)
 				}
+			} else if pluginMessage.Channel == "MC|Brand" {
+				this.mcBrand = packet
 			}
 		}
 		if this.redirecting {
