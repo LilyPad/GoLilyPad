@@ -290,10 +290,7 @@ func (this *Session) HandlePacket(packet packet.Packet) (err error) {
 					}
 				}
 				for _, session := range this.server.SessionRegistry(ROLE_AUTHORIZED).GetAll() {
-					err := session.Write(playerPacket)
-					if (err != nil) {
-						fmt.Println(err)
-					}
+					session.Write(playerPacket)
 				}
 				result = connect.NewResultNotifyPlayer()
 			} else {
