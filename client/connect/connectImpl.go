@@ -85,6 +85,8 @@ func (this *ConnectImpl) HandlePacket(packet packet.Packet) (err error) {
 		this.DispatchEvent("redirect", WrapEventRedirect(packet.(*connect.PacketRedirectEvent)))
 	case connect.PACKET_SERVER_EVENT:
 		this.DispatchEvent("server", WrapEventServer(packet.(*connect.PacketServerEvent)))
+	case connect.PACKET_PLAYER_EVENT:
+		this.DispatchEvent("player", WrapEventPlayer(packet.(*connect.PacketPlayerEvent)))
 	}
 	return
 }
