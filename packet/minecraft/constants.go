@@ -5,7 +5,7 @@ import (
 )
 
 const (
-	STRING_VERSION = string("1.11.1")
+	STRING_VERSION = string("1.11.2")
 	MAGIC          = string("§")
 
 	PACKET_SERVER_HANDSHAKE = 0x00
