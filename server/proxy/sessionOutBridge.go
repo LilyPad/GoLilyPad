@@ -2,7 +2,6 @@ package proxy
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"github.com/LilyPad/GoLilyPad/packet"
 	"github.com/LilyPad/GoLilyPad/packet/minecraft"
@@ -124,16 +123,7 @@ func (this *SessionOutBridge) HandlePacket(packet packet.Packet) (err error) {
 			this.EnsureCompression()
 			this.pipeline.Replace("registry", this.protocol.PlayClientCodec)
 		} else if packet.Id() == this.protocol.IdMap.PacketClientLoginDisconnect {
-			textJson := packet.(*minecraft.PacketClientLoginDisconnect).Json
-			if this.session.protocolVersion < mc19.VersionNum {
-				this.session.DisconnectJson(textJson)
-			} else {
-				var text string
-				if json.Unmarshal([]byte(textJson), &text) != nil {
-					text = textJson
-				}
-				this.session.Disconnect(text)
-			}
+			this.session.DisconnectJson(packet.(*minecraft.PacketClientLoginDisconnect).Json)
 			this.conn.Close()
 		} else if packet.Id() == this.protocol.IdMap.PacketClientLoginSetCompression {
 			this.SetCompression(packet.(*minecraft.PacketClientLoginSetCompression).Threshold)
