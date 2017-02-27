@@ -12,6 +12,7 @@ import (
 type Server struct {
 	listener        net.Listener
 	SessionRegistry *SessionRegistry
+	CompThreshold   *int
 
 	motd           *string
 	maxPlayers     *uint16
@@ -24,9 +25,10 @@ type Server struct {
 	publicKey      []byte
 }
 
-func NewServer(motd *string, maxPlayers *uint16, syncMaxPlayers *bool, authenticate *bool, router Router, localizer Localizer, connect *connect.ProxyConnect) (this *Server, err error) {
+func NewServer(motd *string, maxPlayers *uint16, syncMaxPlayers *bool, authenticate *bool, compThreshold *int, router Router, localizer Localizer, connect *connect.ProxyConnect) (this *Server, err error) {
 	this = new(Server)
 	this.SessionRegistry = NewSessionRegistry()
+	this.CompThreshold = compThreshold
 	this.motd = motd
 	this.maxPlayers = maxPlayers
 	this.syncMaxPlayers = syncMaxPlayers

@@ -157,6 +157,7 @@ type ConfigProxy struct {
 	MaxPlayers     uint16            `yaml:"maxPlayers"`
 	SyncMaxPlayers bool              `yaml:"syncMaxPlayers"`
 	Authenticate   bool              `yaml:"authenticate"`
+	CompThreshold  int               `yaml:"compression-threshold"`
 }
 
 type ConfigProxyLocale struct {
@@ -202,9 +203,10 @@ func DefaultConfig() (config *Config) {
 			LostConn: "Lost connection... Please try to reconnect",
 			Shutdown: "The server is being restarted. Please try to reconnect",
 		},
-		Motd:         "A LilyPad Server",
-		MaxPlayers:   1,
-		Authenticate: true,
+		Motd:          "A LilyPad Server",
+		MaxPlayers:    1,
+		Authenticate:  true,
+		CompThreshold: 256,
 	}
 	return
 }
