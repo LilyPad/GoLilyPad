@@ -13,14 +13,7 @@ type Config struct {
 }
 
 func (this *Config) Route(domain string) (val []string) {
-	this.Proxy.routesMutex.Lock()
-	if this.Proxy.routes == nil {
-		this.Proxy.routes = make(map[string]ConfigProxyRoute)
-		for _, route := range this.Proxy.Routes {
-			this.Proxy.routes[strings.ToLower(route.Domain)] = route
-		}
-	}
-	this.Proxy.routesMutex.Unlock()
+	this.routeBake()
 	if route, ok := this.Proxy.routes[strings.ToLower(domain)]; ok {
 		if route.Servers != nil {
 			val = make([]string, len(route.Servers))
@@ -40,14 +33,7 @@ func (this *Config) Route(domain string) (val []string) {
 }
 
 func (this *Config) RouteMotds(domain string) (val []string) {
-	this.Proxy.routesMutex.Lock()
-	if this.Proxy.routes == nil {
-		this.Proxy.routes = make(map[string]ConfigProxyRoute)
-		for _, route := range this.Proxy.Routes {
-			this.Proxy.routes[strings.ToLower(route.Domain)] = route
-		}
-	}
-	this.Proxy.routesMutex.Unlock()
+	this.routeBake()
 	if route, ok := this.Proxy.routes[strings.ToLower(domain)]; ok {
 		if route.Motds != nil {
 			val = make([]string, len(route.Motds))
@@ -67,14 +53,7 @@ func (this *Config) RouteMotds(domain string) (val []string) {
 }
 
 func (this *Config) RouteIcons(domain string) (val []string) {
-	this.Proxy.routesMutex.Lock()
-	if this.Proxy.routes == nil {
-		this.Proxy.routes = make(map[string]ConfigProxyRoute)
-		for _, route := range this.Proxy.Routes {
-			this.Proxy.routes[strings.ToLower(route.Domain)] = route
-		}
-	}
-	this.Proxy.routesMutex.Unlock()
+	this.routeBake()
 	if route, ok := this.Proxy.routes[strings.ToLower(domain)]; ok {
 		if route.Icons != nil {
 			val = make([]string, len(route.Icons))
@@ -94,14 +73,7 @@ func (this *Config) RouteIcons(domain string) (val []string) {
 }
 
 func (this *Config) RouteSample(domain string) (val string) {
-	this.Proxy.routesMutex.Lock()
-	if this.Proxy.routes == nil {
-		this.Proxy.routes = make(map[string]ConfigProxyRoute)
-		for _, route := range this.Proxy.Routes {
-			this.Proxy.routes[strings.ToLower(route.Domain)] = route
-		}
-	}
-	this.Proxy.routesMutex.Unlock()
+	this.routeBake()
 	if route, ok := this.Proxy.routes[strings.ToLower(domain)]; ok && route.Sample != "" {
 		val = route.Sample
 	} else if domain != "" {
@@ -110,6 +82,24 @@ func (this *Config) RouteSample(domain string) (val string) {
 		val = "sample.txt"
 	}
 	return
+}
+
+func (this *Config) routeBake() {
+	this.Proxy.routesMutex.Lock()
+	if this.Proxy.routes == nil {
+		this.Proxy.routes = make(map[string]ConfigProxyRoute)
+		for _, route := range this.Proxy.Routes {
+			if route.Domains != nil {
+				for _, domain := range route.Domains {
+					this.Proxy.routes[strings.ToLower(domain)] = route
+				}
+			}
+			if route.Domain != "" {
+				this.Proxy.routes[strings.ToLower(route.Domain)] = route
+			}
+		}
+	}
+	this.Proxy.routesMutex.Unlock()
 }
 
 func (this *Config) LocaleFull() (val string) {
@@ -168,7 +158,8 @@ type ConfigProxyLocale struct {
 }
 
 type ConfigProxyRoute struct {
-	Domain  string   `yaml:"domain"`
+	Domain  string   `yaml:"domain,omitempty"`
+	Domains []string `yaml:"domains,omitempty"`
 	Server  string   `yaml:"server,omitempty"`
 	Servers []string `yaml:"servers,omitempty"`
 	Motd    string   `yaml:"motd,omitempty"`
@@ -190,10 +181,10 @@ func DefaultConfig() (config *Config) {
 	config.Proxy = ConfigProxy{
 		Bind: ":25565",
 		Routes: []ConfigProxyRoute{
-			ConfigProxyRoute{"", "example", nil, "", nil, "", nil, ""},
-			ConfigProxyRoute{"example.com", "", []string{"hub1", "hub2"}, "Example Custom MOTD", nil, "", nil, ""},
-			ConfigProxyRoute{"hub.example.com", "hub", nil, "", []string{"Example MOTD 1", "Example MOTD 2"}, "", nil, ""},
-			ConfigProxyRoute{"icon.example.com", "hub", nil, "", nil, "icon.png", []string{"icon1.png", "icon2.png", "icons/icon3.png"}, ""},
+			ConfigProxyRoute{"", nil, "example", nil, "", nil, "", nil, ""},
+			ConfigProxyRoute{"example.com", nil, "", []string{"hub1", "hub2"}, "Example Custom MOTD", nil, "", nil, ""},
+			ConfigProxyRoute{"hub.example.com", nil, "hub", nil, "", []string{"Example MOTD 1", "Example MOTD 2"}, "", nil, ""},
+			ConfigProxyRoute{"icon.example.com", nil, "hub", nil, "", nil, "icon.png", []string{"icon1.png", "icon2.png", "icons/icon3.png"}, ""},
 		},
 		Locale: ConfigProxyLocale{
 			Full:     "The server seems to be currently full. Try again later!",

@@ -228,6 +228,7 @@ func (this *Session) HandlePacket(packet packet.Packet) (err error) {
 			} else {
 				this.serverAddress = this.rawServerAddress[:idx]
 			}
+			this.serverAddress = strings.TrimSuffix(this.serverAddress, ".")
 			supportedVersion := false
 			for _, version := range minecraft.Versions {
 				if version != this.protocolVersion {
