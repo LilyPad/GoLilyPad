@@ -94,7 +94,7 @@ func (this *Config) routeBake() {
 					this.Proxy.routes[strings.ToLower(domain)] = route
 				}
 			}
-			if route.Domain != "" {
+			if route.Domains == nil || route.Domain != "" {
 				this.Proxy.routes[strings.ToLower(route.Domain)] = route
 			}
 		}
