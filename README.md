@@ -21,13 +21,13 @@ $ go get github.com/klauspost/compress/zlib
 ### Server Connect ###
 
 ```bash
-$ cd $GOPATH/pkg/github.com/LilyPad/GoLilyPad/server/connect/main
+$ cd $GOPATH/src/github.com/LilyPad/GoLilyPad/server/connect/main
 ```
 
 ### Server Proxy ###
 
 ```bash
-$ cd $GOPATH/pkg/github.com/LilyPad/GoLilyPad/server/proxy/main
+$ cd $GOPATH/src/github.com/LilyPad/GoLilyPad/server/proxy/main
 ```
 
 ### Lastly ###
