@@ -54,7 +54,7 @@ func (this *SessionOutBridge) Serve() {
 	this.pipeline = packet.NewPacketPipeline()
 	this.pipeline.AddLast("varIntLength", packet.NewPacketCodecVarIntLength())
 	this.pipeline.AddLast("registry", minecraft.HandshakePacketClientCodec)
-	this.connCodec = packet.NewPacketConnCodec(this.conn, this.pipeline, 30*time.Second)
+	this.connCodec = packet.NewPacketConnCodec(this.conn, this.pipeline, 20*time.Second)
 
 	inRemotePort, _ := strconv.ParseUint(this.session.remotePort, 10, 16)
 	outRemotePort, _ := strconv.ParseUint(this.remotePort, 10, 16)

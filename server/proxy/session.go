@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"github.com/LilyPad/GoLilyPad/packet"
 	"github.com/LilyPad/GoLilyPad/packet/minecraft"
+	mc112 "github.com/LilyPad/GoLilyPad/packet/minecraft/v112"
 	mc17 "github.com/LilyPad/GoLilyPad/packet/minecraft/v17"
 	mc18 "github.com/LilyPad/GoLilyPad/packet/minecraft/v18"
 	mc19 "github.com/LilyPad/GoLilyPad/packet/minecraft/v19"
@@ -86,7 +87,7 @@ func (this *Session) Serve() {
 	this.pipeline = packet.NewPacketPipeline()
 	this.pipeline.AddLast("varIntLength", packet.NewPacketCodecVarIntLength())
 	this.pipeline.AddLast("registry", minecraft.HandshakePacketServerCodec)
-	this.connCodec = packet.NewPacketConnCodec(this.conn, this.pipeline, 10*time.Second)
+	this.connCodec = packet.NewPacketConnCodec(this.conn, this.pipeline, 20*time.Second)
 	this.connCodec.ReadConn(this)
 }
 
@@ -248,7 +249,9 @@ func (this *Session) HandlePacket(packet packet.Packet) (err error) {
 					err = errors.New(fmt.Sprintf("Protocol version does not match: %d", this.protocolVersion))
 					return
 				}
-				if this.protocolVersion >= mc19.VersionNum01 {
+				if this.protocolVersion >= mc112.VersionNum {
+					this.protocol = mc112.Version
+				} else if this.protocolVersion >= mc19.VersionNum01 {
 					this.protocol = mc19.Version01
 				} else if this.protocolVersion >= mc19.VersionNum {
 					this.protocol = mc19.Version
