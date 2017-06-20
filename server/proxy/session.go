@@ -19,7 +19,6 @@ import (
 	uuid "github.com/satori/go.uuid"
 	"io/ioutil"
 	"net"
-	"regexp"
 	"strings"
 	"sync"
 	"time"
@@ -349,7 +348,7 @@ func (this *Session) HandlePacket(packet packet.Packet) (err error) {
 				err = errors.New("Unexpected name: length is more than 16")
 				return
 			}
-			if ok, _ := regexp.MatchString("^[a-zA-Z0-9_]+$", this.name); !ok {
+			if!regexreplace(this.name) {
 				err = errors.New("Unexpected name: pattern mismatch")
 				return
 			}
@@ -448,6 +447,15 @@ func (this *Session) HandlePacket(packet packet.Packet) (err error) {
 		this.outBridge.Write(packet)
 	}
 	return
+}
+
+func regexreplace(s string) bool {
+    for i := 0;i < len(s);i++ {
+		if s[i] < 48 || s[i] < 65 && s[i] > 57 || s[i] > 122 {
+			return false
+		}
+    }
+    return true
 }
 
 func (this *Session) ErrorCaught(err error) {
