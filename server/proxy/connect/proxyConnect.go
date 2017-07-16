@@ -50,7 +50,7 @@ func NewProxyConnect(addr *string, user *string, pass *string, proxy *ProxyConfi
 			if serverEvent.Address == "127.0.0.1" || serverEvent.Address == "localhost" {
 				address, _, _ = net.SplitHostPort(*addr)
 			} else if strings.Contains(serverEvent.Address, ":") {
-				address = "[" + serverEvent.Address "]"
+				address = "[" + serverEvent.Address + "]"
 			} else {
 				address = serverEvent.Address
 			}
