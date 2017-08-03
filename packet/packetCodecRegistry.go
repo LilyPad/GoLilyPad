@@ -12,12 +12,13 @@ type PacketCodecRegistry struct {
 }
 
 type PacketDecodeError struct {
-	Id  int
-	Err error
+	Id    int
+	Codec PacketCodec
+	Err   error
 }
 
 func (this PacketDecodeError) Error() string {
-	return fmt.Sprintf("Error decoding id: %d err: \"%s\"", this.Id, this.Err)
+	return fmt.Sprintf("Error decoding id: %d codec: \"%s\" err: \"%s\"", this.Id, this.Codec, this.Err)
 }
 
 func NewPacketCodecRegistry(codecs []PacketCodec) (this *PacketCodecRegistry) {
@@ -54,7 +55,7 @@ func (this *PacketCodecRegistry) Decode(reader io.Reader) (packet Packet, err er
 	}
 	packet, err = codec.Decode(reader)
 	if err != nil {
-		err = PacketDecodeError{id, err}
+		err = PacketDecodeError{id, codec, err}
 	}
 	return
 }
