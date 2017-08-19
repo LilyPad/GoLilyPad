@@ -393,10 +393,21 @@ func (this *Session) HandlePacket(packet packet.Packet) (err error) {
 			if err != nil {
 				return
 			}
-			if bytes.Compare(this.verifyToken, verifyToken) != 0 {
-				err = errors.New("Verify token does not match")
+
+			// Check that the bytes in the verify token match the original verify token in constant time to prevent timing attacks
+			if len(this.verifyToken) != len(verifyToken) {
+				err = errors.New("Verify token does not match (length mismatch)")
 				return
 			}
+			ret := 0
+			for i := 0; i < len(this.verifyToken); i++ {
+				ret |= this.verifyToken[i] ^ verifyToken[i]
+			}
+			if ret != 0 {
+				err = errors.New("Verify token does not match (byte mismatch)")
+				return
+			}
+
 			err = this.SetEncryption(sharedSecret)
 			if err != nil {
 				return
