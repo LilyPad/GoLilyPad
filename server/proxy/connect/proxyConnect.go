@@ -6,6 +6,7 @@ import (
 	uuid "github.com/satori/go.uuid"
 	"net"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 )
@@ -48,6 +49,8 @@ func NewProxyConnect(addr *string, user *string, pass *string, proxy *ProxyConfi
 			var address string
 			if serverEvent.Address == "127.0.0.1" || serverEvent.Address == "localhost" {
 				address, _, _ = net.SplitHostPort(*addr)
+			} else if strings.Contains(serverEvent.Address, ":") {
+				address = "[" + serverEvent.Address + "]"
 			} else {
 				address = serverEvent.Address
 			}
