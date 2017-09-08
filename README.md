@@ -36,3 +36,36 @@ $ cd $GOPATH/src/github.com/LilyPad/GoLilyPad/server/proxy/main
 $ go build
 $ ./main
 ```
+
+Docker
+--------
+## Building ##
+```bash
+docker build -t lilypad/golilypad .
+```
+
+## Server Connect ##
+```bash
+docker run -itd --name LPConnect lilypad/golilypad connect
+```
+
+Running with config loaded from disk:
+```bash
+docker run -itd --name LPConnect -v `pwd`/connect-config:/data lilypad/golilypad connect
+```
+
+## Server Proxy ##
+```bash
+docker run -itd --name LPProxy --link LPConnect:connect lilypad/golilypad proxy
+```
+
+You might need to restart the proxy if you didn't load in a config. 
+```bash
+docker restart LPPRoxy
+```
+
+Running with config loaded from disk:
+```bash
+docker run -itd --name LPProxy --link LPConnect:connect -v `pwd`/proxy-config:/data lilypad/golilypad proxy
+```
+this will create a directory called proxy-config where the proxy.yml will be either generated or used. 
