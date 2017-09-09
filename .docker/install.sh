@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Install dependencies
+apk -U add openssl ca-certificates go git musl-dev
+
 #Make sure directory is there
 if [ ! -d "${GOPATH}" ]; then
   mkdir -p ${GOPATH}

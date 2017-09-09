@@ -1,8 +1,8 @@
 # Base system is alpine linux for small size
 FROM alpine:latest
 
-# Install build dependencies
-RUN apk -U add bash openssl ca-certificates go git musl-dev
+# Install build dependencie
+RUN apk -U add bash
 
 ENV GOPATH /go
 ENV LILYPAD_INSTALL_DIR /opt/lilypad
