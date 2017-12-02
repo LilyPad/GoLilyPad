@@ -72,7 +72,7 @@ func main() {
 		}
 	}
 
-	fmt.Println("Proxy server started, version:", VERSION)
+	fmt.Println("Proxy server started, version:", strings.Replace(VERSION, "_", " ", -1))
 	for {
 		select {
 		case str := <-stdinString:

@@ -55,7 +55,7 @@ func main() {
 		server.Close()
 	}
 
-	fmt.Println("Connect server started, version:", VERSION)
+	fmt.Println("Connect server started, version:", strings.Replace(VERSION, "_", " ", -1))
 	for {
 		select {
 		case str := <-stdinString:
