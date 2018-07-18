@@ -1,6 +1,8 @@
-package v17
+package v113
 
 import (
+	"errors"
+	"fmt"
 	"github.com/LilyPad/GoLilyPad/packet"
 	minecraft "github.com/LilyPad/GoLilyPad/packet/minecraft"
 	"io"
@@ -21,8 +23,24 @@ func (this *CodecClientTeams) Decode(reader io.Reader) (decode packet.Packet, er
 	if err != nil {
 		return
 	}
-	if packetClientTeams.Action == 0 || packetClientTeams.Action == 2 {
+	if packetClientTeams.Action == minecraft.PACKET_CLIENT_TEAMS_ACTION_ADD || packetClientTeams.Action == minecraft.PACKET_CLIENT_TEAMS_ACTION_INFO_UPDATE {
 		packetClientTeams.DisplayName, err = packet.ReadString(reader)
+		if err != nil {
+			return
+		}
+		packetClientTeams.FriendlyFire, err = packet.ReadInt8(reader)
+		if err != nil {
+			return
+		}
+		packetClientTeams.NameTagVisibility, err = packet.ReadString(reader)
+		if err != nil {
+			return
+		}
+		packetClientTeams.CollisionRule, err = packet.ReadString(reader)
+		if err != nil {
+			return
+		}
+		packetClientTeams.Color, err = packet.ReadVarInt(reader)
 		if err != nil {
 			return
 		}
@@ -34,20 +52,23 @@ func (this *CodecClientTeams) Decode(reader io.Reader) (decode packet.Packet, er
 		if err != nil {
 			return
 		}
-		packetClientTeams.FriendlyFire, err = packet.ReadInt8(reader)
+	}
+	if packetClientTeams.Action == minecraft.PACKET_CLIENT_TEAMS_ACTION_ADD || packetClientTeams.Action == minecraft.PACKET_CLIENT_TEAMS_ACTION_PLAYERS_ADD || packetClientTeams.Action == minecraft.PACKET_CLIENT_TEAMS_ACTION_PLAYERS_REMOVE {
+		var playersLength int
+		playersLength, err = packet.ReadVarInt(reader)
 		if err != nil {
 			return
 		}
-	}
-	if packetClientTeams.Action == minecraft.PACKET_CLIENT_TEAMS_ACTION_ADD || packetClientTeams.Action == minecraft.PACKET_CLIENT_TEAMS_ACTION_PLAYERS_ADD || packetClientTeams.Action == minecraft.PACKET_CLIENT_TEAMS_ACTION_PLAYERS_REMOVE {
-		var playersLength uint16
-		playersLength, err = packet.ReadUint16(reader)
-		if err != nil {
+		if playersLength < 0 {
+			err = errors.New(fmt.Sprintf("Decode, Players length is below zero: %d", playersLength))
+			return
+		}
+		if playersLength > 65535 {
+			err = errors.New(fmt.Sprintf("Decode, Players length is above maximum: %d", playersLength))
 			return
 		}
 		packetClientTeams.Players = make([]string, playersLength)
-		var i uint16
-		for i = 0; i < playersLength; i++ {
+		for i := 0; i < playersLength; i++ {
 			packetClientTeams.Players[i], err = packet.ReadString(reader)
 			if err != nil {
 				return
@@ -73,21 +94,37 @@ func (this *CodecClientTeams) Encode(writer io.Writer, encode packet.Packet) (er
 		if err != nil {
 			return
 		}
+		err = packet.WriteInt8(writer, packetClientTeams.FriendlyFire)
+		if err != nil {
+			return
+		}
+		err = packet.WriteString(writer, packetClientTeams.NameTagVisibility)
+		if err != nil {
+			return
+		}
+		if len(packetClientTeams.CollisionRule) == 0 {
+			err = packet.WriteString(writer, "never")
+		} else {
+			err = packet.WriteString(writer, packetClientTeams.CollisionRule)
+		}
+		if err != nil {
+			return
+		}
+		err = packet.WriteVarInt(writer, packetClientTeams.Color)
+		if err != nil {
+			return
+		}
 		err = packet.WriteString(writer, packetClientTeams.Prefix)
 		if err != nil {
 			return
 		}
 		err = packet.WriteString(writer, packetClientTeams.Suffix)
-		if err != nil {
-			return
-		}
-		err = packet.WriteInt8(writer, packetClientTeams.FriendlyFire)
 	}
 	if packetClientTeams.Action == minecraft.PACKET_CLIENT_TEAMS_ACTION_ADD || packetClientTeams.Action == minecraft.PACKET_CLIENT_TEAMS_ACTION_PLAYERS_ADD || packetClientTeams.Action == minecraft.PACKET_CLIENT_TEAMS_ACTION_PLAYERS_REMOVE {
 		if err != nil {
 			return
 		}
-		err = packet.WriteUint16(writer, uint16(len(packetClientTeams.Players)))
+		err = packet.WriteVarInt(writer, len(packetClientTeams.Players))
 		for i := 0; i < len(packetClientTeams.Players); i++ {
 			if err != nil {
 				return

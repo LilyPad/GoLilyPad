@@ -18,11 +18,11 @@ type PacketClientTeams struct {
 	FriendlyFire      int8
 	NameTagVisibility string
 	CollisionRule     string
-	Color             int8
+	Color             int
 	Players           []string
 }
 
-func NewPacketClientTeamsAdd(idMap *IdMap, name string, displayName string, prefix string, suffix string, friendlyFire int8, nameTagVisibility string, color int8, players []string) (this *PacketClientTeams) {
+func NewPacketClientTeamsAdd(idMap *IdMap, name string, displayName string, prefix string, suffix string, friendlyFire int8, nameTagVisibility string, color int, players []string) (this *PacketClientTeams) {
 	this = new(PacketClientTeams)
 	this.IdFrom(idMap)
 	this.Name = name
@@ -45,7 +45,7 @@ func NewPacketClientTeamsRemove(idMap *IdMap, name string) (this *PacketClientTe
 	return
 }
 
-func NewPacketClientTeamsInfoUpdate(idMap *IdMap, name string, displayName string, prefix string, suffix string, friendlyFire int8, nameTagVisibility string, collisionRule string, color int8) (this *PacketClientTeams) {
+func NewPacketClientTeamsInfoUpdate(idMap *IdMap, name string, displayName string, prefix string, suffix string, friendlyFire int8, nameTagVisibility string, collisionRule string, color int) (this *PacketClientTeams) {
 	this = new(PacketClientTeams)
 	this.IdFrom(idMap)
 	this.Name = name

@@ -1,4 +1,4 @@
-package v1121
+package v113
 
 import (
 	"github.com/LilyPad/GoLilyPad/packet"
@@ -22,111 +22,127 @@ const (
 	PACKET_CLIENT_BLOCK_CHANGE                  = 0x0B
 	PACKET_CLIENT_BOSS_BAR                      = 0x0C
 	PACKET_CLIENT_DIFFICULTY                    = 0x0D
-	PACKET_CLIENT_TAB_COMPLETE                  = 0x0E
-	PACKET_CLIENT_CHAT                          = 0x0F
-	PACKET_CLIENT_MULTI_BLOCK_CHANGE            = 0x10
-	PACKET_CLIENT_CONFIRM_TRANSACTION           = 0x11
-	PACKET_CLIENT_CLOSE_WINDOW                  = 0x12
-	PACKET_CLIENT_OPEN_WINDOW                   = 0x13
-	PACKET_CLIENT_WINDOW_ITEMS                  = 0x14
-	PACKET_CLIENT_WINDOW_PROPERTY               = 0x15
-	PACKET_CLIENT_SET_SLOT                      = 0x16
-	PACKET_CLIENT_SET_COOLDOWN                  = 0x17
-	PACKET_CLIENT_PLUGIN_MESSAGE                = 0x18
-	PACKET_CLIENT_NAMED_SOUND_EFFECT            = 0x19
-	PACKET_CLIENT_DISCONNECT                    = 0x1A
-	PACKET_CLIENT_ENTITY_STATUS                 = 0x1B
-	PACKET_CLIENT_EXPLOSION                     = 0x1C
-	PACKET_CLIENT_UNLOAD_CHUNK                  = 0x1D
-	PACKET_CLIENT_CHANGE_GAME_STATE             = 0x1E
-	PACKET_CLIENT_KEEPALIVE                     = 0x1F
-	PACKET_CLIENT_CHUNK_DATA                    = 0x20
-	PACKET_CLIENT_EFFECT                        = 0x21
-	PACKET_CLIENT_PARTICLE                      = 0x22
-	PACKET_CLIENT_JOIN_GAME                     = 0x23
-	PACKET_CLIENT_MAPS                          = 0x24
-	PACKET_CLIENT_ENTITY                        = 0x25
-	PACKET_CLIENT_ENTITY_RELATIVE_MOVE          = 0x26
-	PACKET_CLIENT_ENTITY_LOOK_AND_RELATIVE_MOVE = 0x27
-	PACKET_CLIENT_ENTITY_LOOK                   = 0x28
-	PACKET_CLIENT_VEHICLE_MOVE                  = 0x29
-	PACKET_CLIENT_SIGN_EDITOR_OPEN              = 0x2A
-	PACKET_CLIENT_CRAFT_RECIPE_RESPONSE         = 0x2B // new
-	PACKET_CLIENT_PLAYER_ABILITIES              = 0x2C
-	PACKET_CLIENT_COMBAT_EVENT                  = 0x2D
-	PACKET_CLIENT_PLAYER_LIST                   = 0x2E
-	PACKET_CLIENT_PLAYER_POSITION_AND_LOOK      = 0x2F
-	PACKET_CLIENT_USE_BED                       = 0x30
-	PACKET_CLIENT_UNLOCK_RECIPES                = 0x31 // new
-	PACKET_CLIENT_DESTROY_ENTITIES              = 0x32
-	PACKET_CLIENT_REMOVE_ENTITY_EFFECT          = 0x33
-	PACKET_CLIENT_RESOURCE_PACK                 = 0x34
-	PACKET_CLIENT_RESPAWN                       = 0x35
-	PACKET_CLIENT_ENTITY_HEAD_LOOK              = 0x36
-	PACKET_CLIENT_ADVANCEMENT_PROGRESS          = 0x37 // new
-	PACKET_CLIENT_WORLD_BORDER                  = 0x38
-	PACKET_CLIENT_CAMERA                        = 0x39
-	PACKET_CLIENT_HELD_ITEM_CHANGE              = 0x3A
-	PACKET_CLIENT_DISPLAY_SCOREBOARD            = 0x3B
-	PACKET_CLIENT_ENTITY_METADATA               = 0x3C
-	PACKET_CLIENT_ATTACH_ENTITY                 = 0x3D
-	PACKET_CLIENT_ENTITY_VELOCITY               = 0x3E
-	PACKET_CLIENT_ENTITY_EQUIPMENT              = 0x3F
-	PACKET_CLIENT_SET_EXPERIENCE                = 0x40
-	PACKET_CLIENT_UPDATE_HEALTH                 = 0x41
-	PACKET_CLIENT_SCOREBOARD_OBJECTIVE          = 0x42
-	PACKET_CLIENT_SET_PASSENGERS                = 0x43
-	PACKET_CLIENT_TEAMS                         = 0x44
-	PACKET_CLIENT_UPDATE_SCORE                  = 0x45
-	PACKET_CLIENT_SPAWN_POSITION                = 0x46
-	PACKET_CLIENT_TIME_UPDATE                   = 0x47
-	PACKET_CLIENT_TITLE                         = 0x48
-	PACKET_CLIENT_SOUND_EFFECT                  = 0x49
-	PACKET_CLIENT_PLAYER_LIST_HEAD_FOOT         = 0x4A
-	PACKET_CLIENT_COLLECT_ITEM                  = 0x4B
-	PACKET_CLIENT_ENTITY_TELEPORT               = 0x4C
-	PACKET_CLIENT_ADVANCEMENTS                  = 0x4D // new
-	PACKET_CLIENT_ENTITY_PROPERTIES             = 0x4E
-	PACKET_CLIENT_ENTITY_EFFECT                 = 0x4F
-	PACKET_CLIENT_UPDATE_SIGN                   = -1 // removed
+	PACKET_CLIENT_CHAT                          = 0x0E
+	PACKET_CLIENT_MULTI_BLOCK_CHANGE            = 0x0F
+	PACKET_CLIENT_TAB_COMPLETE                  = 0x10
+	PACKET_CLIENT_DECLARE_COMMANDS              = 0x11 // new
+	PACKET_CLIENT_CONFIRM_TRANSACTION           = 0x12
+	PACKET_CLIENT_CLOSE_WINDOW                  = 0x13
+	PACKET_CLIENT_OPEN_WINDOW                   = 0x14
+	PACKET_CLIENT_WINDOW_ITEMS                  = 0x15
+	PACKET_CLIENT_WINDOW_PROPERTY               = 0x16
+	PACKET_CLIENT_SET_SLOT                      = 0x17
+	PACKET_CLIENT_SET_COOLDOWN                  = 0x18
+	PACKET_CLIENT_PLUGIN_MESSAGE                = 0x19
+	PACKET_CLIENT_NAMED_SOUND_EFFECT            = 0x1A
+	PACKET_CLIENT_DISCONNECT                    = 0x1B
+	PACKET_CLIENT_ENTITY_STATUS                 = 0x1C
+	PACKET_CLIENT_NBT_QUERY_RESPONSE            = 0x1D // new
+	PACKET_CLIENT_EXPLOSION                     = 0x1E
+	PACKET_CLIENT_UNLOAD_CHUNK                  = 0x1F
+	PACKET_CLIENT_CHANGE_GAME_STATE             = 0x20
+	PACKET_CLIENT_KEEPALIVE                     = 0x21
+	PACKET_CLIENT_CHUNK_DATA                    = 0x22
+	PACKET_CLIENT_EFFECT                        = 0x23
+	PACKET_CLIENT_PARTICLE                      = 0x24
+	PACKET_CLIENT_JOIN_GAME                     = 0x25
+	PACKET_CLIENT_MAPS                          = 0x26
+	PACKET_CLIENT_ENTITY                        = 0x27
+	PACKET_CLIENT_ENTITY_RELATIVE_MOVE          = 0x28
+	PACKET_CLIENT_ENTITY_LOOK_AND_RELATIVE_MOVE = 0x29
+	PACKET_CLIENT_ENTITY_LOOK                   = 0x2A
+	PACKET_CLIENT_VEHICLE_MOVE                  = 0x2B
+	PACKET_CLIENT_SIGN_EDITOR_OPEN              = 0x2C
+	PACKET_CLIENT_CRAFT_RECIPE_RESPONSE         = 0x2D
+	PACKET_CLIENT_PLAYER_ABILITIES              = 0x2E
+	PACKET_CLIENT_COMBAT_EVENT                  = 0x2F
+	PACKET_CLIENT_PLAYER_LIST                   = 0x30
+	PACKET_CLIENT_FACE_PLAYER                   = 0x31 // new
+	PACKET_CLIENT_PLAYER_POSITION_AND_LOOK      = 0x32
+	PACKET_CLIENT_USE_BED                       = 0x33
+	PACKET_CLIENT_UNLOCK_RECIPES                = 0x34
+	PACKET_CLIENT_DESTROY_ENTITIES              = 0x35
+	PACKET_CLIENT_REMOVE_ENTITY_EFFECT          = 0x36
+	PACKET_CLIENT_RESOURCE_PACK                 = 0x37
+	PACKET_CLIENT_RESPAWN                       = 0x38
+	PACKET_CLIENT_ENTITY_HEAD_LOOK              = 0x39
+	PACKET_CLIENT_ADVANCEMENT_PROGRESS          = 0x3A
+	PACKET_CLIENT_WORLD_BORDER                  = 0x3B
+	PACKET_CLIENT_CAMERA                        = 0x3C
+	PACKET_CLIENT_HELD_ITEM_CHANGE              = 0x3D
+	PACKET_CLIENT_DISPLAY_SCOREBOARD            = 0x3E
+	PACKET_CLIENT_ENTITY_METADATA               = 0x3F
+	PACKET_CLIENT_ATTACH_ENTITY                 = 0x40
+	PACKET_CLIENT_ENTITY_VELOCITY               = 0x41
+	PACKET_CLIENT_ENTITY_EQUIPMENT              = 0x42
+	PACKET_CLIENT_SET_EXPERIENCE                = 0x43
+	PACKET_CLIENT_UPDATE_HEALTH                 = 0x44
+	PACKET_CLIENT_SCOREBOARD_OBJECTIVE          = 0x45
+	PACKET_CLIENT_SET_PASSENGERS                = 0x46
+	PACKET_CLIENT_TEAMS                         = 0x47
+	PACKET_CLIENT_UPDATE_SCORE                  = 0x48
+	PACKET_CLIENT_SPAWN_POSITION                = 0x49
+	PACKET_CLIENT_TIME_UPDATE                   = 0x4A
+	PACKET_CLIENT_TITLE                         = 0x4B
+	PACKET_CLIENT_STOP_SOUND                    = 0x4C
+	PACKET_CLIENT_SOUND_EFFECT                  = 0x4D
+	PACKET_CLIENT_PLAYER_LIST_HEAD_FOOT         = 0x4E
+	PACKET_CLIENT_COLLECT_ITEM                  = 0x4F
+	PACKET_CLIENT_ENTITY_TELEPORT               = 0x50
+	PACKET_CLIENT_ADVANCEMENTS                  = 0x51
+	PACKET_CLIENT_ENTITY_PROPERTIES             = 0x52
+	PACKET_CLIENT_ENTITY_EFFECT                 = 0x53
+	PACKET_CLIENT_DECLARE_RECIPES               = 0x54 // new
+	PACKET_CLIENT_TAGS                          = 0x55 // new
+	PACKET_CLIENT_UPDATE_SIGN                   = -1
 	PACKET_CLIENT_MAP_CHUNK_BULK                = -1
 	PACKET_CLIENT_SET_COMPRESSION               = -1
 	PACKET_CLIENT_UPDATE_ENTITY_NBT             = -1
 
-	PACKET_SERVER_TELEPORT_CONFIRM          = 0x00
-	PACKET_SERVER_TAB_COMPLETE              = 0x01
-	PACKET_SERVER_CHAT                      = 0x02
-	PACKET_SERVER_CLIENT_STATUS             = 0x03
-	PACKET_SERVER_CLIENT_SETTINGS           = 0x04
-	PACKET_SERVER_CONFIRM_TRANSACTION       = 0x05
-	PACKET_SERVER_ENCHANT_ITEM              = 0x06
-	PACKET_SERVER_CLICK_WINDOW              = 0x07
-	PACKET_SERVER_CLOSE_WINDOW              = 0x08
-	PACKET_SERVER_PLUGIN_MESSAGE            = 0x09
-	PACKET_SERVER_USE_ENTITY                = 0x0A
-	PACKET_SERVER_KEEPALIVE                 = 0x0B
-	PACKET_SERVER_PLAYER                    = 0x0C
-	PACKET_SERVER_PLAYER_POSITION           = 0x0D
-	PACKET_SERVER_PLAYER_LOOK_AND_POSITION  = 0x0E
-	PACKET_SERVER_PLAYER_LOOK               = 0x0F
-	PACKET_SERVER_VEHICLE_MOVE              = 0x10
-	PACKET_SERVER_STEER_BOAT                = 0x11
-	PACKET_SERVER_CRAFT_RECIPE_REQUEST      = 0x12 // new
-	PACKET_SERVER_PLAYER_ABILITIES          = 0x13
-	PACKET_SERVER_PLAYER_DIGGING            = 0x14
-	PACKET_SERVER_ENTITY_ACTION             = 0x15
-	PACKET_SERVER_STEER_VEHICLE             = 0x16
-	PACKET_SERVER_CRAFTING_BOOK_DATA        = 0x17 // new
-	PACKET_SERVER_RESOURCE_PACK_STATUS      = 0x18
-	PACKET_SERVER_ADVANCEMENT_TAB           = 0x19 // new
-	PACKET_SERVER_HELD_ITEM_CHANGE          = 0x1A
-	PACKET_SERVER_CREATIVE_INVENTORY_ACTION = 0x1B
-	PACKET_SERVER_UPDATE_SIGN               = 0x1C
-	PACKET_SERVER_ANIMATION                 = 0x1D
-	PACKET_SERVER_SPECTATE                  = 0x1E
-	PACKET_SERVER_PLAYER_BLOCK_PLACEMENT    = 0x1F
-	PACKET_SERVER_USE_ITEM                  = 0x20
-	PACKET_SERVER_PREPARE_CRAFTING_GRID     = -1 // removed
+	PACKET_SERVER_TELEPORT_CONFIRM              = 0x00
+	PACKET_SERVER_QUERY_BLOCK_NBT               = 0x01 // new
+	PACKET_SERVER_CHAT                          = 0x02
+	PACKET_SERVER_CLIENT_STATUS                 = 0x03
+	PACKET_SERVER_CLIENT_SETTINGS               = 0x04
+	PACKET_SERVER_TAB_COMPLETE                  = 0x05
+	PACKET_SERVER_CONFIRM_TRANSACTION           = 0x06
+	PACKET_SERVER_ENCHANT_ITEM                  = 0x07
+	PACKET_SERVER_CLICK_WINDOW                  = 0x08
+	PACKET_SERVER_CLOSE_WINDOW                  = 0x09
+	PACKET_SERVER_PLUGIN_MESSAGE                = 0x0A
+	PACKET_SERVER_EDIT_BOOK                     = 0x0B // new
+	PACKET_SERVER_QUERY_ENTITY_NBT              = 0x0C // new
+	PACKET_SERVER_USE_ENTITY                    = 0x0D
+	PACKET_SERVER_KEEPALIVE                     = 0x0E
+	PACKET_SERVER_PLAYER                        = 0x0F
+	PACKET_SERVER_PLAYER_POSITION               = 0x10
+	PACKET_SERVER_PLAYER_LOOK_AND_POSITION      = 0x11
+	PACKET_SERVER_PLAYER_LOOK                   = 0x12
+	PACKET_SERVER_VEHICLE_MOVE                  = 0x13
+	PACKET_SERVER_STEER_BOAT                    = 0x14
+	PACKET_SERVER_PICK_ITEM                     = 0x15 // new
+	PACKET_SERVER_CRAFT_RECIPE_REQUEST          = 0x16
+	PACKET_SERVER_PLAYER_ABILITIES              = 0x17
+	PACKET_SERVER_PLAYER_DIGGING                = 0x18
+	PACKET_SERVER_ENTITY_ACTION                 = 0x19
+	PACKET_SERVER_STEER_VEHICLE                 = 0x1A
+	PACKET_SERVER_CRAFTING_BOOK_DATA            = 0x1B
+	PACKET_SERVER_NAME_ITEM                     = 0x1C // new
+	PACKET_SERVER_RESOURCE_PACK_STATUS          = 0x1D
+	PACKET_SERVER_ADVANCEMENT_TAB               = 0x1E
+	PACKET_SERVER_SELECT_TRADE                  = 0x1F // new
+	PACKET_SERVER_SET_BEACON_EFFECT             = 0x20 // new
+	PACKET_SERVER_HELD_ITEM_CHANGE              = 0x21
+	PACKET_SERVER_UPDATE_COMMAND_BLOCK          = 0x22 // new
+	PACKET_SERVER_UPDATE_COMMAND_BLOCK_MINECART = 0x23 // new
+	PACKET_SERVER_CREATIVE_INVENTORY_ACTION     = 0x24
+	PACKET_SERVER_UPDATE_STRUCTURE_BLOCK        = 0x25 // new
+	PACKET_SERVER_UPDATE_SIGN                   = 0x26
+	PACKET_SERVER_ANIMATION                     = 0x27
+	PACKET_SERVER_SPECTATE                      = 0x28
+	PACKET_SERVER_PLAYER_BLOCK_PLACEMENT        = 0x29
+	PACKET_SERVER_USE_ITEM                      = 0x2A
+	PACKET_SERVER_PREPARE_CRAFTING_GRID         = -1
 )
 
 var PlayPacketServerCodec = packet.NewPacketCodecRegistryDual([]packet.PacketCodec{
@@ -187,10 +203,10 @@ var PlayPacketServerCodec = packet.NewPacketCodecRegistryDual([]packet.PacketCod
 	PACKET_CLIENT_PLAYER_LIST:                   &mc18.CodecClientPlayerList{IdMap},
 	PACKET_CLIENT_PLAYER_ABILITIES:              minecraft.NewPacketGenericCodec(PACKET_CLIENT_PLAYER_ABILITIES, Swappers),
 	PACKET_CLIENT_TAB_COMPLETE:                  minecraft.NewPacketGenericCodec(PACKET_CLIENT_TAB_COMPLETE, Swappers),
-	PACKET_CLIENT_SCOREBOARD_OBJECTIVE:          &mc18.CodecClientScoreboardObjective{IdMap},
+	PACKET_CLIENT_SCOREBOARD_OBJECTIVE:          &CodecClientScoreboardObjective{IdMap},
 	PACKET_CLIENT_UPDATE_SCORE:                  minecraft.NewPacketGenericCodec(PACKET_CLIENT_UPDATE_SCORE, Swappers),
 	PACKET_CLIENT_DISPLAY_SCOREBOARD:            minecraft.NewPacketGenericCodec(PACKET_CLIENT_DISPLAY_SCOREBOARD, Swappers),
-	PACKET_CLIENT_TEAMS:                         &mc19.CodecClientTeams{IdMap},
+	PACKET_CLIENT_TEAMS:                         &CodecClientTeams{IdMap},
 	PACKET_CLIENT_PLUGIN_MESSAGE:                minecraft.NewPacketGenericCodec(PACKET_CLIENT_PLUGIN_MESSAGE, Swappers),
 	PACKET_CLIENT_DISCONNECT:                    &mc18.CodecClientDisconnect{IdMap},
 	PACKET_CLIENT_DIFFICULTY:                    minecraft.NewPacketGenericCodec(PACKET_CLIENT_DIFFICULTY, Swappers),
@@ -213,6 +229,12 @@ var PlayPacketServerCodec = packet.NewPacketCodecRegistryDual([]packet.PacketCod
 	PACKET_CLIENT_ADVANCEMENTS:         minecraft.NewPacketGenericCodec(PACKET_CLIENT_ADVANCEMENTS, Swappers),
 	// 1.12.1
 	PACKET_CLIENT_CRAFT_RECIPE_RESPONSE: minecraft.NewPacketGenericCodec(PACKET_CLIENT_CRAFT_RECIPE_RESPONSE, Swappers),
+	// 1.13
+	PACKET_CLIENT_DECLARE_COMMANDS:   minecraft.NewPacketGenericCodec(PACKET_CLIENT_DECLARE_COMMANDS, Swappers),
+	PACKET_CLIENT_NBT_QUERY_RESPONSE: minecraft.NewPacketGenericCodec(PACKET_CLIENT_NBT_QUERY_RESPONSE, Swappers),
+	PACKET_CLIENT_FACE_PLAYER:        minecraft.NewPacketGenericCodec(PACKET_CLIENT_FACE_PLAYER, Swappers),
+	PACKET_CLIENT_DECLARE_RECIPES:    minecraft.NewPacketGenericCodec(PACKET_CLIENT_DECLARE_RECIPES, Swappers),
+	PACKET_CLIENT_TAGS:               minecraft.NewPacketGenericCodec(PACKET_CLIENT_TAGS, Swappers),
 }, []packet.PacketCodec{
 	PACKET_SERVER_KEEPALIVE:                 minecraft.NewPacketGenericCodec(PACKET_SERVER_KEEPALIVE, Swappers),
 	PACKET_SERVER_CHAT:                      minecraft.NewPacketGenericCodec(PACKET_SERVER_CHAT, Swappers),
@@ -250,6 +272,17 @@ var PlayPacketServerCodec = packet.NewPacketCodecRegistryDual([]packet.PacketCod
 	PACKET_SERVER_ADVANCEMENT_TAB:    minecraft.NewPacketGenericCodec(PACKET_SERVER_ADVANCEMENT_TAB, Swappers),
 	// 1.12.1
 	PACKET_SERVER_CRAFT_RECIPE_REQUEST: minecraft.NewPacketGenericCodec(PACKET_SERVER_CRAFT_RECIPE_REQUEST, Swappers),
+	// 1.13
+	PACKET_SERVER_QUERY_BLOCK_NBT:               minecraft.NewPacketGenericCodec(PACKET_SERVER_QUERY_BLOCK_NBT, Swappers),
+	PACKET_SERVER_EDIT_BOOK:                     minecraft.NewPacketGenericCodec(PACKET_SERVER_EDIT_BOOK, Swappers),
+	PACKET_SERVER_QUERY_ENTITY_NBT:              minecraft.NewPacketGenericCodec(PACKET_SERVER_QUERY_ENTITY_NBT, Swappers),
+	PACKET_SERVER_PICK_ITEM:                     minecraft.NewPacketGenericCodec(PACKET_SERVER_PICK_ITEM, Swappers),
+	PACKET_SERVER_NAME_ITEM:                     minecraft.NewPacketGenericCodec(PACKET_SERVER_NAME_ITEM, Swappers),
+	PACKET_SERVER_SELECT_TRADE:                  minecraft.NewPacketGenericCodec(PACKET_SERVER_SELECT_TRADE, Swappers),
+	PACKET_SERVER_SET_BEACON_EFFECT:             minecraft.NewPacketGenericCodec(PACKET_SERVER_SET_BEACON_EFFECT, Swappers),
+	PACKET_SERVER_UPDATE_COMMAND_BLOCK:          minecraft.NewPacketGenericCodec(PACKET_SERVER_UPDATE_COMMAND_BLOCK, Swappers),
+	PACKET_SERVER_UPDATE_COMMAND_BLOCK_MINECART: minecraft.NewPacketGenericCodec(PACKET_SERVER_UPDATE_COMMAND_BLOCK_MINECART, Swappers),
+	PACKET_SERVER_UPDATE_STRUCTURE_BLOCK:        minecraft.NewPacketGenericCodec(PACKET_SERVER_UPDATE_STRUCTURE_BLOCK, Swappers),
 })
 
 var PlayPacketClientCodec = PlayPacketServerCodec.Flip()
@@ -422,7 +455,7 @@ var IdMap = &minecraft.IdMap{
 }
 
 var Version = &minecraft.Version{
-	Name:             "1.12.1",
+	Name:             "1.13",
 	LoginClientCodec: mc18.LoginPacketClientCodec,
 	LoginServerCodec: mc18.LoginPacketServerCodec,
 	PlayClientCodec:  PlayPacketClientCodec,
@@ -431,7 +464,7 @@ var Version = &minecraft.Version{
 }
 
 var Version02 = &minecraft.Version{
-	Name:             "1.12.2",
+	Name:             "1.13",
 	LoginClientCodec: mc18.LoginPacketClientCodec,
 	LoginServerCodec: mc18.LoginPacketServerCodec,
 	PlayClientCodec:  PlayPacketClientCodec,
@@ -439,5 +472,4 @@ var Version02 = &minecraft.Version{
 	IdMap:            IdMap,
 }
 
-var VersionNum = 338
-var VersionNum02 = 340
+var VersionNum = 393

@@ -48,10 +48,12 @@ func (this *CodecClientTeams) Decode(reader io.Reader) (decode packet.Packet, er
 		if err != nil {
 			return
 		}
-		packetClientTeams.Color, err = packet.ReadInt8(reader)
+		var teamColor int8
+		teamColor, err = packet.ReadInt8(reader)
 		if err != nil {
 			return
 		}
+		packetClientTeams.Color = int(teamColor)
 	}
 	if packetClientTeams.Action == minecraft.PACKET_CLIENT_TEAMS_ACTION_ADD || packetClientTeams.Action == minecraft.PACKET_CLIENT_TEAMS_ACTION_PLAYERS_ADD || packetClientTeams.Action == minecraft.PACKET_CLIENT_TEAMS_ACTION_PLAYERS_REMOVE {
 		var playersLength int
@@ -86,7 +88,7 @@ func (this *CodecClientTeams) Encode(writer io.Writer, encode packet.Packet) (er
 		return
 	}
 	err = packet.WriteInt8(writer, packetClientTeams.Action)
-	if packetClientTeams.Action == 0 || packetClientTeams.Action == 2 {
+	if packetClientTeams.Action == minecraft.PACKET_CLIENT_TEAMS_ACTION_ADD || packetClientTeams.Action == minecraft.PACKET_CLIENT_TEAMS_ACTION_INFO_UPDATE {
 		if err != nil {
 			return
 		}
@@ -118,9 +120,9 @@ func (this *CodecClientTeams) Encode(writer io.Writer, encode packet.Packet) (er
 		if err != nil {
 			return
 		}
-		err = packet.WriteInt8(writer, packetClientTeams.Color)
+		err = packet.WriteInt8(writer, int8(packetClientTeams.Color))
 	}
-	if packetClientTeams.Action == 0 || packetClientTeams.Action == 3 || packetClientTeams.Action == 4 {
+	if packetClientTeams.Action == minecraft.PACKET_CLIENT_TEAMS_ACTION_ADD || packetClientTeams.Action == minecraft.PACKET_CLIENT_TEAMS_ACTION_PLAYERS_ADD || packetClientTeams.Action == minecraft.PACKET_CLIENT_TEAMS_ACTION_PLAYERS_REMOVE {
 		if err != nil {
 			return
 		}
