@@ -147,6 +147,7 @@ type ConfigProxy struct {
 	MaxPlayers     uint16            `yaml:"maxPlayers"`
 	SyncMaxPlayers bool              `yaml:"syncMaxPlayers"`
 	Authenticate   bool              `yaml:"authenticate"`
+	PreventProxy   bool              `yaml:"preventProxy"`
 }
 
 type ConfigProxyLocale struct {
@@ -196,6 +197,7 @@ func DefaultConfig() (config *Config) {
 		Motd:         "A LilyPad Server",
 		MaxPlayers:   1,
 		Authenticate: true,
+		PreventProxy: true,
 	}
 	return
 }

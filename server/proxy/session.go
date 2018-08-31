@@ -409,7 +409,13 @@ func (this *Session) HandlePacket(packet packet.Packet) (err error) {
 				return
 			}
 			var authErr error
-			this.profile, authErr = auth.Authenticate(this.name, this.serverId, sharedSecret, this.server.publicKey)
+
+			ip := this.remoteIp
+			if !this.server.PreventProxy() {
+				ip = ""
+			}
+
+			this.profile, authErr = auth.Authenticate(this.name, this.serverId, sharedSecret, this.server.publicKey, ip)
 			if authErr != nil {
 				this.SetAuthenticated(false)
 				fmt.Println("Proxy server, failed to authorize:", this.name, "ip:", this.remoteIp, "err:", authErr)

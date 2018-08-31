@@ -17,6 +17,7 @@ type Server struct {
 	maxPlayers     *uint16
 	syncMaxPlayers *bool
 	authenticate   *bool
+	preventProxy   *bool
 	router         Router
 	localizer      Localizer
 	connect        *connect.ProxyConnect
@@ -24,13 +25,14 @@ type Server struct {
 	publicKey      []byte
 }
 
-func NewServer(motd *string, maxPlayers *uint16, syncMaxPlayers *bool, authenticate *bool, router Router, localizer Localizer, connect *connect.ProxyConnect) (this *Server, err error) {
+func NewServer(motd *string, maxPlayers *uint16, syncMaxPlayers *bool, authenticate *bool, preventProxy *bool, router Router, localizer Localizer, connect *connect.ProxyConnect) (this *Server, err error) {
 	this = new(Server)
 	this.SessionRegistry = NewSessionRegistry()
 	this.motd = motd
 	this.maxPlayers = maxPlayers
 	this.syncMaxPlayers = syncMaxPlayers
 	this.authenticate = authenticate
+	this.preventProxy = preventProxy
 	this.router = router
 	this.localizer = localizer
 	this.connect = connect
@@ -100,5 +102,10 @@ func (this *Server) SyncMaxPlayers() (val bool) {
 
 func (this *Server) Authenticate() (val bool) {
 	val = *this.authenticate
+	return
+}
+
+func (this *Server) PreventProxy() (val bool) {
+	val = *this.preventProxy
 	return
 }

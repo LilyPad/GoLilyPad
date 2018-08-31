@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"net/url"
 )
 
 type GameProfile struct {
@@ -18,8 +19,14 @@ type GameProfileProperty struct {
 	Signature string `json:"signature"`
 }
 
-func Authenticate(name string, serverId string, sharedSecret []byte, publicKey []byte) (profile GameProfile, err error) {
-	response, err := http.Get(fmt.Sprintf(URL, name, MojangSha1Hex([]byte(serverId), sharedSecret, publicKey)))
+func Authenticate(name string, serverId string, sharedSecret []byte, publicKey []byte, ip string) (profile GameProfile, err error) {
+	httpUrl := fmt.Sprintf(URL, name, MojangSha1Hex([]byte(serverId), sharedSecret, publicKey))
+	if len(ip) > 0 {
+		//escape the ip to it correctly parse IPv6 addresses
+		httpUrl += "&ip=" + url.QueryEscape(ip)
+	}
+
+	response, err := http.Get(httpUrl)
 	if err != nil {
 		return
 	}
