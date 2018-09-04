@@ -16,6 +16,7 @@ import (
 	mc17 "github.com/LilyPad/GoLilyPad/packet/minecraft/v17"
 	mc18 "github.com/LilyPad/GoLilyPad/packet/minecraft/v18"
 	mc19 "github.com/LilyPad/GoLilyPad/packet/minecraft/v19"
+	"github.com/LilyPad/GoLilyPad/server/proxy/api"
 	"github.com/LilyPad/GoLilyPad/server/proxy/auth"
 	"github.com/LilyPad/GoLilyPad/server/proxy/connect"
 	uuid "github.com/satori/go.uuid"
@@ -33,6 +34,7 @@ type Session struct {
 	connCodec            *packet.PacketConnCodec
 	pipeline             *packet.PacketPipeline
 	outBridge            *SessionOutBridge
+	apiSession           api.Session
 	compressionThreshold int
 
 	active            bool
@@ -71,6 +73,7 @@ func NewSession(server *Server, conn net.Conn) (this *Session) {
 	this = new(Session)
 	this.server = server
 	this.conn = conn
+	this.apiSession = &apiSession{this}
 	this.compressionThreshold = -1
 	this.active = true
 	this.activeServers = make(map[string]struct{})
@@ -90,15 +93,43 @@ func (this *Session) Serve() {
 	this.pipeline.AddLast("varIntLength", packet.NewPacketCodecVarIntLength())
 	this.pipeline.AddLast("registry", minecraft.HandshakePacketServerCodec)
 	this.connCodec = packet.NewPacketConnCodec(this.conn, this.pipeline, 20*time.Second)
+	event := eventSessionOpen{
+		eventSessionCancellable: eventSessionCancellable{eventSession: eventSession{this}},
+	}
+	eventBus := this.server.apiEventBus
+	eventBus.fireEventSession(eventBus.sessionOpen, &event)
+	if event.IsCancelled() {
+		this.conn.Close()
+		return
+	}
 	this.connCodec.ReadConn(this)
 }
 
 func (this *Session) Write(packet packet.Packet) (err error) {
+	event := this.server.apiEventBus.fireEventSessionPacket(this, &packet, api.PacketStagePre, api.PacketSubjectClient, api.PacketDirectionWrite)
+	if event.IsCancelled() {
+		return
+	}
 	err = this.connCodec.Write(packet)
+	if err != nil {
+		return
+	}
+	this.server.apiEventBus.fireEventSessionPacket(this, &packet, api.PacketStageMonitor, api.PacketSubjectClient, api.PacketDirectionWrite)
 	return
 }
 
 func (this *Session) Redirect(server *connect.Server) {
+	event := eventSessionRedirect{
+		eventSessionCancellable: eventSessionCancellable{eventSession: eventSession{this}},
+		init:                    this.state == STATE_INIT,
+		serverName:              server.Name,
+		serverAddr:              server.Addr,
+	}
+	eventBus := this.server.apiEventBus
+	eventBus.fireEventSession(eventBus.sessionRedirect, &event)
+	if event.IsCancelled() {
+		return
+	}
 	conn, err := net.Dial("tcp", server.Addr)
 	if err != nil {
 		fmt.Println("Proxy server, name:", this.name, "ip:", this.remoteIp, "failed to redirect:", server.Name, "err:", err)
@@ -155,7 +186,7 @@ func (this *Session) SetAuthenticated(result bool) {
 		this.Disconnect(minecraft.Colorize(this.server.localizer.LocaleLoggedIn()))
 		return
 	}
-	this.state = STATE_INIT
+	this.SetState(STATE_INIT)
 	if this.protocolVersion >= mc19.VersionNum {
 		this.SetCompression(256)
 	}
@@ -220,6 +251,19 @@ func (this *Session) DisconnectJson(json string) {
 }
 
 func (this *Session) HandlePacket(packet packet.Packet) (err error) {
+	event := this.server.apiEventBus.fireEventSessionPacket(this, &packet, api.PacketStagePre, api.PacketSubjectClient, api.PacketDirectionRead)
+	if event.IsCancelled() {
+		return
+	}
+	err = this.handlePacket(packet)
+	if err != nil {
+		return
+	}
+	this.server.apiEventBus.fireEventSessionPacket(this, &packet, api.PacketStageMonitor, api.PacketSubjectClient, api.PacketDirectionRead)
+	return
+}
+
+func (this *Session) handlePacket(packet packet.Packet) (err error) {
 	switch this.state {
 	case STATE_DISCONNECTED:
 		if handshakePacket, ok := packet.(*minecraft.PacketServerHandshake); ok {
@@ -245,7 +289,7 @@ func (this *Session) HandlePacket(packet packet.Packet) (err error) {
 					this.protocolVersion = minecraft.Versions[0]
 				}
 				this.pipeline.Replace("registry", minecraft.StatusPacketServerCodec)
-				this.state = STATE_STATUS
+				this.SetState(STATE_STATUS)
 			} else if handshakePacket.State == 2 {
 				if !supportedVersion {
 					err = errors.New(fmt.Sprintf("Protocol version does not match: %d", this.protocolVersion))
@@ -271,7 +315,7 @@ func (this *Session) HandlePacket(packet packet.Packet) (err error) {
 					this.protocol = mc17.Version
 				}
 				this.pipeline.Replace("registry", this.protocol.LoginServerCodec)
-				this.state = STATE_LOGIN
+				this.SetState(STATE_LOGIN)
 			} else {
 				err = errors.New("Unexpected state")
 				return
@@ -336,7 +380,7 @@ func (this *Session) HandlePacket(packet packet.Packet) (err error) {
 			if err != nil {
 				return
 			}
-			this.state = STATE_STATUS_PING
+			this.SetState(STATE_STATUS_PING)
 		} else {
 			err = errors.New("Unexpected packet: status request expected")
 			return
@@ -376,7 +420,7 @@ func (this *Session) HandlePacket(packet packet.Packet) (err error) {
 				if err != nil {
 					return
 				}
-				this.state = STATE_LOGIN_ENCRYPT
+				this.SetState(STATE_LOGIN_ENCRYPT)
 			} else {
 				this.profile = auth.GameProfile{
 					Id:         GenNameUUID("OfflinePlayer:" + this.name),
@@ -471,9 +515,33 @@ func (this *Session) ErrorCaught(err error) {
 		}
 	}
 
-	this.state = STATE_DISCONNECTED
+	this.SetState(STATE_DISCONNECTED)
 	this.conn.Close()
+	event := eventSessionClose{
+		eventSession: eventSession{this},
+	}
+	eventBus := this.server.apiEventBus
+	eventBus.fireEventSession(eventBus.sessionClose, &event)
 	return
+}
+
+func (this *Session) SetState(state SessionState) {
+	this.state = state
+	event := eventSessionState{
+		eventSession: eventSession{this},
+		state:        api.SessionState(this.state),
+	}
+	eventBus := this.server.apiEventBus
+	eventBus.fireEventSession(eventBus.sessionState, &event)
+}
+
+func (this *Session) Remote() (ip string, port string) {
+	return this.remoteIp, this.remotePort
+}
+
+func (this *Session) RemoteOverride(ip string, port string) {
+	this.remoteIp = ip
+	this.remotePort = port
 }
 
 func (this *Session) Authenticated() (val bool) {

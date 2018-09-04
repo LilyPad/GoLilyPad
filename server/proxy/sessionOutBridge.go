@@ -7,6 +7,7 @@ import (
 	"github.com/LilyPad/GoLilyPad/packet/minecraft"
 	mc17 "github.com/LilyPad/GoLilyPad/packet/minecraft/v17"
 	mc19 "github.com/LilyPad/GoLilyPad/packet/minecraft/v19"
+	"github.com/LilyPad/GoLilyPad/server/proxy/api"
 	"github.com/LilyPad/GoLilyPad/server/proxy/connect"
 	uuid "github.com/satori/go.uuid"
 	"net"
@@ -80,7 +81,15 @@ func (this *SessionOutBridge) Serve() {
 }
 
 func (this *SessionOutBridge) Write(packet packet.Packet) (err error) {
+	event := this.session.server.apiEventBus.fireEventSessionPacket(this.session, &packet, api.PacketStagePre, api.PacketSubjectOutBridge, api.PacketDirectionWrite)
+	if event.IsCancelled() {
+		return
+	}
 	err = this.connCodec.Write(packet)
+	if err != nil {
+		return
+	}
+	this.session.server.apiEventBus.fireEventSessionPacket(this.session, &packet, api.PacketStageMonitor, api.PacketSubjectOutBridge, api.PacketDirectionWrite)
 	return
 }
 
@@ -114,6 +123,19 @@ func (this *SessionOutBridge) HandlePacket(packet packet.Packet) (err error) {
 		this.conn.Close()
 		return
 	}
+	event := this.session.server.apiEventBus.fireEventSessionPacket(this.session, &packet, api.PacketStagePre, api.PacketSubjectOutBridge, api.PacketDirectionRead)
+	if event.IsCancelled() {
+		return
+	}
+	err = this.handlePacket(packet)
+	if err != nil {
+		return
+	}
+	this.session.server.apiEventBus.fireEventSessionPacket(this.session, &packet, api.PacketStageMonitor, api.PacketSubjectOutBridge, api.PacketDirectionRead)
+	return
+}
+
+func (this *SessionOutBridge) handlePacket(packet packet.Packet) (err error) {
 	switch this.state {
 	case STATE_LOGIN:
 		if packet.Id() == this.protocol.IdMap.PacketClientLoginSuccess {
