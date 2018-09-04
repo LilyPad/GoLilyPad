@@ -2,9 +2,9 @@ package packet
 
 import (
 	"bytes"
-	"github.com/klauspost/compress/zlib"
 	"errors"
 	"fmt"
+	"github.com/klauspost/compress/zlib"
 	"io"
 )
 
