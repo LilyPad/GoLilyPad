@@ -241,11 +241,13 @@ func (this *Session) Disconnect(reason string) {
 }
 
 func (this *Session) DisconnectJson(json string) {
-	registry := this.pipeline.Get("registry")
-	if registry == this.protocol.LoginServerCodec {
-		this.Write(minecraft.NewPacketClientLoginDisconnect(this.protocol.IdMap, json))
-	} else if registry == this.protocol.PlayServerCodec {
-		this.Write(minecraft.NewPacketClientDisconnect(this.protocol.IdMap, json))
+	if this.protocol != nil {
+		registry := this.pipeline.Get("registry")
+		if registry == this.protocol.LoginServerCodec {
+			this.Write(minecraft.NewPacketClientLoginDisconnect(this.protocol.IdMap, json))
+		} else if registry == this.protocol.PlayServerCodec {
+			this.Write(minecraft.NewPacketClientDisconnect(this.protocol.IdMap, json))
+		}
 	}
 	this.conn.Close()
 }
