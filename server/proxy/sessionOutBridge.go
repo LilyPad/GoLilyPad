@@ -159,7 +159,7 @@ func (this *SessionOutBridge) handlePacket(packet packet.Packet) (err error) {
 		if packet.Id() == this.protocol.IdMap.PacketClientPlayerPositionandLook {
 			this.session.outBridge = this
 			this.session.redirecting = false
-			this.session.state = STATE_CONNECTED
+			this.session.SetState(STATE_CONNECTED)
 			this.state = STATE_CONNECTED
 			this.session.redirectMutex.Unlock()
 		}
