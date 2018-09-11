@@ -2,6 +2,7 @@ package api
 
 import (
 	"github.com/LilyPad/GoLilyPad/packet"
+	"github.com/LilyPad/GoLilyPad/packet/minecraft"
 	uuid "github.com/satori/go.uuid"
 	"net"
 )
@@ -33,6 +34,7 @@ type Session interface {
 	Remote() (ip string, port string)
 	RemoteOverride(ip string, port string)
 	State() SessionState
+	Version() *minecraft.Version
 }
 
 type SessionRegistry interface {

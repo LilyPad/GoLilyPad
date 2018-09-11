@@ -2,6 +2,7 @@ package proxy
 
 import (
 	"github.com/LilyPad/GoLilyPad/packet"
+	"github.com/LilyPad/GoLilyPad/packet/minecraft"
 	"github.com/LilyPad/GoLilyPad/server/proxy/api"
 	uuid "github.com/satori/go.uuid"
 	"net"
@@ -49,6 +50,10 @@ func (this *apiSession) RemoteOverride(ip string, port string) {
 
 func (this *apiSession) State() api.SessionState {
 	return api.SessionState(this.session.state)
+}
+
+func (this *apiSession) Version() *minecraft.Version {
+	return this.session.protocol
 }
 
 type apiSessionRegistry struct {
