@@ -8,7 +8,9 @@ import (
 )
 
 type PacketCodecVarIntLength struct {
-	codec PacketCodec
+	codec           PacketCodec
+	interceptDecode PacketIntercept
+	interceptEncode PacketIntercept
 }
 
 func NewPacketCodecVarIntLength() (this *PacketCodecVarIntLength) {
@@ -34,13 +36,25 @@ func (this *PacketCodecVarIntLength) Decode(reader io.Reader) (packet Packet, er
 	if err != nil {
 		return
 	}
-	packet, err = this.codec.Decode(bytes.NewBuffer(payload))
+	packet, err = this.codec.Decode(bytes.NewReader(payload))
+	if this.interceptDecode != nil {
+		if err != nil {
+			return
+		}
+		err = this.interceptDecode(packet, bytes.NewBuffer(payload))
+	}
 	return
 }
 
 func (this *PacketCodecVarIntLength) Encode(writer io.Writer, packet Packet) (err error) {
 	buffer := new(bytes.Buffer)
 	err = this.codec.Encode(buffer, packet)
+	if this.interceptEncode != nil {
+		if err != nil {
+			return
+		}
+		err = this.interceptEncode(packet, buffer)
+	}
 	if err != nil {
 		return
 	}
@@ -54,4 +68,12 @@ func (this *PacketCodecVarIntLength) Encode(writer io.Writer, packet Packet) (er
 
 func (this *PacketCodecVarIntLength) SetCodec(codec PacketCodec) {
 	this.codec = codec
+}
+
+func (this *PacketCodecVarIntLength) SetInterceptDecode(intercept PacketIntercept) {
+	this.interceptDecode = intercept
+}
+
+func (this *PacketCodecVarIntLength) SetInterceptEncode(intercept PacketIntercept) {
+	this.interceptEncode = intercept
 }

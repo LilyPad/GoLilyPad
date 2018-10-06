@@ -28,6 +28,7 @@ type Config interface {
 type Session interface {
 	Conn() net.Conn
 	Write(packet.Packet, PacketSubject)
+	Pipeline() *packet.PacketPipeline
 	Profile() (name string, uuid uuid.UUID)
 	Disconnect(reason string)
 	DisconnectJson(json string)

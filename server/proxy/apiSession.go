@@ -27,6 +27,10 @@ func (this *apiSession) Write(packet packet.Packet, subject api.PacketSubject) {
 	}
 }
 
+func (this *apiSession) Pipeline() *packet.PacketPipeline {
+	return this.session.pipeline
+}
+
 func (this *apiSession) Profile() (name string, uuid uuid.UUID) {
 	return this.session.name, this.session.uuid
 }
