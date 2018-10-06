@@ -148,15 +148,15 @@ func (this *Session) SetAuthenticated(result bool) {
 		return
 	}
 	this.uuid, _ = uuid.FromString(FormatUUID(this.profile.Id))
-	if this.server.SessionRegistry.HasName(this.name) {
+	if this.server.sessionRegistry.HasName(this.name) {
 		this.Disconnect(minecraft.Colorize(this.server.localizer.LocaleLoggedIn()))
 		return
 	}
-	if this.server.SessionRegistry.HasUuid(this.uuid) {
+	if this.server.sessionRegistry.HasUuid(this.uuid) {
 		this.Disconnect(minecraft.Colorize(this.server.localizer.LocaleLoggedIn()))
 		return
 	}
-	if this.server.MaxPlayers() > 1 && this.server.SessionRegistry.Len() >= int(this.server.MaxPlayers()) {
+	if this.server.MaxPlayers() > 1 && this.server.sessionRegistry.Len() >= int(this.server.MaxPlayers()) {
 		this.Disconnect(minecraft.Colorize(this.server.localizer.LocaleFull()))
 		return
 	}
@@ -197,7 +197,7 @@ func (this *Session) SetAuthenticated(result bool) {
 	}
 	this.pipeline.Replace("registry", this.protocol.PlayServerCodec)
 	this.connCodec.SetTimeout(20 * time.Second)
-	this.server.SessionRegistry.Register(this)
+	this.server.sessionRegistry.Register(this)
 	this.Redirect(server)
 }
 
@@ -509,7 +509,7 @@ func (this *Session) handlePacket(packet packet.Packet) (err error) {
 func (this *Session) ErrorCaught(err error) {
 	if this.Authenticated() {
 		this.server.connect.RemoveLocalPlayer(this.name, this.uuid)
-		this.server.SessionRegistry.Unregister(this)
+		this.server.sessionRegistry.Unregister(this)
 		if this.outBridge == nil {
 			fmt.Println("Proxy server, name:", this.name, "ip:", this.remoteIp, "disconnected, err:", err)
 		} else {

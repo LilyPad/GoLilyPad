@@ -14,7 +14,7 @@ func NewAPIContext(server *Server) *apiContext {
 	return &apiContext{
 		server:          server,
 		config:          &apiConfig{server},
-		sessionRegistry: &apiSessionRegistry{server.SessionRegistry},
+		sessionRegistry: &apiSessionRegistry{server.sessionRegistry},
 	}
 }
 

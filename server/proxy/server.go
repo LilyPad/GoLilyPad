@@ -17,12 +17,12 @@ import (
 
 type Server struct {
 	listener        net.Listener
-	listenerAddr    string
-	SessionRegistry *SessionRegistry
+	sessionRegistry *SessionRegistry
 
 	apiContext  *apiContext
 	apiEventBus *eventBus
 
+	bind           *string
 	motd           *string
 	maxPlayers     *uint16
 	syncMaxPlayers *bool
@@ -34,9 +34,9 @@ type Server struct {
 	publicKey      []byte
 }
 
-func NewServer(motd *string, maxPlayers *uint16, syncMaxPlayers *bool, authenticate *bool, router Router, localizer Localizer, connect *connect.ProxyConnect) (this *Server, err error) {
+func NewServer(bind *string, motd *string, maxPlayers *uint16, syncMaxPlayers *bool, authenticate *bool, router Router, localizer Localizer, connect *connect.ProxyConnect) (this *Server, err error) {
 	this = new(Server)
-	this.SessionRegistry = NewSessionRegistry()
+	this.sessionRegistry = NewSessionRegistry()
 	this.apiContext = NewAPIContext(this)
 	this.apiEventBus = NewEventBus()
 	this.motd = motd
@@ -55,7 +55,7 @@ func NewServer(motd *string, maxPlayers *uint16, syncMaxPlayers *bool, authentic
 		return
 	}
 	connect.OnRedirect(func(serverName string, player string) {
-		session := this.SessionRegistry.GetByName(player)
+		session := this.sessionRegistry.GetByName(player)
 		if session == nil {
 			return
 		}
@@ -69,9 +69,8 @@ func NewServer(motd *string, maxPlayers *uint16, syncMaxPlayers *bool, authentic
 	return
 }
 
-func (this *Server) ListenAndServe(addr string) (err error) {
-	this.listenerAddr = addr
-	this.listener, err = net.Listen("tcp", this.listenerAddr)
+func (this *Server) ListenAndServe() (err error) {
+	this.listener, err = net.Listen("tcp", *this.bind)
 	if err != nil {
 		return
 	}
@@ -126,27 +125,22 @@ func (this *Server) Close() {
 	}
 }
 
-func (this *Server) ListenAddr() (val string) {
-	val = this.listenerAddr
-	return
+func (this *Server) ListenAddr() string {
+	return *this.bind
 }
 
-func (this *Server) Motd() (val string) {
-	val = *this.motd
-	return
+func (this *Server) Motd() string {
+	return *this.motd
 }
 
-func (this *Server) MaxPlayers() (val uint16) {
-	val = *this.maxPlayers
-	return
+func (this *Server) MaxPlayers() uint16 {
+	return *this.maxPlayers
 }
 
-func (this *Server) SyncMaxPlayers() (val bool) {
-	val = *this.syncMaxPlayers
-	return
+func (this *Server) SyncMaxPlayers() bool {
+	return *this.syncMaxPlayers
 }
 
-func (this *Server) Authenticate() (val bool) {
-	val = *this.authenticate
-	return
+func (this *Server) Authenticate() bool {
+	return *this.authenticate
 }
