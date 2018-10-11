@@ -39,6 +39,7 @@ func NewServer(bind *string, motd *string, maxPlayers *uint16, syncMaxPlayers *b
 	this.sessionRegistry = NewSessionRegistry()
 	this.apiContext = NewAPIContext(this)
 	this.apiEventBus = NewEventBus()
+	this.bind = bind
 	this.motd = motd
 	this.maxPlayers = maxPlayers
 	this.syncMaxPlayers = syncMaxPlayers
