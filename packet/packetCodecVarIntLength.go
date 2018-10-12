@@ -36,7 +36,7 @@ func (this *PacketCodecVarIntLength) Decode(reader io.Reader) (packet Packet, er
 	if err != nil {
 		return
 	}
-	packet, err = this.codec.Decode(bytes.NewReader(payload))
+	packet, err = this.codec.Decode(bytes.NewBuffer(payload))
 	if this.interceptDecode != nil {
 		if err != nil {
 			return
