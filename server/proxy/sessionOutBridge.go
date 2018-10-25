@@ -308,8 +308,6 @@ func (this *SessionOutBridge) ErrorCaught(err error) {
 	if this.state != STATE_DISCONNECTED && this.session.outBridge == this {
 		this.session.Disconnect(minecraft.Colorize(this.session.server.localizer.LocaleLostConn()))
 	}
-	this.session = nil
-	this.server = nil
 	this.state = STATE_DISCONNECTED
 	this.conn.Close()
 }
