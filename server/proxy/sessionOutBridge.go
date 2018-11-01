@@ -22,6 +22,7 @@ type SessionOutBridge struct {
 	conn                 net.Conn
 	connCodec            *packet.PacketConnCodec
 	pipeline             *packet.PacketPipeline
+	apiOutBridge         api.OutBridge
 	compressionThreshold int
 
 	remoteIp      string
@@ -36,6 +37,7 @@ func NewSessionOutBridge(session *Session, server *connect.Server, conn net.Conn
 	this.protocol = this.session.protocol
 	this.server = server
 	this.conn = conn
+	this.apiOutBridge = &apiOutBridge{this}
 	this.compressionThreshold = -1
 	this.remoteIp, this.remotePort, _ = net.SplitHostPort(conn.RemoteAddr().String())
 	this.state = STATE_DISCONNECTED

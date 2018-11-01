@@ -25,6 +25,10 @@ type Config interface {
 	Authenticate() bool
 }
 
+type OutBridge interface {
+	Version() *minecraft.Version
+}
+
 type Session interface {
 	Conn() net.Conn
 	Write(packet.Packet, PacketSubject)
@@ -36,6 +40,7 @@ type Session interface {
 	RemoteOverride(ip string, port string)
 	State() SessionState
 	Version() *minecraft.Version
+	OutBridge() OutBridge
 }
 
 type SessionRegistry interface {
@@ -96,6 +101,7 @@ const (
 
 type EventBus interface {
 	HandleSessionOpen(EventSessionHandler)
+	HandleSessionLogin(EventSessionHandler)
 	HandleSessionClose(EventSessionHandler)
 	HandleSessionState(EventSessionHandler)
 	HandleSessionRedirect(EventSessionHandler)
@@ -116,6 +122,13 @@ type EventSessionHandler func(EventSession)
 type EventSessionOpen interface {
 	EventSession
 	EventCancellable
+}
+
+type EventSessionLogin interface {
+	EventSession
+	EventCancellable
+	SetReason(reason string)
+	GetReason() string
 }
 
 type EventSessionClose interface {

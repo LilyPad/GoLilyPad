@@ -60,6 +60,16 @@ func (this *apiSession) Version() *minecraft.Version {
 	return this.session.protocol
 }
 
+func (this *apiSession) OutBridge() api.OutBridge {
+	outBridge := this.session.outBridge
+
+	if outBridge == nil {
+		return nil
+	}
+
+	return outBridge.apiOutBridge
+}
+
 type apiSessionRegistry struct {
 	sessionRegistry *SessionRegistry
 }

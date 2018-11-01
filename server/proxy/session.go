@@ -160,6 +160,18 @@ func (this *Session) SetAuthenticated(result bool) {
 		this.Disconnect(minecraft.Colorize(this.server.localizer.LocaleFull()))
 		return
 	}
+
+	event := eventSessionLogin{
+		eventSessionCancellable: eventSessionCancellable{eventSession: eventSession{this}},
+		reason: "",
+	}
+	eventBus := this.server.apiEventBus
+	eventBus.fireEventSession(eventBus.sessionLogin, &event)
+	if event.IsCancelled() {
+		this.Disconnect(event.GetReason())
+		return
+	}
+
 	servers := this.server.router.Route(this.serverAddress)
 	activeServers := []string{}
 	for _, serverName := range servers {
