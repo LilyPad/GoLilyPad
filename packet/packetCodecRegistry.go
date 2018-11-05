@@ -40,11 +40,17 @@ func NewPacketCodecRegistryDual(encodeCodecs []PacketCodec, decodeCodecs []Packe
 }
 
 func (this *PacketCodecRegistry) Decode(reader io.Reader) (packet Packet, err error) {
-	payload, err := ioutil.ReadAll(reader)
-	if err != nil {
-		return
+	var buffer io.Reader
+	var bufferPayload []byte
+	if this.interceptDecode != nil {
+		bufferPayload, err = ioutil.ReadAll(reader)
+		if err != nil {
+			return
+		}
+		buffer = bytes.NewBuffer(bufferPayload)
+	} else {
+		buffer = reader
 	}
-	buffer := bytes.NewBuffer(payload)
 	id, err := ReadVarInt(buffer)
 	if err != nil {
 		return
@@ -70,7 +76,7 @@ func (this *PacketCodecRegistry) Decode(reader io.Reader) (packet Packet, err er
 		if err != nil {
 			return
 		}
-		err = this.interceptDecode(packet, bytes.NewBuffer(payload))
+		err = this.interceptDecode(packet, bytes.NewBuffer(bufferPayload))
 	}
 	return
 }
