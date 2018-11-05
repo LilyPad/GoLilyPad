@@ -71,11 +71,9 @@ func (this *PacketCodecRegistry) Decode(reader io.Reader) (packet Packet, err er
 	packet, err = codec.Decode(buffer)
 	if err != nil {
 		err = PacketDecodeError{id, codec, err}
+		return
 	}
 	if this.interceptDecode != nil {
-		if err != nil {
-			return
-		}
 		err = this.interceptDecode(packet, bytes.NewBuffer(bufferPayload))
 	}
 	return
