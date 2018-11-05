@@ -4,11 +4,15 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"bytes"
+	"io/ioutil"
 )
 
 type PacketCodecRegistry struct {
 	EncodeCodecs []PacketCodec
 	DecodeCodecs []PacketCodec
+	interceptDecode PacketIntercept
+	interceptEncode PacketIntercept
 }
 
 type PacketDecodeError struct {
@@ -36,7 +40,12 @@ func NewPacketCodecRegistryDual(encodeCodecs []PacketCodec, decodeCodecs []Packe
 }
 
 func (this *PacketCodecRegistry) Decode(reader io.Reader) (packet Packet, err error) {
-	id, err := ReadVarInt(reader)
+	payload, err := ioutil.ReadAll(reader)
+	if err != nil {
+		return
+	}
+	buffer := bytes.NewBuffer(payload)
+	id, err := ReadVarInt(buffer)
 	if err != nil {
 		return
 	}
@@ -53,9 +62,15 @@ func (this *PacketCodecRegistry) Decode(reader io.Reader) (packet Packet, err er
 		err = errors.New(fmt.Sprintf("Decode, Packet Id does not have a codec: %d", id))
 		return
 	}
-	packet, err = codec.Decode(reader)
+	packet, err = codec.Decode(buffer)
 	if err != nil {
 		err = PacketDecodeError{id, codec, err}
+	}
+	if this.interceptDecode != nil {
+		if err != nil {
+			return
+		}
+		err = this.interceptDecode(packet, bytes.NewBuffer(payload))
 	}
 	return
 }
@@ -75,15 +90,26 @@ func (this *PacketCodecRegistry) Encode(writer io.Writer, packet Packet) (err er
 		err = errors.New(fmt.Sprintf("Encode, Packet Id does not have a codec: %d", id))
 		return
 	}
+	buffer := new(bytes.Buffer)
 	if raw, ok := packet.(PacketRaw); ok && raw.Raw() {
-		err = codec.Encode(writer, packet)
+		err = codec.Encode(buffer, packet)
 	} else {
-		err = WriteVarInt(writer, id)
+		err = WriteVarInt(buffer, id)
 		if err != nil {
 			return
 		}
-		err = codec.Encode(writer, packet)
+		err = codec.Encode(buffer, packet)
 	}
+	if err != nil {
+		return
+	}
+	if this.interceptEncode != nil {
+		err = this.interceptEncode(packet, buffer)
+		if err != nil {
+			return
+		}
+	}
+	_, err = buffer.WriteTo(writer)
 	return
 }
 
@@ -107,3 +133,12 @@ func (this *PacketCodecRegistry) Copy() (thisCopy *PacketCodecRegistry) {
 func (this *PacketCodecRegistry) SetCodec(codec PacketCodec) {
 	panic("PacketCodecRegistry must be last in the pipeline")
 }
+
+func (this *PacketCodecRegistry) SetInterceptDecode(intercept PacketIntercept) {
+	this.interceptDecode = intercept
+}
+
+func (this *PacketCodecRegistry) SetInterceptEncode(intercept PacketIntercept) {
+	this.interceptEncode = intercept
+}
+

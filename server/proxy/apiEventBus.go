@@ -7,6 +7,7 @@ import (
 
 type eventBus struct {
 	sessionOpen        []api.EventSessionHandler
+	sessionLogin       []api.EventSessionHandler
 	sessionClose       []api.EventSessionHandler
 	sessionState       []api.EventSessionHandler
 	sessionRedirect    []api.EventSessionHandler
@@ -17,6 +18,7 @@ type eventBus struct {
 func NewEventBus() *eventBus {
 	this := new(eventBus)
 	this.sessionOpen = make([]api.EventSessionHandler, 0)
+	this.sessionLogin = make([]api.EventSessionHandler, 0)
 	this.sessionClose = make([]api.EventSessionHandler, 0)
 	this.sessionState = make([]api.EventSessionHandler, 0)
 	this.sessionRedirect = make([]api.EventSessionHandler, 0)
@@ -65,6 +67,10 @@ func (this *eventBus) HandleSessionOpen(handler api.EventSessionHandler) {
 	this.sessionOpen = append(this.sessionOpen, handler)
 }
 
+func (this *eventBus) HandleSessionLogin(handler api.EventSessionHandler) {
+	this.sessionLogin = append(this.sessionLogin, handler)
+}
+
 func (this *eventBus) HandleSessionClose(handler api.EventSessionHandler) {
 	this.sessionClose = append(this.sessionClose, handler)
 }
@@ -109,6 +115,19 @@ func (this *eventSessionCancellable) IsCancelled() bool {
 
 type eventSessionOpen struct {
 	eventSessionCancellable
+}
+
+type eventSessionLogin struct {
+	eventSessionCancellable
+	reason string
+}
+
+func (this *eventSessionLogin) SetReason(reason string) {
+	this.reason = reason
+}
+
+func (this *eventSessionLogin) GetReason() string {
+	return this.reason
 }
 
 type eventSessionClose struct {
