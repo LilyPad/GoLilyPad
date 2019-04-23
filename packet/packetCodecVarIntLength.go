@@ -8,7 +8,7 @@ import (
 )
 
 type PacketCodecVarIntLength struct {
-	codec           PacketCodec
+	codec PacketCodec
 }
 
 func NewPacketCodecVarIntLength() (this *PacketCodecVarIntLength) {

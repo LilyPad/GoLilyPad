@@ -8,10 +8,11 @@ type PacketClientJoinGame struct {
 	Difficulty       int8
 	MaxPlayers       int8
 	LevelType        string
+	ViewDistance     int
 	ReducedDebugInfo bool
 }
 
-func NewPacketClientJoinGame(idMap *IdMap, entityId int32, gamemode int8, dimension int8, difficulty int8, maxPlayers int8, levelType string, reducedDebugInfo bool) (this *PacketClientJoinGame) {
+func NewPacketClientJoinGame(idMap *IdMap, entityId int32, gamemode int8, dimension int8, difficulty int8, maxPlayers int8, levelType string, viewDistance int, reducedDebugInfo bool) (this *PacketClientJoinGame) {
 	this = new(PacketClientJoinGame)
 	this.IdFrom(idMap)
 	this.EntityId = entityId
@@ -20,6 +21,7 @@ func NewPacketClientJoinGame(idMap *IdMap, entityId int32, gamemode int8, dimens
 	this.Difficulty = difficulty
 	this.MaxPlayers = maxPlayers
 	this.LevelType = levelType
+	this.ViewDistance = viewDistance
 	this.ReducedDebugInfo = reducedDebugInfo
 	return
 }

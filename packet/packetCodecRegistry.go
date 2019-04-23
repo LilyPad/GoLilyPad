@@ -1,16 +1,16 @@
 package packet
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"io"
-	"bytes"
 	"io/ioutil"
 )
 
 type PacketCodecRegistry struct {
-	EncodeCodecs []PacketCodec
-	DecodeCodecs []PacketCodec
+	EncodeCodecs    []PacketCodec
+	DecodeCodecs    []PacketCodec
 	interceptDecode PacketIntercept
 	interceptEncode PacketIntercept
 }
@@ -145,4 +145,3 @@ func (this *PacketCodecRegistry) SetInterceptDecode(intercept PacketIntercept) {
 func (this *PacketCodecRegistry) SetInterceptEncode(intercept PacketIntercept) {
 	this.interceptEncode = intercept
 }
-
