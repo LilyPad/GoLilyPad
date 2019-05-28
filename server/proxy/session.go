@@ -310,7 +310,9 @@ func (this *Session) handlePacket(packet packet.Packet) (err error) {
 					err = errors.New(fmt.Sprintf("Protocol version does not match: %d", this.protocolVersion))
 					return
 				}
-				if this.protocolVersion >= mc114.VersionNum01 {
+				if this.protocolVersion >= mc114.VersionNum02 {
+					this.protocol = mc114.Version02
+				} else if this.protocolVersion >= mc114.VersionNum01 {
 					this.protocol = mc114.Version01
 				} else if this.protocolVersion >= mc114.VersionNum {
 					this.protocol = mc114.Version
