@@ -516,7 +516,17 @@ var Version03 = &minecraft.Version{
 	IdMap:            IdMap,
 }
 
+var Version04 = &minecraft.Version{
+	Name:             "1.14.4",
+	LoginClientCodec: mc18.LoginPacketClientCodec,
+	LoginServerCodec: mc18.LoginPacketServerCodec,
+	PlayClientCodec:  PlayPacketClientCodec,
+	PlayServerCodec:  PlayPacketServerCodec,
+	IdMap:            IdMap,
+}
+
 var VersionNum = 477
 var VersionNum01 = 480
 var VersionNum02 = 485
 var VersionNum03 = 490
+var VersionNum04 = 498
