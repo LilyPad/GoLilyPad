@@ -4,7 +4,6 @@ import (
 	yaml "gopkg.in/yaml.v2"
 	"io/ioutil"
 	"strings"
-	"sync"
 )
 
 type Config struct {
@@ -13,7 +12,6 @@ type Config struct {
 }
 
 func (this *Config) Route(domain string) (val []string) {
-	this.routeBake()
 	if route, ok := this.Proxy.routes[strings.ToLower(domain)]; ok {
 		if route.Servers != nil {
 			val = make([]string, len(route.Servers))
@@ -33,7 +31,6 @@ func (this *Config) Route(domain string) (val []string) {
 }
 
 func (this *Config) RouteMotds(domain string) (val []string) {
-	this.routeBake()
 	if route, ok := this.Proxy.routes[strings.ToLower(domain)]; ok {
 		if route.Motds != nil {
 			val = make([]string, len(route.Motds))
@@ -53,7 +50,6 @@ func (this *Config) RouteMotds(domain string) (val []string) {
 }
 
 func (this *Config) RouteIcons(domain string) (val []string) {
-	this.routeBake()
 	if route, ok := this.Proxy.routes[strings.ToLower(domain)]; ok {
 		if route.Icons != nil {
 			val = make([]string, len(route.Icons))
@@ -73,7 +69,6 @@ func (this *Config) RouteIcons(domain string) (val []string) {
 }
 
 func (this *Config) RouteSample(domain string) (val string) {
-	this.routeBake()
 	if route, ok := this.Proxy.routes[strings.ToLower(domain)]; ok && route.Sample != "" {
 		val = route.Sample
 	} else if domain != "" {
@@ -85,7 +80,6 @@ func (this *Config) RouteSample(domain string) (val string) {
 }
 
 func (this *Config) routeBake() {
-	this.Proxy.routesMutex.Lock()
 	if this.Proxy.routes == nil {
 		this.Proxy.routes = make(map[string]ConfigProxyRoute)
 		for _, route := range this.Proxy.Routes {
@@ -99,7 +93,6 @@ func (this *Config) routeBake() {
 			}
 		}
 	}
-	this.Proxy.routesMutex.Unlock()
 }
 
 func (this *Config) LocaleFull() (val string) {
@@ -141,7 +134,6 @@ type ConfigProxy struct {
 	Bind           string             `yaml:"bind"`
 	Routes         []ConfigProxyRoute `yaml:"routes"`
 	routes         map[string]ConfigProxyRoute
-	routesMutex    sync.RWMutex
 	Locale         ConfigProxyLocale `yaml:"locale"`
 	Motd           string            `yaml:"motd"`
 	MaxPlayers     uint16            `yaml:"maxPlayers"`
@@ -207,6 +199,10 @@ func LoadConfig(file string) (config *Config, err error) {
 	}
 	config = new(Config)
 	err = yaml.Unmarshal(data, config)
+	if err != nil {
+		return
+	}
+	config.routeBake()
 	return
 }
 
