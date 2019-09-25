@@ -173,10 +173,10 @@ func DefaultConfig() (config *Config) {
 	config.Proxy = ConfigProxy{
 		Bind: ":25565",
 		Routes: []ConfigProxyRoute{
-			ConfigProxyRoute{"", nil, "example", nil, "", nil, "", nil, ""},
-			ConfigProxyRoute{"example.com", nil, "", []string{"hub1", "hub2"}, "Example Custom MOTD", nil, "", nil, ""},
-			ConfigProxyRoute{"hub.example.com", nil, "hub", nil, "", []string{"Example MOTD 1", "Example MOTD 2"}, "", nil, ""},
-			ConfigProxyRoute{"icon.example.com", nil, "hub", nil, "", nil, "icon.png", []string{"icon1.png", "icon2.png", "icons/icon3.png"}, ""},
+			{"", nil, "example", nil, "", nil, "", nil, ""},
+			{"example.com", nil, "", []string{"hub1", "hub2"}, "Example Custom MOTD", nil, "", nil, ""},
+			{"hub.example.com", nil, "hub", nil, "", []string{"Example MOTD 1", "Example MOTD 2"}, "", nil, ""},
+			{"icon.example.com", nil, "hub", nil, "", nil, "icon.png", []string{"icon1.png", "icon2.png", "icons/icon3.png"}, ""},
 		},
 		Locale: ConfigProxyLocale{
 			Full:     "The server seems to be currently full. Try again later!",

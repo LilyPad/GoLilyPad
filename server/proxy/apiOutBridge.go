@@ -9,5 +9,3 @@ type apiOutBridge struct {
 func (this *apiOutBridge) Version() *minecraft.Version {
 	return this.session.protocol
 }
-
-

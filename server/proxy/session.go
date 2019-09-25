@@ -164,7 +164,7 @@ func (this *Session) SetAuthenticated(result bool) {
 
 	event := eventSessionLogin{
 		eventSessionCancellable: eventSessionCancellable{eventSession: eventSession{this}},
-		reason: "",
+		reason:                  "",
 	}
 	eventBus := this.server.apiEventBus
 	eventBus.fireEventSession(eventBus.sessionLogin, &event)

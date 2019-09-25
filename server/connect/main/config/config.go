@@ -53,8 +53,8 @@ func DefaultConfig() (config *Config) {
 	config = new(Config)
 	config.Bind = ":5091"
 	config.Logins = []ConfigLogin{
-		ConfigLogin{"example", "", nil, "example"},
-		ConfigLogin{"", "^example-.*$", nil, "example"},
+		{"example", "", nil, "example"},
+		{"", "^example-.*$", nil, "example"},
 	}
 	return
 }

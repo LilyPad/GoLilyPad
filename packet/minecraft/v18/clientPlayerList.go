@@ -32,7 +32,7 @@ func (this *CodecClientPlayerList) Decode(reader io.Reader) (decode packet.Packe
 		return
 	}
 	packetClientPlayerList.Items = make([]minecraft.PacketClientPlayerListItem, itemLength)
-	for i, _ := range packetClientPlayerList.Items {
+	for i := range packetClientPlayerList.Items {
 		item := &packetClientPlayerList.Items[i]
 		item.UUID, err = packet.ReadUUID(reader)
 		if err != nil {
@@ -59,7 +59,7 @@ func (this *CodecClientPlayerList) Decode(reader io.Reader) (decode packet.Packe
 				return
 			}
 			addPlayer.Properties = make([]minecraft.PacketClientPlayerListAddPlayerProperty, propertiesLength)
-			for j, _ := range addPlayer.Properties {
+			for j := range addPlayer.Properties {
 				property := &addPlayer.Properties[j]
 				property.Name, err = packet.ReadString(reader)
 				if err != nil {

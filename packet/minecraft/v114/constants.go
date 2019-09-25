@@ -3,9 +3,9 @@ package v114
 import (
 	"github.com/LilyPad/GoLilyPad/packet"
 	minecraft "github.com/LilyPad/GoLilyPad/packet/minecraft"
+	mc113 "github.com/LilyPad/GoLilyPad/packet/minecraft/v113"
 	mc18 "github.com/LilyPad/GoLilyPad/packet/minecraft/v18"
 	mc19 "github.com/LilyPad/GoLilyPad/packet/minecraft/v19"
-	mc113 "github.com/LilyPad/GoLilyPad/packet/minecraft/v113"
 )
 
 const (
@@ -45,7 +45,7 @@ const (
 	PACKET_CLIENT_CHUNK_DATA                    = 0x21
 	PACKET_CLIENT_EFFECT                        = 0x22
 	PACKET_CLIENT_PARTICLE                      = 0x23
-	PACKET_CLIENT_UPDATE_LIGHT					= 0x24 // new
+	PACKET_CLIENT_UPDATE_LIGHT                  = 0x24 // new
 	PACKET_CLIENT_JOIN_GAME                     = 0x25
 	PACKET_CLIENT_MAPS                          = 0x26
 	PACKET_CLIENT_TRADE_LIST                    = 0x27 // new
@@ -54,7 +54,7 @@ const (
 	PACKET_CLIENT_ENTITY_LOOK                   = 0x2A
 	PACKET_CLIENT_ENTITY                        = 0x2B
 	PACKET_CLIENT_VEHICLE_MOVE                  = 0x2C
-	PACKET_CLIENT_OPEN_BOOK                   	= 0x2D // new
+	PACKET_CLIENT_OPEN_BOOK                     = 0x2D // new
 	PACKET_CLIENT_OPEN_WINDOW                   = 0x2E
 	PACKET_CLIENT_SIGN_EDITOR_OPEN              = 0x2F
 	PACKET_CLIENT_CRAFT_RECIPE_RESPONSE         = 0x30
@@ -73,8 +73,8 @@ const (
 	PACKET_CLIENT_WORLD_BORDER                  = 0x3D
 	PACKET_CLIENT_CAMERA                        = 0x3E
 	PACKET_CLIENT_HELD_ITEM_CHANGE              = 0x3F
-	PACKET_CLIENT_UPDATE_VIEW_POSITION			= 0x40 // new
-	PACKET_CLIENT_UPDATE_VIEW_DISTANCE			= 0x41 // new
+	PACKET_CLIENT_UPDATE_VIEW_POSITION          = 0x40 // new
+	PACKET_CLIENT_UPDATE_VIEW_DISTANCE          = 0x41 // new
 	PACKET_CLIENT_DISPLAY_SCOREBOARD            = 0x42
 	PACKET_CLIENT_ENTITY_METADATA               = 0x43
 	PACKET_CLIENT_ATTACH_ENTITY                 = 0x44
@@ -89,7 +89,7 @@ const (
 	PACKET_CLIENT_SPAWN_POSITION                = 0x4D
 	PACKET_CLIENT_TIME_UPDATE                   = 0x4E
 	PACKET_CLIENT_TITLE                         = 0x4F
-	PACKET_CLIENT_ENTITY_SOUND_EFFECT			= 0x50 // new
+	PACKET_CLIENT_ENTITY_SOUND_EFFECT           = 0x50 // new
 	PACKET_CLIENT_SOUND_EFFECT                  = 0x51
 	PACKET_CLIENT_STOP_SOUND                    = 0x52
 	PACKET_CLIENT_PLAYER_LIST_HEAD_FOOT         = 0x53
@@ -110,7 +110,7 @@ const (
 
 	PACKET_SERVER_TELEPORT_CONFIRM              = 0x00
 	PACKET_SERVER_QUERY_BLOCK_NBT               = 0x01
-	PACKET_SERVER_SET_DIFFICULTY				= 0x02 // new
+	PACKET_SERVER_SET_DIFFICULTY                = 0x02 // new
 	PACKET_SERVER_CHAT                          = 0x03
 	PACKET_SERVER_CLIENT_STATUS                 = 0x04
 	PACKET_SERVER_CLIENT_SETTINGS               = 0x05
@@ -124,7 +124,7 @@ const (
 	PACKET_SERVER_QUERY_ENTITY_NBT              = 0x0D
 	PACKET_SERVER_USE_ENTITY                    = 0x0E
 	PACKET_SERVER_KEEPALIVE                     = 0x0F
-	PACKET_SERVER_LOCK_DIFFICULTY				= 0x10 // new
+	PACKET_SERVER_LOCK_DIFFICULTY               = 0x10 // new
 	PACKET_SERVER_PLAYER_POSITION               = 0x11
 	PACKET_SERVER_PLAYER_LOOK_AND_POSITION      = 0x12
 	PACKET_SERVER_PLAYER_LOOK                   = 0x13
@@ -147,7 +147,7 @@ const (
 	PACKET_SERVER_UPDATE_COMMAND_BLOCK          = 0x24
 	PACKET_SERVER_UPDATE_COMMAND_BLOCK_MINECART = 0x25
 	PACKET_SERVER_CREATIVE_INVENTORY_ACTION     = 0x26
-	PACKET_SERVER_UPDATE_JIGSAW_BLOCK			= 0x27 // new
+	PACKET_SERVER_UPDATE_JIGSAW_BLOCK           = 0x27 // new
 	PACKET_SERVER_UPDATE_STRUCTURE_BLOCK        = 0x28
 	PACKET_SERVER_UPDATE_SIGN                   = 0x29
 	PACKET_SERVER_ANIMATION                     = 0x2A
@@ -247,14 +247,14 @@ var PlayPacketServerCodec = packet.NewPacketCodecRegistryDual([]packet.PacketCod
 	PACKET_CLIENT_DECLARE_RECIPES:    minecraft.NewPacketGenericCodec(PACKET_CLIENT_DECLARE_RECIPES, Swappers),
 	PACKET_CLIENT_TAGS:               minecraft.NewPacketGenericCodec(PACKET_CLIENT_TAGS, Swappers),
 	// 1.14
-	PACKET_CLIENT_OPEN_HORSE_WINDOW:	minecraft.NewPacketGenericCodec(PACKET_CLIENT_OPEN_HORSE_WINDOW, Swappers),
-	PACKET_CLIENT_UPDATE_LIGHT:	minecraft.NewPacketGenericCodec(PACKET_CLIENT_UPDATE_LIGHT, Swappers),
-	PACKET_CLIENT_TRADE_LIST:	minecraft.NewPacketGenericCodec(PACKET_CLIENT_TRADE_LIST, Swappers),
-	PACKET_CLIENT_OPEN_BOOK:	minecraft.NewPacketGenericCodec(PACKET_CLIENT_OPEN_BOOK, Swappers),
-	PACKET_CLIENT_UPDATE_VIEW_POSITION:	minecraft.NewPacketGenericCodec(PACKET_CLIENT_UPDATE_VIEW_POSITION, Swappers),
-	PACKET_CLIENT_UPDATE_VIEW_DISTANCE:	&CodecClientViewDistance{IdMap},
-	PACKET_CLIENT_ENTITY_SOUND_EFFECT:	minecraft.NewPacketGenericCodec(PACKET_CLIENT_ENTITY_SOUND_EFFECT, Swappers),
-	PACKET_CLIENT_ACKNOWLEDGE_PLAYER_DIGGING:	minecraft.NewPacketGenericCodec(PACKET_CLIENT_ACKNOWLEDGE_PLAYER_DIGGING, Swappers),
+	PACKET_CLIENT_OPEN_HORSE_WINDOW:          minecraft.NewPacketGenericCodec(PACKET_CLIENT_OPEN_HORSE_WINDOW, Swappers),
+	PACKET_CLIENT_UPDATE_LIGHT:               minecraft.NewPacketGenericCodec(PACKET_CLIENT_UPDATE_LIGHT, Swappers),
+	PACKET_CLIENT_TRADE_LIST:                 minecraft.NewPacketGenericCodec(PACKET_CLIENT_TRADE_LIST, Swappers),
+	PACKET_CLIENT_OPEN_BOOK:                  minecraft.NewPacketGenericCodec(PACKET_CLIENT_OPEN_BOOK, Swappers),
+	PACKET_CLIENT_UPDATE_VIEW_POSITION:       minecraft.NewPacketGenericCodec(PACKET_CLIENT_UPDATE_VIEW_POSITION, Swappers),
+	PACKET_CLIENT_UPDATE_VIEW_DISTANCE:       &CodecClientViewDistance{IdMap},
+	PACKET_CLIENT_ENTITY_SOUND_EFFECT:        minecraft.NewPacketGenericCodec(PACKET_CLIENT_ENTITY_SOUND_EFFECT, Swappers),
+	PACKET_CLIENT_ACKNOWLEDGE_PLAYER_DIGGING: minecraft.NewPacketGenericCodec(PACKET_CLIENT_ACKNOWLEDGE_PLAYER_DIGGING, Swappers),
 }, []packet.PacketCodec{
 	PACKET_SERVER_KEEPALIVE:                 minecraft.NewPacketGenericCodec(PACKET_SERVER_KEEPALIVE, Swappers),
 	PACKET_SERVER_CHAT:                      minecraft.NewPacketGenericCodec(PACKET_SERVER_CHAT, Swappers),
@@ -304,8 +304,8 @@ var PlayPacketServerCodec = packet.NewPacketCodecRegistryDual([]packet.PacketCod
 	PACKET_SERVER_UPDATE_COMMAND_BLOCK_MINECART: minecraft.NewPacketGenericCodec(PACKET_SERVER_UPDATE_COMMAND_BLOCK_MINECART, Swappers),
 	PACKET_SERVER_UPDATE_STRUCTURE_BLOCK:        minecraft.NewPacketGenericCodec(PACKET_SERVER_UPDATE_STRUCTURE_BLOCK, Swappers),
 	// 1.14
-	PACKET_SERVER_SET_DIFFICULTY: minecraft.NewPacketGenericCodec(PACKET_SERVER_SET_DIFFICULTY, Swappers),
-	PACKET_SERVER_LOCK_DIFFICULTY: minecraft.NewPacketGenericCodec(PACKET_SERVER_LOCK_DIFFICULTY, Swappers),
+	PACKET_SERVER_SET_DIFFICULTY:      minecraft.NewPacketGenericCodec(PACKET_SERVER_SET_DIFFICULTY, Swappers),
+	PACKET_SERVER_LOCK_DIFFICULTY:     minecraft.NewPacketGenericCodec(PACKET_SERVER_LOCK_DIFFICULTY, Swappers),
 	PACKET_SERVER_UPDATE_JIGSAW_BLOCK: minecraft.NewPacketGenericCodec(PACKET_SERVER_UPDATE_JIGSAW_BLOCK, Swappers),
 })
 
@@ -317,12 +317,12 @@ var Swappers = &minecraft.PacketGenericSwappers{
 		PACKET_CLIENT_ATTACH_ENTITY: {0, 4},
 	},
 	ClientVarInt: []bool{
-		PACKET_CLIENT_SPAWN_OBJECT:                  true,
-		PACKET_CLIENT_SPAWN_MOB:                     true,
-		PACKET_CLIENT_SPAWN_PLAYER:                  true,
-		PACKET_CLIENT_ENTITY_EQUIPMENT:              true,
-		PACKET_CLIENT_SET_PASSENGERS:                true,
-		PACKET_CLIENT_ENTITY_PROPERTIES:             true,
+		PACKET_CLIENT_SPAWN_OBJECT:      true,
+		PACKET_CLIENT_SPAWN_MOB:         true,
+		PACKET_CLIENT_SPAWN_PLAYER:      true,
+		PACKET_CLIENT_ENTITY_EQUIPMENT:  true,
+		PACKET_CLIENT_SET_PASSENGERS:    true,
+		PACKET_CLIENT_ENTITY_PROPERTIES: true,
 		// PACKET_CLIENT_USE_BED:                    true, // removed
 		PACKET_CLIENT_COLLECT_ITEM:                  true, // TODO change the second argument too?
 		PACKET_CLIENT_ANIMATION:                     true,

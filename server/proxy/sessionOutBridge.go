@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"github.com/LilyPad/GoLilyPad/packet"
 	"github.com/LilyPad/GoLilyPad/packet/minecraft"
+	mc114 "github.com/LilyPad/GoLilyPad/packet/minecraft/v114"
 	mc17 "github.com/LilyPad/GoLilyPad/packet/minecraft/v17"
 	mc19 "github.com/LilyPad/GoLilyPad/packet/minecraft/v19"
-	mc114 "github.com/LilyPad/GoLilyPad/packet/minecraft/v114"
 	"github.com/LilyPad/GoLilyPad/server/proxy/api"
 	"github.com/LilyPad/GoLilyPad/server/proxy/connect"
 	uuid "github.com/satori/go.uuid"
@@ -212,12 +212,12 @@ func (this *SessionOutBridge) handlePacketConnected(packet packet.Packet) (err e
 			}
 			if len(this.session.playerList) > 0 {
 				if this.session.protocolVersion <= mc17.VersionNum {
-					for player, _ := range this.session.playerList {
+					for player := range this.session.playerList {
 						this.session.Write(mc17.NewPacketClientPlayerListRemove(player))
 					}
 				} else {
 					items := make([]minecraft.PacketClientPlayerListItem, 0, len(this.session.playerList))
-					for uuidString, _ := range this.session.playerList {
+					for uuidString := range this.session.playerList {
 						uuid, _ := uuid.FromBytes([]byte(uuidString))
 						items = append(items, minecraft.PacketClientPlayerListItem{UUID: uuid})
 					}
@@ -226,26 +226,26 @@ func (this *SessionOutBridge) handlePacketConnected(packet packet.Packet) (err e
 				this.session.playerList = make(map[string]struct{})
 			}
 			if len(this.session.scoreboards) > 0 {
-				for scoreboard, _ := range this.session.scoreboards {
+				for scoreboard := range this.session.scoreboards {
 					this.session.Write(minecraft.NewPacketClientScoreboardObjectiveRemove(this.protocol.IdMap, scoreboard))
 				}
 				this.session.scoreboards = make(map[string]struct{})
 			}
 			if len(this.session.teams) > 0 {
-				for team, _ := range this.session.teams {
+				for team := range this.session.teams {
 					this.session.Write(minecraft.NewPacketClientTeamsRemove(this.protocol.IdMap, team))
 				}
 				this.session.teams = make(map[string]struct{})
 			}
 			if len(this.session.pluginChannels) > 0 {
 				channels := make([][]byte, 0, len(this.session.pluginChannels))
-				for channel, _ := range this.session.pluginChannels {
+				for channel := range this.session.pluginChannels {
 					channels = append(channels, []byte(channel))
 				}
 				this.Write(minecraft.NewPacketServerPluginMessage(this.protocol.IdMap, "REGISTER", bytes.Join(channels, []byte{0})))
 			}
 			if len(this.session.bossBars) > 0 {
-				for uuidString, _ := range this.session.bossBars {
+				for uuidString := range this.session.bossBars {
 					uuid, _ := uuid.FromBytes([]byte(uuidString))
 					this.session.Write(mc19.NewPacketClientBossBarRemove(this.protocol.IdMap, uuid))
 				}
