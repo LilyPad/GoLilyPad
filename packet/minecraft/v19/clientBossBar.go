@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/LilyPad/GoLilyPad/packet"
+	"github.com/LilyPad/GoLilyPad/packet/minecraft"
 	uuid "github.com/satori/go.uuid"
 	"io"
 )
@@ -18,6 +19,7 @@ const (
 )
 
 type PacketClientBossBar struct {
+	minecraft.IdMapPacket
 	UUID     uuid.UUID
 	Action   int
 	Title    string
@@ -27,22 +29,25 @@ type PacketClientBossBar struct {
 	Flags    uint8
 }
 
-func NewPacketClientBossBarRemove(UUID uuid.UUID) (this *PacketClientBossBar) {
+func NewPacketClientBossBarRemove(idMap *minecraft.IdMap, UUID uuid.UUID) (this *PacketClientBossBar) {
 	this = new(PacketClientBossBar)
+	this.IdFrom(idMap)
 	this.UUID = UUID
 	this.Action = PACKET_CLIENT_BOSS_BAR_ACTION_REMOVE
 	return
 }
 
-func (this *PacketClientBossBar) Id() int {
-	return PACKET_CLIENT_BOSS_BAR
+func (this *PacketClientBossBar) IdFrom(idMap *minecraft.IdMap) {
+	this.IdSet(idMap.PacketClientBossBar)
 }
 
 type CodecClientBossBar struct {
+	IdMap *minecraft.IdMap
 }
 
 func (this *CodecClientBossBar) Decode(reader io.Reader) (decode packet.Packet, err error) {
 	packetClientBossBar := new(PacketClientBossBar)
+	packetClientBossBar.IdFrom(this.IdMap)
 	packetClientBossBar.UUID, err = packet.ReadUUID(reader)
 	if err != nil {
 		return

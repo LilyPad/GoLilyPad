@@ -11,3 +11,7 @@ func (this *IdMapPacket) Id() int {
 func (this *IdMapPacket) IdFrom(idMap *IdMap) {
 	panic("")
 }
+
+func (this *IdMapPacket) IdSet(id int) {
+	this.id = id
+}

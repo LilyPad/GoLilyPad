@@ -7,6 +7,7 @@ import (
 	"github.com/LilyPad/GoLilyPad/packet/minecraft"
 	mc17 "github.com/LilyPad/GoLilyPad/packet/minecraft/v17"
 	mc19 "github.com/LilyPad/GoLilyPad/packet/minecraft/v19"
+	mc114 "github.com/LilyPad/GoLilyPad/packet/minecraft/v114"
 	"github.com/LilyPad/GoLilyPad/server/proxy/api"
 	"github.com/LilyPad/GoLilyPad/server/proxy/connect"
 	uuid "github.com/satori/go.uuid"
@@ -206,6 +207,9 @@ func (this *SessionOutBridge) handlePacketConnected(packet packet.Packet) (err e
 			}
 			this.session.Write(minecraft.NewPacketClientRespawn(this.protocol.IdMap, swapDimension, 2, 0, "DEFAULT"))
 			this.session.Write(minecraft.NewPacketClientRespawn(this.protocol.IdMap, int32(joinGamePacket.Dimension), joinGamePacket.Difficulty, joinGamePacket.Gamemode, joinGamePacket.LevelType))
+			if this.session.protocolVersion >= mc114.VersionNum {
+				this.session.Write(minecraft.NewPacketClientViewDistance(this.protocol.IdMap, joinGamePacket.ViewDistance))
+			}
 			if len(this.session.playerList) > 0 {
 				if this.session.protocolVersion <= mc17.VersionNum {
 					for player, _ := range this.session.playerList {
@@ -243,7 +247,7 @@ func (this *SessionOutBridge) handlePacketConnected(packet packet.Packet) (err e
 			if len(this.session.bossBars) > 0 {
 				for uuidString, _ := range this.session.bossBars {
 					uuid, _ := uuid.FromBytes([]byte(uuidString))
-					this.session.Write(mc19.NewPacketClientBossBarRemove(uuid))
+					this.session.Write(mc19.NewPacketClientBossBarRemove(this.protocol.IdMap, uuid))
 				}
 			}
 			return

@@ -101,6 +101,7 @@ const (
 	PACKET_CLIENT_ENTITY_EFFECT                 = 0x59
 	PACKET_CLIENT_DECLARE_RECIPES               = 0x5A
 	PACKET_CLIENT_TAGS                          = 0x5B
+	PACKET_CLIENT_ACKNOWLEDGE_PLAYER_DIGGING    = 0x5C
 	PACKET_CLIENT_UPDATE_SIGN                   = -1
 	PACKET_CLIENT_MAP_CHUNK_BULK                = -1
 	PACKET_CLIENT_SET_COMPRESSION               = -1
@@ -155,10 +156,6 @@ const (
 	PACKET_SERVER_USE_ITEM                      = 0x2D
 	PACKET_SERVER_PREPARE_CRAFTING_GRID         = -1
 )
-
-// TODO
-// join gmae changed
-// respawn changed
 
 var PlayPacketServerCodec = packet.NewPacketCodecRegistryDual([]packet.PacketCodec{
 	PACKET_CLIENT_KEEPALIVE:                     minecraft.NewPacketGenericCodec(PACKET_CLIENT_KEEPALIVE, Swappers),
@@ -255,8 +252,9 @@ var PlayPacketServerCodec = packet.NewPacketCodecRegistryDual([]packet.PacketCod
 	PACKET_CLIENT_TRADE_LIST:	minecraft.NewPacketGenericCodec(PACKET_CLIENT_TRADE_LIST, Swappers),
 	PACKET_CLIENT_OPEN_BOOK:	minecraft.NewPacketGenericCodec(PACKET_CLIENT_OPEN_BOOK, Swappers),
 	PACKET_CLIENT_UPDATE_VIEW_POSITION:	minecraft.NewPacketGenericCodec(PACKET_CLIENT_UPDATE_VIEW_POSITION, Swappers),
-	PACKET_CLIENT_UPDATE_VIEW_DISTANCE:	minecraft.NewPacketGenericCodec(PACKET_CLIENT_UPDATE_VIEW_DISTANCE, Swappers),
+	PACKET_CLIENT_UPDATE_VIEW_DISTANCE:	&CodecClientViewDistance{IdMap},
 	PACKET_CLIENT_ENTITY_SOUND_EFFECT:	minecraft.NewPacketGenericCodec(PACKET_CLIENT_ENTITY_SOUND_EFFECT, Swappers),
+	PACKET_CLIENT_ACKNOWLEDGE_PLAYER_DIGGING:	minecraft.NewPacketGenericCodec(PACKET_CLIENT_ACKNOWLEDGE_PLAYER_DIGGING, Swappers),
 }, []packet.PacketCodec{
 	PACKET_SERVER_KEEPALIVE:                 minecraft.NewPacketGenericCodec(PACKET_SERVER_KEEPALIVE, Swappers),
 	PACKET_SERVER_CHAT:                      minecraft.NewPacketGenericCodec(PACKET_SERVER_CHAT, Swappers),
@@ -363,6 +361,7 @@ var IdMap = &minecraft.IdMap{
 	PacketClientUpdateHealth:              PACKET_CLIENT_UPDATE_HEALTH,
 	PacketClientRespawn:                   PACKET_CLIENT_RESPAWN,
 	PacketClientPlayerPositionandLook:     PACKET_CLIENT_PLAYER_POSITION_AND_LOOK,
+	PacketClientUpdateViewDistance:        PACKET_CLIENT_UPDATE_VIEW_DISTANCE,
 	PacketClientHeldItemChange:            PACKET_CLIENT_HELD_ITEM_CHANGE,
 	PacketClientUseBed:                    PACKET_CLIENT_USE_BED,
 	PacketClientAnimation:                 PACKET_CLIENT_ANIMATION,

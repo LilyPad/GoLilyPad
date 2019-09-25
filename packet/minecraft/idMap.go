@@ -10,6 +10,7 @@ type IdMap struct {
 	PacketClientUpdateHealth              int
 	PacketClientRespawn                   int
 	PacketClientPlayerPositionandLook     int
+	PacketClientUpdateViewDistance        int
 	PacketClientHeldItemChange            int
 	PacketClientUseBed                    int
 	PacketClientAnimation                 int
