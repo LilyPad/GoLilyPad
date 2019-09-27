@@ -217,7 +217,7 @@ var PlayPacketServerCodec = packet.NewPacketCodecRegistryDual([]packet.PacketCod
 	PACKET_CLIENT_PLAYER_LIST_HEAD_FOOT:         minecraft.NewPacketGenericCodec(PACKET_CLIENT_PLAYER_LIST_HEAD_FOOT, Swappers),
 	PACKET_CLIENT_RESOURCE_PACK:                 minecraft.NewPacketGenericCodec(PACKET_CLIENT_RESOURCE_PACK, Swappers),
 	// 1.9
-	PACKET_CLIENT_BOSS_BAR:       &mc19.CodecClientBossBar{},
+	PACKET_CLIENT_BOSS_BAR:       &mc19.CodecClientBossBar{IdMap},
 	PACKET_CLIENT_SET_COOLDOWN:   minecraft.NewPacketGenericCodec(PACKET_CLIENT_SET_COOLDOWN, Swappers),
 	PACKET_CLIENT_UNLOAD_CHUNK:   minecraft.NewPacketGenericCodec(PACKET_CLIENT_UNLOAD_CHUNK, Swappers),
 	PACKET_CLIENT_VEHICLE_MOVE:   minecraft.NewPacketGenericCodec(PACKET_CLIENT_VEHICLE_MOVE, Swappers),
