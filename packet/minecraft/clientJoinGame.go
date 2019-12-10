@@ -2,14 +2,16 @@ package minecraft
 
 type PacketClientJoinGame struct {
 	IdMapPacket
-	EntityId         int32
-	Gamemode         int8
-	Dimension        int8
-	Difficulty       int8
-	MaxPlayers       int8
-	LevelType        string
-	ViewDistance     int
-	ReducedDebugInfo bool
+	EntityId            int32
+	Gamemode            int8
+	Dimension           int8
+	HashedSeed          int64
+	Difficulty          int8
+	MaxPlayers          int8
+	LevelType           string
+	ViewDistance        int
+	ReducedDebugInfo    bool
+	EnableRespawnScreen bool
 }
 
 func NewPacketClientJoinGame(idMap *IdMap, entityId int32, gamemode int8, dimension int8, difficulty int8, maxPlayers int8, levelType string, viewDistance int, reducedDebugInfo bool) (this *PacketClientJoinGame) {

@@ -14,6 +14,7 @@ import (
 	mc1121 "github.com/LilyPad/GoLilyPad/packet/minecraft/v1121"
 	mc113 "github.com/LilyPad/GoLilyPad/packet/minecraft/v113"
 	mc114 "github.com/LilyPad/GoLilyPad/packet/minecraft/v114"
+	mc115 "github.com/LilyPad/GoLilyPad/packet/minecraft/v115"
 	mc17 "github.com/LilyPad/GoLilyPad/packet/minecraft/v17"
 	mc18 "github.com/LilyPad/GoLilyPad/packet/minecraft/v18"
 	mc19 "github.com/LilyPad/GoLilyPad/packet/minecraft/v19"
@@ -310,7 +311,9 @@ func (this *Session) handlePacket(packet packet.Packet) (err error) {
 					err = errors.New(fmt.Sprintf("Protocol version does not match: %d", this.protocolVersion))
 					return
 				}
-				if this.protocolVersion >= mc114.VersionNum04 {
+				if this.protocolVersion >= mc115.VersionNum {
+					this.protocol = mc115.Version
+				} else if this.protocolVersion >= mc114.VersionNum04 {
 					this.protocol = mc114.Version04
 				} else if this.protocolVersion >= mc114.VersionNum03 {
 					this.protocol = mc114.Version03

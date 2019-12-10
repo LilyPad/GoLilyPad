@@ -3,6 +3,7 @@ package minecraft
 type PacketClientRespawn struct {
 	IdMapPacket
 	Dimension  int32
+	HashedSeed int64
 	Difficulty int8
 	Gamemode   int8
 	LevelType  string
