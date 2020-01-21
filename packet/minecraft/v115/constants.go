@@ -491,3 +491,4 @@ var Version = &minecraft.Version{
 
 var VersionNum = 573
 var VersionNum01 = 575
+var VersionNum02 = 578
