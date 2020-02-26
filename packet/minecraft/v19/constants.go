@@ -248,7 +248,7 @@ var Swappers = &minecraft.PacketGenericSwappers{
 		PACKET_CLIENT_SET_PASSENGERS:                true,
 		PACKET_CLIENT_ENTITY_PROPERTIES:             true,
 		PACKET_CLIENT_USE_BED:                       true,
-		PACKET_CLIENT_COLLECT_ITEM:                  true, // TODO change the second argument too?
+		PACKET_CLIENT_COLLECT_ITEM:                  true,
 		PACKET_CLIENT_ANIMATION:                     true,
 		PACKET_CLIENT_SPAWN_PAINTING:                true,
 		PACKET_CLIENT_SPAWN_EXPERIENCE_ORB:          true,
@@ -265,9 +265,9 @@ var Swappers = &minecraft.PacketGenericSwappers{
 		PACKET_CLIENT_REMOVE_ENTITY_EFFECT:          true,
 		PACKET_CLIENT_BLOCK_BREAK_ANIMATION:         true,
 		PACKET_CLIENT_CAMERA:                        true,
-		// TODO combat event
 	},
-	ServerInt: [][]int{},
+	ClientSpawnObject: minecraft.PacketGenericSwappersClientSpawnObjectUUID,
+	ServerInt:         [][]int{},
 	ServerVarInt: []bool{
 		PACKET_SERVER_ENTITY_ACTION: true,
 		PACKET_SERVER_USE_ENTITY:    true,
@@ -386,6 +386,16 @@ var IdMap = &minecraft.IdMap{
 	PacketServerVehicleMove:     PACKET_SERVER_VEHICLE_MOVE,
 	PacketServerSteerBoat:       PACKET_SERVER_STEER_BOAT,
 	PacketServerUseItem:         PACKET_SERVER_USE_ITEM,
+	// 1.12 - unsupported
+	PlayClientUnlockRecipes:       -1,
+	PlayClientAdvancementProgress: -1,
+	PlayClientAdvancements:        -1,
+	PlayServerPrepareCraftingGrid: -1,
+	PlayServerCraftingBookData:    -1,
+	PlayServerAdvancementTab:      -1,
+	// 1.14 - unsupported
+	PacketClientUpdateViewDistance: -1,
+	PacketClientEntitySoundEffect:  -1,
 
 	PacketClientLoginDisconnect:      mc18.PACKET_CLIENT_LOGIN_DISCONNECT,
 	PacketClientLoginEncryptRequest:  mc18.PACKET_CLIENT_LOGIN_ENCRYPT_REQUEST,
@@ -402,10 +412,10 @@ var Version = &minecraft.Version{
 	PlayClientCodec:  PlayPacketClientCodec,
 	PlayServerCodec:  PlayPacketServerCodec,
 	IdMap:            IdMap,
+	Id: []int{
+		107, // 1.9
+	},
 }
-
-var VersionNum = 107
-var VersionNum01 = 108
 
 var PlayPacketServerCodec01 *packet.PacketCodecRegistry = nil
 var PlayPacketClientCodec01 *packet.PacketCodecRegistry = nil
@@ -416,11 +426,20 @@ func init() {
 	PlayPacketServerCodec01.EncodeCodecs[PACKET_CLIENT_JOIN_GAME] = &CodecClientJoinGame01{IdMap}
 	PlayPacketClientCodec01 = PlayPacketServerCodec01.Flip()
 	Version01 = &minecraft.Version{
-		Name:             "1.9",
+		Name:             "1.9.1",
+		NameLatest:       "1.11.1",
 		LoginClientCodec: mc18.LoginPacketClientCodec,
 		LoginServerCodec: mc18.LoginPacketServerCodec,
 		PlayClientCodec:  PlayPacketClientCodec01,
 		PlayServerCodec:  PlayPacketServerCodec01,
 		IdMap:            IdMap,
+		Id: []int{
+			316, // 1.11.1
+			315, // 1.11
+			210, // 1.10
+			110, // 1.9.3
+			109, // 1.9.2
+			108, // 1.9.1
+		},
 	}
 }

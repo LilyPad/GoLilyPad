@@ -241,7 +241,7 @@ var Swappers = &minecraft.PacketGenericSwappers{
 	ClientVarInt: []bool{
 		PACKET_CLIENT_ENTITY_EQUIPMENT:              true,
 		PACKET_CLIENT_USE_BED:                       true,
-		PACKET_CLIENT_COLLECT_ITEM:                  true, // TODO change the second argument too?
+		PACKET_CLIENT_COLLECT_ITEM:                  true,
 		PACKET_CLIENT_ANIMATION:                     true,
 		PACKET_CLIENT_SPAWN_PLAYER:                  true,
 		PACKET_CLIENT_SPAWN_OBJECT:                  true,
@@ -261,9 +261,8 @@ var Swappers = &minecraft.PacketGenericSwappers{
 		PACKET_CLIENT_REMOVE_ENTITY_EFFECT:          true,
 		PACKET_CLIENT_ENTITY_PROPERTIES:             true,
 		PACKET_CLIENT_BLOCK_BREAK_ANIMATION:         true,
-		// TODO combat event
-		PACKET_CLIENT_UPDATE_ENTITY_NBT: true,
-		PACKET_CLIENT_CAMERA:            true,
+		PACKET_CLIENT_UPDATE_ENTITY_NBT:             true,
+		PACKET_CLIENT_CAMERA:                        true,
 	},
 	ServerInt: [][]int{},
 	ServerVarInt: []bool{
@@ -374,8 +373,7 @@ var IdMap = &minecraft.IdMap{
 	PacketServerPluginMessage:             PACKET_SERVER_PLUGIN_MESSAGE,
 	PacketServerSpectate:                  PACKET_SERVER_SPECTATE,
 	PacketServerResourcePackStatus:        PACKET_SERVER_RESOURCE_PACK_STATUS,
-
-	// unsupported
+	// 1.9 - unsupported
 	PacketClientBossBar:         -1,
 	PacketClientSetCooldown:     -1,
 	PacketClientUnloadChunk:     -1,
@@ -385,6 +383,16 @@ var IdMap = &minecraft.IdMap{
 	PacketServerVehicleMove:     -1,
 	PacketServerSteerBoat:       -1,
 	PacketServerUseItem:         -1,
+	// 1.12 - unsupported
+	PlayClientUnlockRecipes:       -1,
+	PlayClientAdvancementProgress: -1,
+	PlayClientAdvancements:        -1,
+	PlayServerPrepareCraftingGrid: -1,
+	PlayServerCraftingBookData:    -1,
+	PlayServerAdvancementTab:      -1,
+	// 1.14 - unsupported
+	PacketClientUpdateViewDistance: -1,
+	PacketClientEntitySoundEffect:  -1,
 
 	PacketClientLoginDisconnect:      PACKET_CLIENT_LOGIN_DISCONNECT,
 	PacketClientLoginEncryptRequest:  PACKET_CLIENT_LOGIN_ENCRYPT_REQUEST,
@@ -401,6 +409,7 @@ var Version = &minecraft.Version{
 	PlayClientCodec:  PlayPacketClientCodec,
 	PlayServerCodec:  PlayPacketServerCodec,
 	IdMap:            IdMap,
+	Id: []int{
+		47, // 1.8
+	},
 }
-
-var VersionNum = 47

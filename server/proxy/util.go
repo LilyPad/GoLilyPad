@@ -5,13 +5,12 @@ import (
 	cryptoRand "crypto/rand"
 	"crypto/sha1"
 	"encoding/hex"
-	"github.com/LilyPad/GoLilyPad/packet/minecraft"
 	"io"
 	"math/rand"
 )
 
 func MinecraftVersion() string {
-	return minecraft.STRING_VERSION
+	return sessionVersionTable.Latest().NameLatest
 }
 
 func RandomBytes(size int) (bytes []byte, err error) {

@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/LilyPad/GoLilyPad/packet"
 	"github.com/LilyPad/GoLilyPad/packet/minecraft"
-	mc114 "github.com/LilyPad/GoLilyPad/packet/minecraft/v114"
 	mc17 "github.com/LilyPad/GoLilyPad/packet/minecraft/v17"
 	mc19 "github.com/LilyPad/GoLilyPad/packet/minecraft/v19"
 	"github.com/LilyPad/GoLilyPad/server/proxy/api"
@@ -207,11 +206,11 @@ func (this *SessionOutBridge) handlePacketConnected(packet packet.Packet) (err e
 			}
 			this.session.Write(minecraft.NewPacketClientRespawn(this.protocol.IdMap, swapDimension, 2, 0, "DEFAULT"))
 			this.session.Write(minecraft.NewPacketClientRespawn(this.protocol.IdMap, int32(joinGamePacket.Dimension), joinGamePacket.Difficulty, joinGamePacket.Gamemode, joinGamePacket.LevelType))
-			if this.session.protocolVersion >= mc114.VersionNum {
+			if this.protocol.IdMap.PacketClientUpdateViewDistance != -1 {
 				this.session.Write(minecraft.NewPacketClientViewDistance(this.protocol.IdMap, joinGamePacket.ViewDistance))
 			}
 			if len(this.session.playerList) > 0 {
-				if this.session.protocolVersion <= mc17.VersionNum {
+				if this.protocol == mc17.Version {
 					for player := range this.session.playerList {
 						this.session.Write(mc17.NewPacketClientPlayerListRemove(player))
 					}
@@ -253,7 +252,7 @@ func (this *SessionOutBridge) handlePacketConnected(packet packet.Packet) (err e
 			return
 		}
 	} else if id == this.protocol.IdMap.PacketClientPlayerList {
-		if this.session.protocolVersion <= mc17.VersionNum {
+		if this.protocol == mc17.Version {
 			playerListPacket := packet.(*mc17.PacketClientPlayerList)
 			if playerListPacket.Online {
 				this.session.playerList[playerListPacket.Name] = struct{}{}

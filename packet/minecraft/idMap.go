@@ -76,6 +76,7 @@ type IdMap struct {
 	PacketClientPlayerListHeadFoot        int
 	PacketClientResourcePack              int
 	PacketClientUpdateEntityNbt           int
+	PacketClientEntitySoundEffect         int
 	PacketServerKeepalive                 int
 	PacketServerChat                      int
 	PacketServerUseEntity                 int

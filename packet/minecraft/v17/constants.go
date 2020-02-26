@@ -251,6 +251,7 @@ var Swappers = &minecraft.PacketGenericSwappers{
 		PACKET_CLIENT_BLOCK_BREAK_ANIMATION: true,
 		PACKET_CLIENT_SPAWN_GLOBAL_ENTITY:   true,
 	},
+	ClientEntityDestroy: minecraft.PacketGenericSwappersClientEntityDestroyInt32,
 	ServerInt: [][]int{
 		PACKET_SERVER_USE_ENTITY:    {0},
 		PACKET_SERVER_ANIMATION:     {0},
@@ -264,11 +265,14 @@ var IdMap = mc18.IdMap
 
 var Version = &minecraft.Version{
 	Name:             "1.7",
+	NameLatest:       "1.7.10",
 	LoginClientCodec: LoginPacketClientCodec,
 	LoginServerCodec: LoginPacketServerCodec,
 	PlayClientCodec:  PlayPacketClientCodec,
 	PlayServerCodec:  PlayPacketServerCodec,
 	IdMap:            IdMap,
+	Id: []int{
+		5, // 1.7.10
+		4, // 1.7
+	},
 }
-
-var VersionNum = 5

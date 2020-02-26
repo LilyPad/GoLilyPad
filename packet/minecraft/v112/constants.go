@@ -262,7 +262,7 @@ var Swappers = &minecraft.PacketGenericSwappers{
 		PACKET_CLIENT_SET_PASSENGERS:                true,
 		PACKET_CLIENT_ENTITY_PROPERTIES:             true,
 		PACKET_CLIENT_USE_BED:                       true,
-		PACKET_CLIENT_COLLECT_ITEM:                  true, // TODO change the second argument too?
+		PACKET_CLIENT_COLLECT_ITEM:                  true,
 		PACKET_CLIENT_ANIMATION:                     true,
 		PACKET_CLIENT_SPAWN_PAINTING:                true,
 		PACKET_CLIENT_SPAWN_EXPERIENCE_ORB:          true,
@@ -279,9 +279,9 @@ var Swappers = &minecraft.PacketGenericSwappers{
 		PACKET_CLIENT_REMOVE_ENTITY_EFFECT:          true,
 		PACKET_CLIENT_BLOCK_BREAK_ANIMATION:         true,
 		PACKET_CLIENT_CAMERA:                        true,
-		// TODO combat event
 	},
-	ServerInt: [][]int{},
+	ClientSpawnObject: minecraft.PacketGenericSwappersClientSpawnObjectUUID,
+	ServerInt:         [][]int{},
 	ServerVarInt: []bool{
 		PACKET_SERVER_ENTITY_ACTION: true,
 		PACKET_SERVER_USE_ENTITY:    true,
@@ -407,6 +407,9 @@ var IdMap = &minecraft.IdMap{
 	PlayServerPrepareCraftingGrid: PACKET_SERVER_PREPARE_CRAFTING_GRID,
 	PlayServerCraftingBookData:    PACKET_SERVER_CRAFTING_BOOK_DATA,
 	PlayServerAdvancementTab:      PACKET_SERVER_ADVANCEMENT_TAB,
+	// 1.14 - unsupported
+	PacketClientUpdateViewDistance: -1,
+	PacketClientEntitySoundEffect:  -1,
 
 	PacketClientLoginDisconnect:      mc18.PACKET_CLIENT_LOGIN_DISCONNECT,
 	PacketClientLoginEncryptRequest:  mc18.PACKET_CLIENT_LOGIN_ENCRYPT_REQUEST,
@@ -423,6 +426,7 @@ var Version = &minecraft.Version{
 	PlayClientCodec:  PlayPacketClientCodec,
 	PlayServerCodec:  PlayPacketServerCodec,
 	IdMap:            IdMap,
+	Id: []int{
+		335, // 1.12
+	},
 }
-
-var VersionNum = 335

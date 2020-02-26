@@ -30,6 +30,18 @@ import (
 	"time"
 )
 
+var sessionVersionTable *minecraft.VersionTable = minecraft.NewVersionTableFrom(
+	mc17.Version,
+	mc18.Version,
+	mc19.Version,
+	mc19.Version01,
+	mc112.Version,
+	mc1121.Version,
+	mc113.Version,
+	mc114.Version,
+	mc115.Version,
+)
+
 type Session struct {
 	server               *Server
 	conn                 net.Conn
@@ -201,7 +213,7 @@ func (this *Session) SetAuthenticated(result bool) {
 		return
 	}
 	this.SetState(STATE_INIT)
-	if this.protocolVersion >= mc19.VersionNum {
+	if this.protocol.IdMap.PacketClientSetCompression == -1 {
 		this.SetCompression(256)
 	}
 	if this.protocolVersion >= 5 {
@@ -292,57 +304,18 @@ func (this *Session) handlePacket(packet packet.Packet) (err error) {
 				this.serverAddress = this.rawServerAddress[:idx]
 			}
 			this.serverAddress = strings.TrimSuffix(this.serverAddress, ".")
-			supportedVersion := false
-			for _, version := range minecraft.Versions {
-				if version != this.protocolVersion {
-					continue
-				}
-				supportedVersion = true
-				break
-			}
+			this.protocol = sessionVersionTable.ById(this.protocolVersion)
 			if handshakePacket.State == 1 {
-				if !supportedVersion {
-					this.protocolVersion = minecraft.Versions[0]
+				if this.protocol == nil {
+					this.protocol = sessionVersionTable.Latest()
+					this.protocolVersion = this.protocol.IdLatest
 				}
 				this.pipeline.Replace("registry", minecraft.StatusPacketServerCodec)
 				this.SetState(STATE_STATUS)
 			} else if handshakePacket.State == 2 {
-				if !supportedVersion {
-					err = errors.New(fmt.Sprintf("Protocol version does not match: %d", this.protocolVersion))
+				if this.protocol == nil {
+					err = errors.New(fmt.Sprintf("Protocol version is not supported: %d", this.protocolVersion))
 					return
-				}
-				if this.protocolVersion >= mc115.VersionNum {
-					this.protocol = mc115.Version
-				} else if this.protocolVersion >= mc114.VersionNum04 {
-					this.protocol = mc114.Version04
-				} else if this.protocolVersion >= mc114.VersionNum03 {
-					this.protocol = mc114.Version03
-				} else if this.protocolVersion >= mc114.VersionNum02 {
-					this.protocol = mc114.Version02
-				} else if this.protocolVersion >= mc114.VersionNum01 {
-					this.protocol = mc114.Version01
-				} else if this.protocolVersion >= mc114.VersionNum {
-					this.protocol = mc114.Version
-				} else if this.protocolVersion >= mc113.VersionNum02 {
-					this.protocol = mc113.Version02
-				} else if this.protocolVersion >= mc113.VersionNum01 {
-					this.protocol = mc113.Version01
-				} else if this.protocolVersion >= mc113.VersionNum {
-					this.protocol = mc113.Version
-				} else if this.protocolVersion >= mc1121.VersionNum02 {
-					this.protocol = mc1121.Version02
-				} else if this.protocolVersion >= mc1121.VersionNum {
-					this.protocol = mc1121.Version
-				} else if this.protocolVersion >= mc112.VersionNum {
-					this.protocol = mc112.Version
-				} else if this.protocolVersion >= mc19.VersionNum01 {
-					this.protocol = mc19.Version01
-				} else if this.protocolVersion >= mc19.VersionNum {
-					this.protocol = mc19.Version
-				} else if this.protocolVersion >= mc18.VersionNum {
-					this.protocol = mc18.Version
-				} else {
-					this.protocol = mc17.Version
 				}
 				this.pipeline.Replace("registry", this.protocol.LoginServerCodec)
 				this.SetState(STATE_LOGIN)
@@ -380,7 +353,7 @@ func (this *Session) handlePacket(packet packet.Packet) (err error) {
 				iconString = "data:image/png;base64," + base64.StdEncoding.EncodeToString(icon)
 			}
 			version := make(map[string]interface{})
-			version["name"] = minecraft.STRING_VERSION
+			version["name"] = sessionVersionTable.Latest().NameLatest
 			version["protocol"] = this.protocolVersion
 			players := make(map[string]interface{})
 			if this.server.SyncMaxPlayers() {

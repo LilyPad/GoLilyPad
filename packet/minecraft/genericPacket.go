@@ -5,6 +5,7 @@ import (
 	"encoding/binary"
 	"github.com/LilyPad/GoLilyPad/packet"
 	"github.com/klauspost/compress/zlib"
+	uuid "github.com/satori/go.uuid"
 	"io"
 	"io/ioutil"
 )
@@ -17,12 +18,25 @@ type PacketGeneric struct {
 }
 
 type PacketGenericSwappers struct {
-	ClientInt    [][]int
-	ClientVarInt []bool
-	ServerInt    [][]int
-	ServerVarInt []bool
-	IdMap        *IdMap
+	ClientInt           [][]int
+	ClientVarInt        []bool
+	ClientSpawnObject   int
+	ClientEntityDestroy int
+	ServerInt           [][]int
+	ServerVarInt        []bool
+	IdMap               *IdMap
 }
+
+const (
+	PacketGenericSwappersClientSpawnObjectNoUUID int = iota
+	PacketGenericSwappersClientSpawnObjectUUID
+	PacketGenericSwappersClientSpawnObjectUUIDTypeVar
+)
+
+const (
+	PacketGenericSwappersClientEntityDestroyVar int = iota
+	PacketGenericSwappersClientEntityDestroyInt32
+)
 
 func NewPacketGeneric(id int, bytes []byte, compressed bool, swappers *PacketGenericSwappers) (this *PacketGeneric) {
 	this = new(PacketGeneric)
@@ -59,96 +73,182 @@ func (this *PacketGeneric) Decompress() (err error) {
 	return
 }
 
-func (this *PacketGeneric) SwapEntities(a int32, b int32, clientServer bool) {
+func (this *PacketGeneric) SwapEntities(a int32, b int32, isClientBound bool) {
 	if a == b {
 		return
 	}
-	newBuffer := &bytes.Buffer{}
-	if this.id == this.swappers.IdMap.PacketClientSpawnObject && clientServer {
-		this.Decompress()
-		buffer := bytes.NewReader(this.Bytes)
-		if this.id == 0x00 { // v1.9
+	if isClientBound {
+		if this.id == this.swappers.IdMap.PacketClientSpawnObject {
+			// PacketClientSpawnObject
+			this.Decompress()
+			buffer := bytes.NewReader(this.Bytes)
+			// read
 			entityId, _ := packet.ReadVarInt(buffer)
-			entityUUID, _ := packet.ReadUUID(buffer)
-			entityType, _ := packet.ReadUint8(buffer)
-			entityX, _ := packet.ReadFloat64(buffer)
-			entityY, _ := packet.ReadFloat64(buffer)
-			entityZ, _ := packet.ReadFloat64(buffer)
-			entityPitch, _ := packet.ReadUint8(buffer)
-			entityYaw, _ := packet.ReadUint8(buffer)
-			entityData, _ := packet.ReadInt32(buffer)
-			if (entityType >= 60 && entityType <= 66) || entityType == 90 {
-				if entityData == a {
-					entityData = b
-				} else if entityData == b {
-					entityData = a
+			var entityUUID uuid.UUID
+			if this.swappers.ClientSpawnObject >= PacketGenericSwappersClientSpawnObjectUUID { // v1.9+ - has uuid
+				entityUUID, _ = packet.ReadUUID(buffer)
+			}
+			var entityType int
+			var entityTypeIsSwap bool
+			if this.swappers.ClientSpawnObject >= PacketGenericSwappersClientSpawnObjectUUIDTypeVar { // v1.14+
+				entityType, _ = packet.ReadVarInt(buffer)
+				entityTypeIsSwap = entityType == 2 || entityType == 101 || entityType == 71
+				if entityType == 2 || entityType == 71 {
+					a = a + 1
+					b = b + 1
+				}
+			} else {
+				entityTypeU8, _ := packet.ReadUint8(buffer)
+				entityType = int(entityTypeU8)
+				entityTypeIsSwap = entityType == 60 || entityType == 90 || entityType == 91
+				if (entityType == 60 || entityType == 91) && this.swappers.ClientSpawnObject >= PacketGenericSwappersClientSpawnObjectUUID { // v1.9+
+					a = a + 1
+					b = b + 1
 				}
 			}
-			packet.WriteVarInt(newBuffer, entityId)
-			packet.WriteUUID(newBuffer, entityUUID)
-			packet.WriteUint8(newBuffer, entityType)
-			packet.WriteFloat64(newBuffer, entityX)
-			packet.WriteFloat64(newBuffer, entityY)
-			packet.WriteFloat64(newBuffer, entityZ)
-			packet.WriteUint8(newBuffer, entityPitch)
-			packet.WriteUint8(newBuffer, entityYaw)
-			packet.WriteInt32(newBuffer, entityData)
-		} else {
+			if entityTypeIsSwap {
+				var entitySkip []byte
+				if this.swappers.ClientSpawnObject >= PacketGenericSwappersClientSpawnObjectUUID { // v1.9+ - f64 xyz
+					entitySkip = make([]byte, 8+8+8+1+1)
+				} else {
+					entitySkip = make([]byte, 4+4+4+1+1)
+				}
+				buffer.Read(entitySkip)
+				entityData, _ := packet.ReadInt32(buffer)
+				// rewrite
+				this.swapAndIf(entityData, a, b, func(newId int32) {
+					entityData = newId
+					bufferRewrite := new(bytes.Buffer)
+					packet.WriteVarInt(bufferRewrite, entityId)
+					if this.swappers.ClientSpawnObject >= PacketGenericSwappersClientSpawnObjectUUID { // v1.9+ - has uuid
+						packet.WriteUUID(bufferRewrite, entityUUID)
+					}
+					if this.swappers.ClientSpawnObject >= PacketGenericSwappersClientSpawnObjectUUIDTypeVar { // v1.14+
+						packet.WriteVarInt(bufferRewrite, entityType)
+					} else {
+						packet.WriteUint8(bufferRewrite, uint8(entityType))
+					}
+					bufferRewrite.Write(entitySkip)
+					packet.WriteInt32(bufferRewrite, entityData)
+					buffer.WriteTo(bufferRewrite)
+					this.Bytes = bufferRewrite.Bytes()
+				})
+			}
+		} else if this.id == this.swappers.IdMap.PacketClientCollectItem {
+			// PacketClientCollectItem
+			if ok := this.swappers.ClientVarInt[this.id]; ok {
+				this.Decompress()
+				buffer := bytes.NewReader(this.Bytes)
+				collectedId, _ := packet.ReadVarInt(buffer)
+				collectorId, _ := packet.ReadVarInt(buffer)
+				this.swapAndIf(int32(collectorId), a, b, func(newId int32) {
+					collectorId = int(newId)
+					bufferRewrite := new(bytes.Buffer)
+					packet.WriteVarInt(bufferRewrite, collectedId)
+					packet.WriteVarInt(bufferRewrite, collectorId)
+					buffer.WriteTo(bufferRewrite)
+					this.Bytes = bufferRewrite.Bytes()
+				})
+			}
+		} else if this.id == this.swappers.IdMap.PacketClientCombatEvent {
+			// PacketClientCombatEvent
+			this.Decompress()
+			buffer := bytes.NewReader(this.Bytes)
+			bufferRewrite := new(bytes.Buffer)
+
+			eventId, _ := packet.ReadUint8(buffer)
+			packet.WriteUint8(bufferRewrite, eventId)
+			if eventId == 1 {
+				// end combat
+				duration, _ := packet.ReadVarInt(buffer)
+				entityId, _ := packet.ReadInt32(buffer)
+				entityId = this.swapAndRet(entityId, a, b)
+				packet.WriteVarInt(bufferRewrite, duration)
+				packet.WriteInt32(bufferRewrite, entityId)
+			} else if eventId == 2 {
+				// entity dead
+				playerId, _ := packet.ReadVarInt(buffer)
+				playerId = int(this.swapAndRet(int32(playerId), a, b))
+				entityId, _ := packet.ReadInt32(buffer)
+				entityId = this.swapAndRet(entityId, a, b)
+				packet.WriteVarInt(bufferRewrite, playerId)
+				packet.WriteInt32(bufferRewrite, entityId)
+			}
+
+			buffer.WriteTo(bufferRewrite)
+			this.Bytes = bufferRewrite.Bytes()
+		} else if this.id == this.swappers.IdMap.PacketClientEntitySoundEffect {
+			// PacketClientEntitySoundEffect
+			this.Decompress()
+			buffer := bytes.NewReader(this.Bytes)
+			soundId, _ := packet.ReadVarInt(buffer)
+			soundCategory, _ := packet.ReadVarInt(buffer)
 			entityId, _ := packet.ReadVarInt(buffer)
-			entityType, _ := packet.ReadUint8(buffer)
-			entityX, _ := packet.ReadInt32(buffer)
-			entityY, _ := packet.ReadInt32(buffer)
-			entityZ, _ := packet.ReadInt32(buffer)
-			entityPitch, _ := packet.ReadUint8(buffer)
-			entityYaw, _ := packet.ReadUint8(buffer)
-			entityData, _ := packet.ReadInt32(buffer)
-			if (entityType >= 60 && entityType <= 66) || entityType == 90 {
-				if entityData == a {
-					entityData = b
-				} else if entityData == b {
-					entityData = a
+			this.swapAndIf(int32(entityId), a, b, func(newId int32) {
+				entityId = int(newId)
+				bufferRewrite := new(bytes.Buffer)
+				packet.WriteVarInt(bufferRewrite, soundId)
+				packet.WriteVarInt(bufferRewrite, soundCategory)
+				packet.WriteVarInt(bufferRewrite, entityId)
+				buffer.WriteTo(bufferRewrite)
+				this.Bytes = bufferRewrite.Bytes()
+			})
+
+		} else if this.id == this.swappers.IdMap.PacketClientSetPassengers || this.id == this.swappers.IdMap.PacketClientDestroyEntities {
+			// PacketClientSetPassengers & PacketClientDestroyEntities
+			this.Decompress()
+			buffer := bytes.NewReader(this.Bytes)
+			bufferRewrite := new(bytes.Buffer)
+			if this.id == this.swappers.IdMap.PacketClientSetPassengers {
+				entityId, _ := packet.ReadVarInt(buffer)
+				packet.WriteVarInt(bufferRewrite, entityId)
+			}
+			if this.swappers.ClientEntityDestroy == PacketGenericSwappersClientEntityDestroyInt32 { // 1.17
+				nEntities, _ := packet.ReadUint8(buffer)
+				packet.WriteUint8(bufferRewrite, nEntities)
+				for i := uint8(0); i < nEntities; i++ {
+					entityId, _ := packet.ReadInt32(buffer)
+					entityId = this.swapAndRet(entityId, a, b)
+					packet.WriteInt32(bufferRewrite, entityId)
+				}
+			} else { // 1.18+
+				nEntities, _ := packet.ReadVarInt(buffer)
+				packet.WriteVarInt(bufferRewrite, nEntities)
+				for i := 0; i < nEntities; i++ {
+					entityId, _ := packet.ReadVarInt(buffer)
+					entityId = int(this.swapAndRet(int32(entityId), a, b))
+					packet.WriteVarInt(bufferRewrite, entityId)
 				}
 			}
-			packet.WriteVarInt(newBuffer, entityId)
-			packet.WriteUint8(newBuffer, entityType)
-			packet.WriteInt32(newBuffer, entityX)
-			packet.WriteInt32(newBuffer, entityY)
-			packet.WriteInt32(newBuffer, entityZ)
-			packet.WriteUint8(newBuffer, entityPitch)
-			packet.WriteUint8(newBuffer, entityYaw)
-			packet.WriteInt32(newBuffer, entityData)
+			this.Bytes = bufferRewrite.Bytes()
 		}
-		buffer.WriteTo(newBuffer)
-		this.Bytes = newBuffer.Bytes()
-	} else if (this.id == this.swappers.IdMap.PacketClientSetPassengers /* || this.id == this.swappers.IdMap.PacketClientDestroyEntities*/) && clientServer {
-		this.Decompress()
-		buffer := bytes.NewReader(this.Bytes)
-		if this.id == this.swappers.IdMap.PacketClientSetPassengers {
-			entityId, _ := packet.ReadVarInt(buffer)
-			packet.WriteVarInt(newBuffer, entityId)
-		}
-		nEntities, _ := packet.ReadVarInt(buffer)
-		packet.WriteVarInt(newBuffer, nEntities)
-		for i := 0; i < nEntities; i++ {
-			entityId, _ := packet.ReadVarInt(buffer)
-			if entityId == int(a) {
-				entityId = int(b)
-			} else if entityId == int(b) {
-				entityId = int(a)
-			}
-			packet.WriteVarInt(newBuffer, entityId)
-		}
-		this.Bytes = newBuffer.Bytes()
 	}
-	// FIXME combat event
-	// FIXME collect item
-	this.swapEntitiesInt(a, b, clientServer)
-	this.swapEntitiesVarInt(a, b, clientServer)
+	// TODO entity metadata?
+	this.swapEntitiesInt(a, b, isClientBound)
+	this.swapEntitiesVarInt(a, b, isClientBound)
 }
 
-func (this *PacketGeneric) swapEntitiesInt(a int32, b int32, clientServer bool) {
+func (this *PacketGeneric) swapAndIf(field int32, a int32, b int32, f func(int32)) {
+	if field == a {
+		f(b)
+	} else if field == b {
+		f(a)
+	}
+}
+
+func (this *PacketGeneric) swapAndRet(field int32, a int32, b int32) int32 {
+	if field == a {
+		return b
+	} else if field == b {
+		return a
+	} else {
+		return field
+	}
+}
+
+func (this *PacketGeneric) swapEntitiesInt(a int32, b int32, isClientBound bool) {
 	var positions [][]int
-	if clientServer {
+	if isClientBound {
 		positions = this.swappers.ClientInt
 	} else {
 		positions = this.swappers.ServerInt
@@ -178,9 +278,9 @@ func (this *PacketGeneric) swapEntitiesInt(a int32, b int32, clientServer bool) 
 	}
 }
 
-func (this *PacketGeneric) swapEntitiesVarInt(a int32, b int32, clientServer bool) {
+func (this *PacketGeneric) swapEntitiesVarInt(a int32, b int32, isClientBound bool) {
 	var positions []bool
-	if clientServer {
+	if isClientBound {
 		positions = this.swappers.ClientVarInt
 	} else {
 		positions = this.swappers.ServerVarInt
@@ -211,13 +311,13 @@ func (this *PacketGeneric) swapEntitiesVarInt(a int32, b int32, clientServer boo
 		return
 	}
 	// Apply the new Id
-	newBuffer := new(bytes.Buffer)
-	err = packet.WriteVarInt(newBuffer, newId)
+	bufferRewrite := new(bytes.Buffer)
+	err = packet.WriteVarInt(bufferRewrite, newId)
 	if err != nil {
 		return
 	}
-	buffer.WriteTo(newBuffer)
-	this.Bytes = newBuffer.Bytes()
+	buffer.WriteTo(bufferRewrite)
+	this.Bytes = bufferRewrite.Bytes()
 }
 
 func (this *PacketGeneric) Raw() bool {

@@ -5,8 +5,7 @@ import (
 )
 
 const (
-	STRING_VERSION = string("1.15.2")
-	MAGIC          = string("§")
+	MAGIC = string("§")
 
 	PACKET_SERVER_HANDSHAKE = 0x00
 
@@ -15,8 +14,6 @@ const (
 	PACKET_SERVER_STATUS_REQUEST  = 0x00
 	PACKET_SERVER_STATUS_PING     = 0x01
 )
-
-var Versions = []int{578, 575, 573, 498, 490, 485, 480, 477, 404, 401, 393, 340, 338, 335, 316, 315, 210, 110, 109, 108, 107, 47, 5, 4}
 
 var HandshakePacketServerCodec = packet.NewPacketCodecRegistryDual([]packet.PacketCodec{}, []packet.PacketCodec{
 	PACKET_SERVER_HANDSHAKE: new(CodecServerHandshake),
