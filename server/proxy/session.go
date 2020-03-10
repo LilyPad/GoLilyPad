@@ -303,6 +303,13 @@ func (this *Session) handlePacket(packet packet.Packet) (err error) {
 			} else {
 				this.serverAddress = this.rawServerAddress[:idx]
 			}
+			proxyIdx := strings.Index(this.serverAddress, "///")
+			if proxyIdx != -1 {
+				remote := this.serverAddress[proxyIdx+3:]
+				portIdx := strings.Index(remote, ":")
+				this.remoteIp = remote[:portIdx]
+				this.serverAddress = this.serverAddress[:proxyIdx]
+			}
 			this.serverAddress = strings.TrimSuffix(this.serverAddress, ".")
 			this.protocol = sessionVersionTable.ById(this.protocolVersion)
 			if handshakePacket.State == 1 {
