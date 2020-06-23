@@ -125,6 +125,10 @@ const (
 	PACKET_SERVER_SPECTATE                  = 0x1E
 	PACKET_SERVER_PLAYER_BLOCK_PLACEMENT    = 0x1F
 	PACKET_SERVER_USE_ITEM                  = 0x20
+
+	ENTITY_ARROW          = 60
+	ENTITY_FISHING_BOBBER = 90
+	ENTITY_SPECTRAL_ARROW = 91
 )
 
 var PlayPacketServerCodec = packet.NewPacketCodecRegistryDual([]packet.PacketCodec{
@@ -417,6 +421,10 @@ var IdMap = &minecraft.IdMap{
 	PacketClientLoginSetCompression:  mc18.PACKET_CLIENT_LOGIN_SET_COMPRESSION,
 	PacketServerLoginStart:           mc18.PACKET_SERVER_LOGIN_START,
 	PacketServerLoginEncryptResponse: mc18.PACKET_SERVER_LOGIN_ENCRYPT_RESPONSE,
+
+	EntityArrow:         ENTITY_ARROW,
+	EntityFishingBobber: ENTITY_FISHING_BOBBER,
+	EntitySpectralArrow: ENTITY_SPECTRAL_ARROW,
 }
 
 var Version = &minecraft.Version{

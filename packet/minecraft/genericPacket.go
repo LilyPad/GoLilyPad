@@ -92,16 +92,16 @@ func (this *PacketGeneric) SwapEntities(a int32, b int32, isClientBound bool) {
 			var entityTypeIsSwap bool
 			if this.swappers.ClientSpawnObject >= PacketGenericSwappersClientSpawnObjectUUIDTypeVar { // v1.14+
 				entityType, _ = packet.ReadVarInt(buffer)
-				entityTypeIsSwap = entityType == 2 || entityType == 101 || entityType == 71
-				if entityType == 2 || entityType == 71 {
+				entityTypeIsSwap = entityType == this.swappers.IdMap.EntityArrow || entityType == this.swappers.IdMap.EntityFishingBobber || entityType == this.swappers.IdMap.EntitySpectralArrow
+				if entityType == this.swappers.IdMap.EntityArrow || entityType == this.swappers.IdMap.EntitySpectralArrow {
 					a = a + 1
 					b = b + 1
 				}
 			} else {
 				entityTypeU8, _ := packet.ReadUint8(buffer)
 				entityType = int(entityTypeU8)
-				entityTypeIsSwap = entityType == 60 || entityType == 90 || entityType == 91
-				if (entityType == 60 || entityType == 91) && this.swappers.ClientSpawnObject >= PacketGenericSwappersClientSpawnObjectUUID { // v1.9+
+				entityTypeIsSwap = entityType == this.swappers.IdMap.EntityArrow || entityType == this.swappers.IdMap.EntityFishingBobber || entityType == this.swappers.IdMap.EntitySpectralArrow
+				if (entityType == this.swappers.IdMap.EntityArrow || entityType == this.swappers.IdMap.EntitySpectralArrow) && this.swappers.ClientSpawnObject >= PacketGenericSwappersClientSpawnObjectUUID { // v1.9+
 					a = a + 1
 					b = b + 1
 				}
@@ -193,7 +193,6 @@ func (this *PacketGeneric) SwapEntities(a int32, b int32, isClientBound bool) {
 				buffer.WriteTo(bufferRewrite)
 				this.Bytes = bufferRewrite.Bytes()
 			})
-
 		} else if this.id == this.swappers.IdMap.PacketClientSetPassengers || this.id == this.swappers.IdMap.PacketClientDestroyEntities {
 			// PacketClientSetPassengers & PacketClientDestroyEntities
 			this.Decompress()

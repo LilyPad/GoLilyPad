@@ -114,6 +114,10 @@ const (
 	PACKET_CLIENT_LOGIN_SET_COMPRESSION  = 0x03
 	PACKET_SERVER_LOGIN_START            = 0x00
 	PACKET_SERVER_LOGIN_ENCRYPT_RESPONSE = 0x01
+
+	ENTITY_ARROW          = 60
+	ENTITY_FISHING_BOBBER = 90
+	ENTITY_SPECTRAL_ARROW = -1
 )
 
 var PlayPacketServerCodec = packet.NewPacketCodecRegistryDual([]packet.PacketCodec{

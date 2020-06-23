@@ -113,6 +113,10 @@ const (
 	PACKET_CLIENT_LOGIN_SET_COMPRESSION  = 0x03
 	PACKET_SERVER_LOGIN_START            = 0x00
 	PACKET_SERVER_LOGIN_ENCRYPT_RESPONSE = 0x01
+
+	ENTITY_ARROW          = 60
+	ENTITY_FISHING_BOBBER = 90
+	ENTITY_SPECTRAL_ARROW = -1
 )
 
 var PlayPacketServerCodec = packet.NewPacketCodecRegistryDual([]packet.PacketCodec{
@@ -400,6 +404,10 @@ var IdMap = &minecraft.IdMap{
 	PacketClientLoginSetCompression:  PACKET_CLIENT_LOGIN_SET_COMPRESSION,
 	PacketServerLoginStart:           PACKET_SERVER_LOGIN_START,
 	PacketServerLoginEncryptResponse: PACKET_SERVER_LOGIN_ENCRYPT_RESPONSE,
+
+	EntityArrow:         ENTITY_ARROW,
+	EntityFishingBobber: ENTITY_FISHING_BOBBER,
+	EntitySpectralArrow: ENTITY_SPECTRAL_ARROW,
 }
 
 var Version = &minecraft.Version{

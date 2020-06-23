@@ -129,4 +129,9 @@ type IdMap struct {
 	PlayServerPrepareCraftingGrid int
 	PlayServerCraftingBookData    int
 	PlayServerAdvancementTab      int
+
+	// Entities
+	EntityArrow         int
+	EntityFishingBobber int
+	EntitySpectralArrow int
 }
