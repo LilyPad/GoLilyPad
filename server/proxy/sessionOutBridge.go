@@ -204,8 +204,18 @@ func (this *SessionOutBridge) handlePacketConnected(packet packet.Packet) (err e
 			} else {
 				swapDimension = 0
 			}
-			this.session.Write(minecraft.NewPacketClientRespawn(this.protocol.IdMap, swapDimension, 2, 0, "DEFAULT"))
-			this.session.Write(minecraft.NewPacketClientRespawn(this.protocol.IdMap, int32(joinGamePacket.Dimension), joinGamePacket.Difficulty, joinGamePacket.Gamemode, joinGamePacket.LevelType))
+			var swapDimensionName string
+			if joinGamePacket.DimensionName == "minecraft:overworld" {
+				swapDimensionName = "minecraft:the_nether"
+			} else {
+				swapDimensionName = "minecraft:overworld"
+			}
+			swapRespawn := minecraft.NewPacketClientRespawnFrom(this.protocol.IdMap, joinGamePacket)
+			swapRespawn.Dimension = swapDimension
+			swapRespawn.DimensionName = swapDimensionName
+			swapRespawn.WorldName = swapDimensionName
+			this.session.Write(swapRespawn)
+			this.session.Write(minecraft.NewPacketClientRespawnFrom(this.protocol.IdMap, joinGamePacket))
 			if this.protocol.IdMap.PacketClientUpdateViewDistance != -1 {
 				this.session.Write(minecraft.NewPacketClientViewDistance(this.protocol.IdMap, joinGamePacket.ViewDistance))
 			}
