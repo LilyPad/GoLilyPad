@@ -42,26 +42,28 @@ func ReadString(reader io.Reader) (val string, err error) {
 }
 
 func WriteVarInt(writer io.Writer, val int) (err error) {
-	for val >= 0x80 {
-		err = WriteUint8(writer, byte(val)|0x80)
+	uval := uint32(val)
+	for uval >= 0x80 {
+		err = WriteUint8(writer, byte(uval)|0x80)
 		if err != nil {
 			return
 		}
-		val >>= 7
+		uval >>= 7
 	}
-	err = WriteUint8(writer, byte(val))
+	err = WriteUint8(writer, byte(uval))
 	return
 }
 
 func ReadVarInt(reader io.Reader) (result int, err error) {
 	var bytes byte = 0
 	var b byte
+	var uresult uint32 = 0
 	for {
 		b, err = ReadUint8(reader)
 		if err != nil {
 			return
 		}
-		result |= int(uint(b&0x7F) << uint(bytes*7))
+		uresult |= uint32(b&0x7F) << uint32(bytes*7)
 		bytes++
 		if bytes > 5 {
 			err = errors.New("Decode, VarInt is too long")
@@ -72,6 +74,7 @@ func ReadVarInt(reader io.Reader) (result int, err error) {
 		}
 		break
 	}
+	result = int(int32(uresult))
 	return
 }
 
