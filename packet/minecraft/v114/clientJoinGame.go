@@ -26,10 +26,11 @@ func (this *CodecClientJoinGame) Decode(reader io.Reader) (decode packet.Packet,
 		return
 	}
 	packetClientJoinGame.Dimension = int8(dimension32)
-	packetClientJoinGame.MaxPlayers, err = packet.ReadInt8(reader)
+	maxPlayers8, err := packet.ReadInt8(reader)
 	if err != nil {
 		return
 	}
+	packetClientJoinGame.MaxPlayers = int(maxPlayers8)
 	packetClientJoinGame.LevelType, err = packet.ReadString(reader)
 	if err != nil {
 		return
@@ -60,7 +61,7 @@ func (this *CodecClientJoinGame) Encode(writer io.Writer, encode packet.Packet) 
 	if err != nil {
 		return
 	}
-	err = packet.WriteInt8(writer, packetClientJoinGame.MaxPlayers)
+	err = packet.WriteInt8(writer, int8(packetClientJoinGame.MaxPlayers))
 	if err != nil {
 		return
 	}

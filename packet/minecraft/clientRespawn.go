@@ -1,10 +1,15 @@
 package minecraft
 
+import (
+	"github.com/LilyPad/GoLilyPad/packet/minecraft/nbt"
+)
+
 type PacketClientRespawn struct {
 	IdMapPacket
-	Dimension        int32  // removed in 1.16+
-	DimensionName    string // 1.16+
-	WorldName        string // 1.16+
+	Dimension        int32   // removed in 1.16+
+	DimensionName    string  // 1.16+ // removed in 1.16.2+
+	DimensionNBT     nbt.Nbt // 1.16.2+
+	WorldName        string  // 1.16+
 	HashedSeed       int64
 	Difficulty       int8
 	Gamemode         int8
@@ -20,6 +25,7 @@ func NewPacketClientRespawnFrom(idMap *IdMap, joinGame *PacketClientJoinGame) (t
 	this.IdFrom(idMap)
 	this.Dimension = int32(joinGame.Dimension)
 	this.DimensionName = joinGame.DimensionName
+	this.DimensionNBT = joinGame.DimensionNBT
 	this.WorldName = joinGame.WorldName
 	this.HashedSeed = joinGame.HashedSeed
 	this.Difficulty = joinGame.Difficulty

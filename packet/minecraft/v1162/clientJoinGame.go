@@ -1,4 +1,4 @@
-package v116
+package v1162
 
 import (
 	"github.com/LilyPad/GoLilyPad/packet"
@@ -15,6 +15,10 @@ func (this *CodecClientJoinGame) Decode(reader io.Reader) (decode packet.Packet,
 	packetClientJoinGame := new(minecraft.PacketClientJoinGame)
 	packetClientJoinGame.IdFrom(this.IdMap)
 	packetClientJoinGame.EntityId, err = packet.ReadInt32(reader)
+	if err != nil {
+		return
+	}
+	packetClientJoinGame.Hardcore, err = packet.ReadBool(reader)
 	if err != nil {
 		return
 	}
@@ -41,7 +45,7 @@ func (this *CodecClientJoinGame) Decode(reader io.Reader) (decode packet.Packet,
 	if err != nil {
 		return
 	}
-	packetClientJoinGame.DimensionName, err = packet.ReadString(reader)
+	packetClientJoinGame.DimensionNBT, err = nbt.ReadNbt(reader)
 	if err != nil {
 		return
 	}
@@ -53,11 +57,10 @@ func (this *CodecClientJoinGame) Decode(reader io.Reader) (decode packet.Packet,
 	if err != nil {
 		return
 	}
-	maxPlayers8, err := packet.ReadInt8(reader)
+	packetClientJoinGame.MaxPlayers, err = packet.ReadVarInt(reader)
 	if err != nil {
 		return
 	}
-	packetClientJoinGame.MaxPlayers = int(maxPlayers8)
 	packetClientJoinGame.ViewDistance, err = packet.ReadVarInt(reader)
 	if err != nil {
 		return
@@ -88,6 +91,10 @@ func (this *CodecClientJoinGame) Encode(writer io.Writer, encode packet.Packet) 
 	if err != nil {
 		return
 	}
+	err = packet.WriteBool(writer, packetClientJoinGame.Hardcore)
+	if err != nil {
+		return
+	}
 	err = packet.WriteInt8(writer, packetClientJoinGame.Gamemode)
 	if err != nil {
 		return
@@ -110,7 +117,7 @@ func (this *CodecClientJoinGame) Encode(writer io.Writer, encode packet.Packet) 
 	if err != nil {
 		return
 	}
-	err = packet.WriteString(writer, packetClientJoinGame.DimensionName)
+	err = nbt.WriteNbt(writer, packetClientJoinGame.DimensionNBT)
 	if err != nil {
 		return
 	}
@@ -122,7 +129,7 @@ func (this *CodecClientJoinGame) Encode(writer io.Writer, encode packet.Packet) 
 	if err != nil {
 		return
 	}
-	err = packet.WriteInt8(writer, int8(packetClientJoinGame.MaxPlayers))
+	err = packet.WriteVarInt(writer, packetClientJoinGame.MaxPlayers)
 	if err != nil {
 		return
 	}

@@ -16,6 +16,7 @@ import (
 	mc114 "github.com/LilyPad/GoLilyPad/packet/minecraft/v114"
 	mc115 "github.com/LilyPad/GoLilyPad/packet/minecraft/v115"
 	mc116 "github.com/LilyPad/GoLilyPad/packet/minecraft/v116"
+	mc1162 "github.com/LilyPad/GoLilyPad/packet/minecraft/v1162"
 	mc17 "github.com/LilyPad/GoLilyPad/packet/minecraft/v17"
 	mc18 "github.com/LilyPad/GoLilyPad/packet/minecraft/v18"
 	mc19 "github.com/LilyPad/GoLilyPad/packet/minecraft/v19"
@@ -42,6 +43,7 @@ var sessionVersionTable *minecraft.VersionTable = minecraft.NewVersionTableFrom(
 	mc114.Version,
 	mc115.Version,
 	mc116.Version,
+	mc1162.Version,
 )
 
 type Session struct {
