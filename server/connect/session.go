@@ -270,6 +270,8 @@ func (this *Session) HandlePacket(packet packet.Packet) (err error) {
 			}
 		case connect.REQUEST_NOTIFY_PLAYER:
 			if this.Authorized() && this.role == ROLE_PROXY {
+				var playerPacket *connect.PacketPlayerEvent
+
 				add := request.(*connect.RequestNotifyPlayer).Add
 				player := request.(*connect.RequestNotifyPlayer).Player
 				uuid := request.(*connect.RequestNotifyPlayer).Uuid
@@ -279,11 +281,16 @@ func (this *Session) HandlePacket(packet packet.Packet) (err error) {
 						break
 					}
 					this.proxyPlayers[player] = uuid
+					playerPacket = connect.NewPacketPlayerEventJoin(player, uuid)
 				} else {
 					if uuid, ok := this.proxyPlayers[player]; ok {
 						this.server.networkCache.RemovePlayer(player, uuid)
 						delete(this.proxyPlayers, player)
+						playerPacket = connect.NewPacketPlayerEventLeave(player, uuid)
 					}
+				}
+				for _, session := range this.server.SessionRegistry(ROLE_AUTHORIZED).GetAll() {
+					session.Write(playerPacket)
 				}
 				result = connect.NewResultNotifyPlayer()
 			} else {

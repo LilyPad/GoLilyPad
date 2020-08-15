@@ -26,6 +26,7 @@ const (
 	PACKET_MESSAGE_EVENT  = 0x03
 	PACKET_REDIRECT_EVENT = 0x04
 	PACKET_SERVER_EVENT   = 0x05
+	PACKET_PLAYER_EVENT   = 0x06
 )
 
 var requestCodecs = []RequestCodec{
@@ -61,4 +62,5 @@ var PacketCodec = packet.NewPacketCodecRegistry([]packet.PacketCodec{
 	PACKET_MESSAGE_EVENT:  new(packetMessageEventCodec),
 	PACKET_REDIRECT_EVENT: new(packetRedirectEventCodec),
 	PACKET_SERVER_EVENT:   new(packetServerEventCodec),
+	PACKET_PLAYER_EVENT:   new(packetPlayerEventCodec),
 })
