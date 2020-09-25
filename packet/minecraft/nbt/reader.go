@@ -2,8 +2,8 @@ package nbt
 
 import (
 	"fmt"
-	"io"
 	packet "github.com/LilyPad/GoLilyPad/packet"
+	"io"
 )
 
 type ErrorUnexpectedNbtTag NbtTag

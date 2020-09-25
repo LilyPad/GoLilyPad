@@ -2,8 +2,8 @@ package nbt
 
 import (
 	"errors"
-	"io"
 	packet "github.com/LilyPad/GoLilyPad/packet"
+	"io"
 )
 
 var ErrorUnexpectedType error = errors.New("Unexpected type")
