@@ -198,24 +198,22 @@ func (this *SessionOutBridge) handlePacketConnected(packet packet.Packet) (err e
 		if this.session.state == STATE_INIT {
 			this.session.clientEntityId = joinGamePacket.EntityId
 		} else {
-			var swapDimension int32
-			if joinGamePacket.Dimension == 0 {
-				swapDimension = 1
+			if joinGamePacket.DimensionCodec != nil {
+				// 1.16+
+				this.session.Write(joinGamePacket)
+				this.session.clientEntityId = joinGamePacket.EntityId
 			} else {
-				swapDimension = 0
+				var swapDimension int32
+				if joinGamePacket.Dimension == 0 {
+					swapDimension = 1
+				} else {
+					swapDimension = 0
+				}
+				swapRespawn := minecraft.NewPacketClientRespawnFrom(this.protocol.IdMap, joinGamePacket)
+				swapRespawn.Dimension = swapDimension
+				this.session.Write(swapRespawn)
+				this.session.Write(minecraft.NewPacketClientRespawnFrom(this.protocol.IdMap, joinGamePacket))
 			}
-			var swapDimensionName string
-			if joinGamePacket.DimensionName == "minecraft:overworld" {
-				swapDimensionName = "minecraft:the_nether"
-			} else {
-				swapDimensionName = "minecraft:overworld"
-			}
-			swapRespawn := minecraft.NewPacketClientRespawnFrom(this.protocol.IdMap, joinGamePacket)
-			swapRespawn.Dimension = swapDimension
-			swapRespawn.DimensionName = swapDimensionName
-			swapRespawn.WorldName = swapDimensionName
-			this.session.Write(swapRespawn)
-			this.session.Write(minecraft.NewPacketClientRespawnFrom(this.protocol.IdMap, joinGamePacket))
 			if this.protocol.IdMap.PacketClientUpdateViewDistance != -1 {
 				this.session.Write(minecraft.NewPacketClientViewDistance(this.protocol.IdMap, joinGamePacket.ViewDistance))
 			}
@@ -258,6 +256,12 @@ func (this *SessionOutBridge) handlePacketConnected(packet packet.Packet) (err e
 					uuid, _ := uuid.FromBytes([]byte(uuidString))
 					this.session.Write(mc19.NewPacketClientBossBarRemove(this.protocol.IdMap, uuid))
 				}
+			}
+			if joinGamePacket.DimensionCodec != nil {
+				// 1.16+
+				respawn := minecraft.NewPacketClientRespawnFrom(this.protocol.IdMap, joinGamePacket)
+				respawn.CopyMetadata = false
+				this.session.Write(respawn)
 			}
 			return
 		}
