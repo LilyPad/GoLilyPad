@@ -51,17 +51,10 @@ func (this *packetResultCodec) Decode(reader io.Reader) (decode packet.Packet, e
 		return
 	}
 	if packetResult.StatusCode == STATUS_SUCCESS {
-		var payloadSize uint16
-		payloadSize, err = packet.ReadUint16(reader)
+		_, err = packet.ReadUint16(reader) // payloadSize - ignored as we are already VarInt framed
 		if err != nil {
 			return
 		}
-		payload := make([]byte, payloadSize)
-		_, err = reader.Read(payload)
-		if err != nil {
-			return
-		}
-		buffer := bytes.NewBuffer(payload)
 		requestId := this.Sequencer.RequestIdBySequenceId(packetResult.SequenceId)
 		if requestId < 0 {
 			err = errors.New(fmt.Sprintf("Decode, Request Id is below zero: %d", requestId))
@@ -76,7 +69,7 @@ func (this *packetResultCodec) Decode(reader io.Reader) (decode packet.Packet, e
 			err = errors.New(fmt.Sprintf("Decode, Request Id does not have a codec: %d", requestId))
 			return
 		}
-		packetResult.Result, err = codec.Decode(buffer)
+		packetResult.Result, err = codec.Decode(reader)
 		if err != nil {
 			return
 		}
@@ -94,25 +87,30 @@ func (this *packetResultCodec) Encode(writer io.Writer, encode packet.Packet) (e
 	err = packet.WriteUint8(writer, packetResult.StatusCode)
 	if packetResult.StatusCode == STATUS_SUCCESS {
 		if packetResult.Result.Id() < 0 {
-			err = errors.New(fmt.Sprintf("Encode, Request Id is below zero: %d", packetResult.Result.Id()))
+			err = errors.New(fmt.Sprintf("Encode, Result Id is below zero: %d", packetResult.Result.Id()))
 			return
 		}
 		if packetResult.Result.Id() >= len(requestCodecs) {
-			err = errors.New(fmt.Sprintf("Encode, Request Id is above maximum: %d", packetResult.Result.Id()))
+			err = errors.New(fmt.Sprintf("Encode, Result Id is above maximum: %d", packetResult.Result.Id()))
 			return
 		}
 		buffer := new(bytes.Buffer)
 		codec := resultCodecs[packetResult.Result.Id()]
 		if codec == nil {
-			err = errors.New(fmt.Sprintf("Encode, Request Id does not have a codec: %d", packetResult.Result.Id()))
+			err = errors.New(fmt.Sprintf("Encode, Result Id does not have a codec: %d", packetResult.Result.Id()))
 			return
 		}
 		err = codec.Encode(buffer, packetResult.Result)
 		if err != nil {
 			return
 		}
+		payloadLen := buffer.Len()
+		if payloadLen > 0xFFFF {
+			err = errors.New(fmt.Sprintf("Encode, Result Len > 0xFFFF: %d", payloadLen))
+			return
+		}
 		payload := buffer.Bytes()
-		err = packet.WriteUint16(writer, uint16(len(payload)))
+		err = packet.WriteUint16(writer, uint16(payloadLen))
 		if err != nil {
 			return
 		}

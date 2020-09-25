@@ -45,22 +45,16 @@ func (this *packetRequestCodec) Decode(reader io.Reader) (decode packet.Packet, 
 		err = errors.New(fmt.Sprintf("Decode, Request Id is above maximum: %d", requestId))
 		return
 	}
-	payloadSize, err := packet.ReadUint16(reader)
+	_, err = packet.ReadUint16(reader) // payloadSize - ignored as we are already VarInt framed
 	if err != nil {
 		return
 	}
-	payload := make([]byte, payloadSize)
-	_, err = reader.Read(payload)
-	if err != nil {
-		return
-	}
-	buffer := bytes.NewBuffer(payload)
 	codec := requestCodecs[requestId]
 	if codec == nil {
 		err = errors.New(fmt.Sprintf("Decode, Request Id does not have a codec: %d", requestId))
 		return
 	}
-	packetRequest.Request, err = codec.Decode(buffer)
+	packetRequest.Request, err = codec.Decode(reader)
 	if err != nil {
 		return
 	}
@@ -96,8 +90,13 @@ func (this *packetRequestCodec) Encode(writer io.Writer, encode packet.Packet) (
 	if err != nil {
 		return
 	}
+	payloadLen := buffer.Len()
+	if payloadLen > 0xFFFF {
+		err = errors.New(fmt.Sprintf("Encode, Request Len > 0xFFFF: %d", payloadLen))
+		return
+	}
 	payload := buffer.Bytes()
-	err = packet.WriteUint16(writer, uint16(len(payload)))
+	err = packet.WriteUint16(writer, uint16(payloadLen))
 	if err != nil {
 		return
 	}
