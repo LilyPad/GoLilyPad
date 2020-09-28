@@ -32,6 +32,7 @@ import (
 	"time"
 )
 
+var sessionNameRegex = regexp.MustCompile("^[a-zA-Z0-9_]+$")
 var sessionVersionTable *minecraft.VersionTable = minecraft.NewVersionTableFrom(
 	mc17.Version,
 	mc18.Version,
@@ -410,7 +411,7 @@ func (this *Session) handlePacket(packet packet.Packet) (err error) {
 				err = errors.New("Unexpected name: length is more than 16")
 				return
 			}
-			if ok, _ := regexp.MatchString("^[a-zA-Z0-9_]+$", this.name); !ok {
+			if !sessionNameRegex.MatchString(this.name) {
 				err = errors.New("Unexpected name: pattern mismatch")
 				return
 			}
