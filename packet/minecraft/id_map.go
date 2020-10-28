@@ -130,6 +130,9 @@ type IdMap struct {
 	PlayServerCraftingBookData    int
 	PlayServerAdvancementTab      int
 
+	// 1.13
+	PacketClientStopSound         int
+
 	// Entities
 	EntityArrow         int
 	EntityFishingBobber int

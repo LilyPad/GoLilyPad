@@ -397,6 +397,8 @@ var IdMap = &minecraft.IdMap{
 	PlayServerPrepareCraftingGrid: -1,
 	PlayServerCraftingBookData:    -1,
 	PlayServerAdvancementTab:      -1,
+	// 1.13 - unsupported
+	PacketClientStopSound: -1,
 	// 1.14 - unsupported
 	PacketClientUpdateViewDistance: -1,
 	PacketClientEntitySoundEffect:  -1,
