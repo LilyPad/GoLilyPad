@@ -2,30 +2,37 @@ package connect
 
 import (
 	uuid "github.com/satori/go.uuid"
+	"strings"
 	"sync"
 )
 
 type NetworkCache struct {
-	playerToProxy      map[string]*Session
-	playerUuidsToProxy map[string]*Session
-	playerToProxyLock  sync.RWMutex
-	addresses          []string
-	ports              []uint16
-	motds              []string
-	versions           []string
-	maxPlayers         []uint16
-	shownAddress       string
-	shownPort          uint16
-	shownMotd          string
-	shownVersion       string
-	shownMaxPlayers    uint16
-	rebuildLock        sync.RWMutex
+	playerByName    map[string]*networkCachePlayer
+	playerByUUID    map[string]*networkCachePlayer
+	playerLock      sync.RWMutex
+	addresses       []string
+	ports           []uint16
+	motds           []string
+	versions        []string
+	maxPlayers      []uint16
+	shownAddress    string
+	shownPort       uint16
+	shownMotd       string
+	shownVersion    string
+	shownMaxPlayers uint16
+	rebuildLock     sync.RWMutex
+}
+
+type networkCachePlayer struct {
+	Name    string
+	UUID    uuid.UUID
+	Session *Session
 }
 
 func NewNetworkCache() (this *NetworkCache) {
 	this = new(NetworkCache)
-	this.playerToProxy = make(map[string]*Session)
-	this.playerUuidsToProxy = make(map[string]*Session)
+	this.playerByName = make(map[string]*networkCachePlayer)
+	this.playerByUUID = make(map[string]*networkCachePlayer)
 	this.addresses = make([]string, 0)
 	this.ports = make([]uint16, 0)
 	this.motds = make([]string, 0)
@@ -83,24 +90,30 @@ func (this *NetworkCache) UnregisterProxy(session *Session) {
 	this.RemovePlayersByProxy(session)
 }
 
-func (this *NetworkCache) AddPlayer(player string, uuid uuid.UUID, session *Session) (ok bool) {
-	this.playerToProxyLock.Lock()
-	if _, ok = this.playerToProxy[player]; !ok {
-		if _, ok = this.playerUuidsToProxy[string(uuid[:])]; !ok {
-			this.playerToProxy[player] = session
-			this.playerUuidsToProxy[string(uuid[:])] = session
+func (this *NetworkCache) AddPlayer(name string, uuid uuid.UUID, session *Session) (ok bool) {
+	this.playerLock.Lock()
+	nameLower := strings.ToLower(name)
+	if _, ok = this.playerByName[nameLower]; !ok {
+		if _, ok = this.playerByUUID[string(uuid[:])]; !ok {
+			player := &networkCachePlayer{
+				Name:    name,
+				UUID:    uuid,
+				Session: session,
+			}
+			this.playerByName[nameLower] = player
+			this.playerByUUID[string(uuid[:])] = player
 		}
 	}
-	this.playerToProxyLock.Unlock()
+	this.playerLock.Unlock()
 	ok = !ok
 	return
 }
 
-func (this *NetworkCache) RemovePlayer(player string, uuid uuid.UUID) {
-	this.playerToProxyLock.Lock()
-	delete(this.playerToProxy, player)
-	delete(this.playerUuidsToProxy, string(uuid[:]))
-	this.playerToProxyLock.Unlock()
+func (this *NetworkCache) RemovePlayer(name string, uuid uuid.UUID) {
+	this.playerLock.Lock()
+	delete(this.playerByName, strings.ToLower(name))
+	delete(this.playerByUUID, string(uuid[:]))
+	this.playerLock.Unlock()
 }
 
 func (this *NetworkCache) RemovePlayersByProxy(session *Session) {
@@ -110,19 +123,22 @@ func (this *NetworkCache) RemovePlayersByProxy(session *Session) {
 }
 
 func (this *NetworkCache) Players() (players []string) {
-	this.playerToProxyLock.RLock()
-	players = make([]string, 0, len(this.playerToProxy))
-	for player := range this.playerToProxy {
-		players = append(players, player)
+	this.playerLock.RLock()
+	players = make([]string, 0, len(this.playerByName))
+	for _, player := range this.playerByName {
+		players = append(players, player.Name)
 	}
-	this.playerToProxyLock.RUnlock()
+	this.playerLock.RUnlock()
 	return
 }
 
-func (this *NetworkCache) ProxyByPlayer(player string) (session *Session) {
-	this.playerToProxyLock.RLock()
-	session = this.playerToProxy[player]
-	this.playerToProxyLock.RUnlock()
+func (this *NetworkCache) ProxyByPlayer(name string) (session *Session) {
+	this.playerLock.RLock()
+	player := this.playerByName[strings.ToLower(name)]
+	if player != nil {
+		session = player.Session
+	}
+	this.playerLock.RUnlock()
 	return
 }
 
