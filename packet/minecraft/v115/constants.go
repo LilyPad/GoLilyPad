@@ -251,6 +251,7 @@ var PlayPacketServerCodec = packet.NewPacketCodecRegistryDual([]packet.PacketCod
 	PACKET_CLIENT_FACE_PLAYER:        minecraft.NewPacketGenericCodec(PACKET_CLIENT_FACE_PLAYER, Swappers),
 	PACKET_CLIENT_DECLARE_RECIPES:    minecraft.NewPacketGenericCodec(PACKET_CLIENT_DECLARE_RECIPES, Swappers),
 	PACKET_CLIENT_TAGS:               minecraft.NewPacketGenericCodec(PACKET_CLIENT_TAGS, Swappers),
+	PACKET_CLIENT_STOP_SOUND:         minecraft.NewPacketGenericCodec(PACKET_CLIENT_STOP_SOUND, Swappers),
 	// 1.14
 	PACKET_CLIENT_OPEN_HORSE_WINDOW:          minecraft.NewPacketGenericCodec(PACKET_CLIENT_OPEN_HORSE_WINDOW, Swappers),
 	PACKET_CLIENT_UPDATE_LIGHT:               minecraft.NewPacketGenericCodec(PACKET_CLIENT_UPDATE_LIGHT, Swappers),
@@ -474,6 +475,8 @@ var IdMap = &minecraft.IdMap{
 	PlayServerPrepareCraftingGrid: PACKET_SERVER_PREPARE_CRAFTING_GRID,
 	PlayServerCraftingBookData:    PACKET_SERVER_CRAFTING_BOOK_DATA,
 	PlayServerAdvancementTab:      PACKET_SERVER_ADVANCEMENT_TAB,
+	// 1.13
+	PacketClientStopSound: PACKET_CLIENT_STOP_SOUND,
 	// 1.14
 	PacketClientUpdateViewDistance: PACKET_CLIENT_UPDATE_VIEW_DISTANCE,
 	PacketClientEntitySoundEffect:  PACKET_CLIENT_ENTITY_SOUND_EFFECT,
