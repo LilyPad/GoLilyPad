@@ -351,6 +351,8 @@ var PlayPacketServerCodec = packet.NewPacketCodecRegistryDual([]packet.PacketCod
 	PACKET_SERVER_UPDATE_JIGSAW_BLOCK: minecraft.NewPacketGenericCodec(PACKET_SERVER_UPDATE_JIGSAW_BLOCK, Swappers),
 	// 1.16
 	PACKET_SERVER_GENERATE_STRUCTURE: minecraft.NewPacketGenericCodec(PACKET_SERVER_GENERATE_STRUCTURE, Swappers),
+	// 1.17
+	PACKET_SERVER_PONG:  minecraft.NewPacketGenericCodec(PACKET_SERVER_PONG, Swappers),
 })
 
 var PlayPacketClientCodec = PlayPacketServerCodec.Flip()
