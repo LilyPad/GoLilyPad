@@ -32,6 +32,7 @@ func (this *PacketCodecZlib) Decode(reader io.Reader) (packet Packet, err error)
 	rawBytes := reader.(Byteser).Bytes() // FIXME assuming the caller is a Byteser is a bad idea
 	length, err := ReadVarInt(reader)
 	if err != nil {
+		err = fmt.Errorf("Decode, Compressed length error: %w", err)
 		return
 	}
 	if length < 0 {
@@ -45,6 +46,7 @@ func (this *PacketCodecZlib) Decode(reader io.Reader) (packet Packet, err error)
 		var zlibReader io.ReadCloser
 		zlibReader, err = NewZlibToggleReaderBuffer(rawBytes, zlibBytes)
 		if err != nil {
+			err = fmt.Errorf("Decode, Zlib Toggle Reader error: %w", err)
 			return
 		}
 		packet, err = this.codec.Decode(zlibReader)

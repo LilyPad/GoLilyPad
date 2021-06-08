@@ -53,6 +53,7 @@ func (this *PacketCodecRegistry) Decode(reader io.Reader) (packet Packet, err er
 	}
 	id, err := ReadVarInt(buffer)
 	if err != nil {
+		err = fmt.Errorf("Decode, Id read error: %w", err)
 		return
 	}
 	if id < 0 {

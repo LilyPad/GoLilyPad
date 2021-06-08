@@ -19,6 +19,7 @@ func NewPacketCodecVarIntLength() (this *PacketCodecVarIntLength) {
 func (this *PacketCodecVarIntLength) Decode(reader io.Reader) (packet Packet, err error) {
 	length, err := ReadVarInt(reader)
 	if err != nil {
+		err = fmt.Errorf("Decode, Length read error: %w", err)
 		return
 	}
 	if length < 0 {
@@ -32,6 +33,7 @@ func (this *PacketCodecVarIntLength) Decode(reader io.Reader) (packet Packet, er
 	payload := make([]byte, length)
 	_, err = reader.Read(payload)
 	if err != nil {
+		err = fmt.Errorf("Decode, Length buffer error: %w", err)
 		return
 	}
 	packet, err = this.codec.Decode(bytes.NewBuffer(payload))
