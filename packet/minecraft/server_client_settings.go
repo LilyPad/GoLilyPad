@@ -9,6 +9,7 @@ type PacketServerClientSettings struct {
 	Difficulty   byte
 	SkinParts    byte
 	MainHand     int
+	DisableTextFiltering bool
 }
 
 func NewPacketServerClientSettings(idMap *IdMap, locale string, viewDistance byte, chatFlags byte, chatColours bool, skinParts byte, mainHand int) (this *PacketServerClientSettings) {
