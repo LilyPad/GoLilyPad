@@ -546,7 +546,7 @@ var IdMap = &minecraft.IdMap{
 
 var Version = &minecraft.Version{
 	Name:             "1.17",
-	NameLatest:       "1.17",
+	NameLatest:       "1.17.1",
 	LoginClientCodec: LoginPacketClientCodec,
 	LoginServerCodec: LoginPacketServerCodec,
 	PlayClientCodec:  PlayPacketClientCodec,
@@ -554,5 +554,6 @@ var Version = &minecraft.Version{
 	IdMap:            IdMap,
 	Id: []int{
 		755, // 1.17
+		756, // 1.17.1
 	},
 }
