@@ -100,7 +100,8 @@ func (this *SessionOutBridge) EnsureCompression() {
 }
 
 func (this *SessionOutBridge) SetCompression(threshold int) {
-	if this.state == STATE_INIT || this.state == STATE_CONNECTED {
+	// don't match compression if the client doesnt support compression changes during play (1.9+)
+	if this.session.protocol.IdMap.PacketClientSetCompression != -1 && (this.state == STATE_INIT || this.state == STATE_CONNECTED) {
 		this.session.SetCompression(threshold)
 	}
 	if this.compressionThreshold == threshold {

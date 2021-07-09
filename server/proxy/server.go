@@ -22,19 +22,20 @@ type Server struct {
 	apiContext  *apiContext
 	apiEventBus *eventBus
 
-	bind           *string
-	motd           *string
-	maxPlayers     *uint16
-	syncMaxPlayers *bool
-	authenticate   *bool
-	router         Router
-	localizer      Localizer
-	connect        *connect.ProxyConnect
-	privateKey     *rsa.PrivateKey
-	publicKey      []byte
+	bind                 *string
+	motd                 *string
+	maxPlayers           *uint16
+	syncMaxPlayers       *bool
+	authenticate         *bool
+	compressionThreshold *int
+	router               Router
+	localizer            Localizer
+	connect              *connect.ProxyConnect
+	privateKey           *rsa.PrivateKey
+	publicKey            []byte
 }
 
-func NewServer(bind *string, motd *string, maxPlayers *uint16, syncMaxPlayers *bool, authenticate *bool, router Router, localizer Localizer, connect *connect.ProxyConnect) (this *Server, err error) {
+func NewServer(bind *string, motd *string, maxPlayers *uint16, syncMaxPlayers *bool, authenticate *bool, compressionThreshold *int, router Router, localizer Localizer, connect *connect.ProxyConnect) (this *Server, err error) {
 	this = new(Server)
 	this.sessionRegistry = NewSessionRegistry()
 	this.apiContext = NewAPIContext(this)
@@ -44,6 +45,7 @@ func NewServer(bind *string, motd *string, maxPlayers *uint16, syncMaxPlayers *b
 	this.maxPlayers = maxPlayers
 	this.syncMaxPlayers = syncMaxPlayers
 	this.authenticate = authenticate
+	this.compressionThreshold = compressionThreshold
 	this.router = router
 	this.localizer = localizer
 	this.connect = connect
@@ -144,4 +146,8 @@ func (this *Server) SyncMaxPlayers() bool {
 
 func (this *Server) Authenticate() bool {
 	return *this.authenticate
+}
+
+func (this *Server) CompressionThreshold() int {
+	return *this.compressionThreshold
 }

@@ -221,7 +221,7 @@ func (this *Session) SetAuthenticated(result bool) {
 	}
 	this.SetState(STATE_INIT)
 	if this.protocol.IdMap.PacketClientSetCompression == -1 {
-		this.SetCompression(256)
+		this.SetCompression(this.server.CompressionThreshold())
 	}
 	if this.protocolVersion >= 5 {
 		this.Write(minecraft.NewPacketClientLoginSuccess(this.protocol.IdMap, FormatUUID(this.profile.Id), this.name))
