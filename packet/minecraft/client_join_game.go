@@ -25,6 +25,7 @@ type PacketClientJoinGame struct {
 	EnableRespawnScreen bool
 	IsDebug             bool // 1.16+
 	IsFlat              bool // 1.16+
+	SimulationDistance  int // 1.18+
 }
 
 func (this *PacketClientJoinGame) IdFrom(idMap *IdMap) {

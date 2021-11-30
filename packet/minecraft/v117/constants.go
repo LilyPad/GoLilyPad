@@ -272,6 +272,7 @@ var PlayPacketServerCodec = packet.NewPacketCodecRegistryDual([]packet.PacketCod
 	PACKET_CLIENT_FACE_PLAYER:        minecraft.NewPacketGenericCodec(PACKET_CLIENT_FACE_PLAYER, Swappers),
 	PACKET_CLIENT_DECLARE_RECIPES:    minecraft.NewPacketGenericCodec(PACKET_CLIENT_DECLARE_RECIPES, Swappers),
 	PACKET_CLIENT_TAGS:               minecraft.NewPacketGenericCodec(PACKET_CLIENT_TAGS, Swappers),
+	PACKET_CLIENT_STOP_SOUND:         minecraft.NewPacketGenericCodec(PACKET_CLIENT_STOP_SOUND, Swappers),
 	// 1.14
 	PACKET_CLIENT_OPEN_HORSE_WINDOW:          minecraft.NewPacketGenericCodec(PACKET_CLIENT_OPEN_HORSE_WINDOW, Swappers),
 	PACKET_CLIENT_UPDATE_LIGHT:               minecraft.NewPacketGenericCodec(PACKET_CLIENT_UPDATE_LIGHT, Swappers),
@@ -531,6 +532,8 @@ var IdMap = &minecraft.IdMap{
 	// 1.14
 	PacketClientUpdateViewDistance: PACKET_CLIENT_UPDATE_VIEW_DISTANCE,
 	PacketClientEntitySoundEffect:  PACKET_CLIENT_ENTITY_SOUND_EFFECT,
+	// 1.18 - unsupported
+	PacketClientUpdateSimulationDistance: -1,
 
 	PacketClientLoginDisconnect:      mc18.PACKET_CLIENT_LOGIN_DISCONNECT,
 	PacketClientLoginEncryptRequest:  mc18.PACKET_CLIENT_LOGIN_ENCRYPT_REQUEST,
