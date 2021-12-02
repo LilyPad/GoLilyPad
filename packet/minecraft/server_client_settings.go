@@ -10,6 +10,7 @@ type PacketServerClientSettings struct {
 	SkinParts    byte
 	MainHand     int
 	DisableTextFiltering bool
+	AllowServerListings bool // 1.18+
 }
 
 func NewPacketServerClientSettings(idMap *IdMap, locale string, viewDistance byte, chatFlags byte, chatColours bool, skinParts byte, mainHand int) (this *PacketServerClientSettings) {

@@ -133,6 +133,9 @@ type IdMap struct {
 	// 1.13
 	PacketClientStopSound         int
 
+	// 1.18
+	PacketClientUpdateSimulationDistance int
+
 	// Entities
 	EntityArrow         int
 	EntityFishingBobber int
