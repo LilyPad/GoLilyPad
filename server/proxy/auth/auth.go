@@ -33,9 +33,11 @@ func Authenticate(name string, serverId string, sharedSecret []byte, publicKey [
 	}
 	if len(profile.Id) != 32 {
 		err = errors.New(fmt.Sprintf("Id is not 32 characters: %d", len(profile.Id)))
+		return
 	}
 	if profile.Name != name {
 		err = errors.New(fmt.Sprintf("Name mismatch: %s != %s", name, profile.Name))
+		return
 	}
 	return
 }
