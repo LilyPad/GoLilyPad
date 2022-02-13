@@ -9,6 +9,7 @@ import (
 
 type GameProfile struct {
 	Id         string                `json:"id"`
+	Name       string                `json:"name"`
 	Properties []GameProfileProperty `json:"properties"`
 }
 
@@ -32,6 +33,9 @@ func Authenticate(name string, serverId string, sharedSecret []byte, publicKey [
 	}
 	if len(profile.Id) != 32 {
 		err = errors.New(fmt.Sprintf("Id is not 32 characters: %d", len(profile.Id)))
+	}
+	if profile.Name != name {
+		err = errors.New(fmt.Sprintf("Name mismatch: %s != %s", name, profile.Name))
 	}
 	return
 }
