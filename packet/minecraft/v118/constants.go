@@ -83,50 +83,50 @@ const (
 	PACKET_CLIENT_WORLD_BORDER_SIZE             = 0x44
 	PACKET_CLIENT_WORLD_BORDER_WARNING_DELAY    = 0x45
 	PACKET_CLIENT_WORLD_BORDER_WARNING_REACH    = 0x46
-	PACKET_CLIENT_CAMERA               = 0x47
-	PACKET_CLIENT_HELD_ITEM_CHANGE     = 0x48
-	PACKET_CLIENT_UPDATE_VIEW_POSITION = 0x49
-	PACKET_CLIENT_UPDATE_VIEW_DISTANCE = 0x4A
-	PACKET_CLIENT_SPAWN_POSITION       = 0x4B
-	PACKET_CLIENT_DISPLAY_SCOREBOARD   = 0x4C
-	PACKET_CLIENT_ENTITY_METADATA      = 0x4D
-	PACKET_CLIENT_ATTACH_ENTITY        = 0x4E
-	PACKET_CLIENT_ENTITY_VELOCITY      = 0x4F
-	PACKET_CLIENT_ENTITY_EQUIPMENT     = 0x50
-	PACKET_CLIENT_SET_EXPERIENCE       = 0x51
-	PACKET_CLIENT_UPDATE_HEALTH        = 0x52
-	PACKET_CLIENT_SCOREBOARD_OBJECTIVE = 0x53
-	PACKET_CLIENT_SET_PASSENGERS       = 0x54
-	PACKET_CLIENT_TEAMS                = 0x55
-	PACKET_CLIENT_UPDATE_SCORE         = 0x56
-	PACKET_CLIENT_UPDATE_SIMULATION_DISTANCE = 0x57
-	PACKET_CLIENT_SET_TITLE_SUBTITLE   = 0x58
-	PACKET_CLIENT_TIME_UPDATE    = 0x59
-	PACKET_CLIENT_SET_TITLE_TEXT = 0x5A
-	PACKET_CLIENT_SET_TITLE_TIME = 0x5B
-	PACKET_CLIENT_ENTITY_SOUND_EFFECT   = 0x5C
-	PACKET_CLIENT_SOUND_EFFECT          = 0x5D
-	PACKET_CLIENT_STOP_SOUND            = 0x5E
-	PACKET_CLIENT_PLAYER_LIST_HEAD_FOOT = 0x5F
-	PACKET_CLIENT_NBT_QUERY_RESPONSE    = 0x60
-	PACKET_CLIENT_COLLECT_ITEM          = 0x61
-	PACKET_CLIENT_ENTITY_TELEPORT       = 0x62
-	PACKET_CLIENT_ADVANCEMENTS          = 0x63
-	PACKET_CLIENT_ENTITY_PROPERTIES     = 0x64
-	PACKET_CLIENT_ENTITY_EFFECT         = 0x65
-	PACKET_CLIENT_DECLARE_RECIPES       = 0x66
-	PACKET_CLIENT_TAGS                  = 0x67
-	PACKET_CLIENT_UPDATE_SIGN           = -1
-	PACKET_CLIENT_MAP_CHUNK_BULK        = -1
-	PACKET_CLIENT_SET_COMPRESSION       = -1
-	PACKET_CLIENT_UPDATE_ENTITY_NBT     = -1
-	PACKET_CLIENT_USE_BED               = -1
-	PACKET_CLIENT_SPAWN_GLOBAL_ENTITY   = -1
-	PACKET_CLIENT_CONFIRM_TRANSACTION   = -1
-	PACKET_CLIENT_ENTITY                = -1
-	PACKET_CLIENT_COMBAT_EVENT          = -1
-	PACKET_CLIENT_WORLD_BORDER          = -1
-	PACKET_CLIENT_TITLE                 = -1
+	PACKET_CLIENT_CAMERA                        = 0x47
+	PACKET_CLIENT_HELD_ITEM_CHANGE              = 0x48
+	PACKET_CLIENT_UPDATE_VIEW_POSITION          = 0x49
+	PACKET_CLIENT_UPDATE_VIEW_DISTANCE          = 0x4A
+	PACKET_CLIENT_SPAWN_POSITION                = 0x4B
+	PACKET_CLIENT_DISPLAY_SCOREBOARD            = 0x4C
+	PACKET_CLIENT_ENTITY_METADATA               = 0x4D
+	PACKET_CLIENT_ATTACH_ENTITY                 = 0x4E
+	PACKET_CLIENT_ENTITY_VELOCITY               = 0x4F
+	PACKET_CLIENT_ENTITY_EQUIPMENT              = 0x50
+	PACKET_CLIENT_SET_EXPERIENCE                = 0x51
+	PACKET_CLIENT_UPDATE_HEALTH                 = 0x52
+	PACKET_CLIENT_SCOREBOARD_OBJECTIVE          = 0x53
+	PACKET_CLIENT_SET_PASSENGERS                = 0x54
+	PACKET_CLIENT_TEAMS                         = 0x55
+	PACKET_CLIENT_UPDATE_SCORE                  = 0x56
+	PACKET_CLIENT_UPDATE_SIMULATION_DISTANCE    = 0x57
+	PACKET_CLIENT_SET_TITLE_SUBTITLE            = 0x58
+	PACKET_CLIENT_TIME_UPDATE                   = 0x59
+	PACKET_CLIENT_SET_TITLE_TEXT                = 0x5A
+	PACKET_CLIENT_SET_TITLE_TIME                = 0x5B
+	PACKET_CLIENT_ENTITY_SOUND_EFFECT           = 0x5C
+	PACKET_CLIENT_SOUND_EFFECT                  = 0x5D
+	PACKET_CLIENT_STOP_SOUND                    = 0x5E
+	PACKET_CLIENT_PLAYER_LIST_HEAD_FOOT         = 0x5F
+	PACKET_CLIENT_NBT_QUERY_RESPONSE            = 0x60
+	PACKET_CLIENT_COLLECT_ITEM                  = 0x61
+	PACKET_CLIENT_ENTITY_TELEPORT               = 0x62
+	PACKET_CLIENT_ADVANCEMENTS                  = 0x63
+	PACKET_CLIENT_ENTITY_PROPERTIES             = 0x64
+	PACKET_CLIENT_ENTITY_EFFECT                 = 0x65
+	PACKET_CLIENT_DECLARE_RECIPES               = 0x66
+	PACKET_CLIENT_TAGS                          = 0x67
+	PACKET_CLIENT_UPDATE_SIGN                   = -1
+	PACKET_CLIENT_MAP_CHUNK_BULK                = -1
+	PACKET_CLIENT_SET_COMPRESSION               = -1
+	PACKET_CLIENT_UPDATE_ENTITY_NBT             = -1
+	PACKET_CLIENT_USE_BED                       = -1
+	PACKET_CLIENT_SPAWN_GLOBAL_ENTITY           = -1
+	PACKET_CLIENT_CONFIRM_TRANSACTION           = -1
+	PACKET_CLIENT_ENTITY                        = -1
+	PACKET_CLIENT_COMBAT_EVENT                  = -1
+	PACKET_CLIENT_WORLD_BORDER                  = -1
+	PACKET_CLIENT_TITLE                         = -1
 
 	PACKET_SERVER_TELEPORT_CONFIRM              = 0x00
 	PACKET_SERVER_QUERY_BLOCK_NBT               = 0x01
@@ -184,25 +184,25 @@ const (
 )
 
 var PlayPacketServerCodec = packet.NewPacketCodecRegistryDual([]packet.PacketCodec{
-	PACKET_CLIENT_KEEPALIVE:                minecraft.NewPacketGenericCodec(PACKET_CLIENT_KEEPALIVE, Swappers),
-	PACKET_CLIENT_JOIN_GAME:                &CodecClientJoinGame{IdMap},
-	PACKET_CLIENT_CHAT:                     minecraft.NewPacketGenericCodec(PACKET_CLIENT_CHAT, Swappers),
-	PACKET_CLIENT_TIME_UPDATE:              minecraft.NewPacketGenericCodec(PACKET_CLIENT_TIME_UPDATE, Swappers),
-	PACKET_CLIENT_ENTITY_EQUIPMENT:         minecraft.NewPacketGenericCodec(PACKET_CLIENT_ENTITY_EQUIPMENT, Swappers),
-	PACKET_CLIENT_SPAWN_POSITION:           minecraft.NewPacketGenericCodec(PACKET_CLIENT_SPAWN_POSITION, Swappers),
-	PACKET_CLIENT_UPDATE_HEALTH:            minecraft.NewPacketGenericCodec(PACKET_CLIENT_UPDATE_HEALTH, Swappers),
-	PACKET_CLIENT_RESPAWN:                  &mc1162.CodecClientRespawn{IdMap},
-	PACKET_CLIENT_PLAYER_POSITION_AND_LOOK: minecraft.NewPacketGenericCodec(PACKET_CLIENT_PLAYER_POSITION_AND_LOOK, Swappers),
-	PACKET_CLIENT_HELD_ITEM_CHANGE:         minecraft.NewPacketGenericCodec(PACKET_CLIENT_HELD_ITEM_CHANGE, Swappers),
-	PACKET_CLIENT_ANIMATION:                minecraft.NewPacketGenericCodec(PACKET_CLIENT_ANIMATION, Swappers),
-	PACKET_CLIENT_SPAWN_PLAYER:             minecraft.NewPacketGenericCodec(PACKET_CLIENT_SPAWN_PLAYER, Swappers),
-	PACKET_CLIENT_COLLECT_ITEM:             minecraft.NewPacketGenericCodec(PACKET_CLIENT_COLLECT_ITEM, Swappers),
-	PACKET_CLIENT_SPAWN_OBJECT:             minecraft.NewPacketGenericCodec(PACKET_CLIENT_SPAWN_OBJECT, Swappers),
-	PACKET_CLIENT_SPAWN_MOB:                minecraft.NewPacketGenericCodec(PACKET_CLIENT_SPAWN_MOB, Swappers),
-	PACKET_CLIENT_SPAWN_PAINTING:           minecraft.NewPacketGenericCodec(PACKET_CLIENT_SPAWN_PAINTING, Swappers),
-	PACKET_CLIENT_SPAWN_EXPERIENCE_ORB:     minecraft.NewPacketGenericCodec(PACKET_CLIENT_SPAWN_EXPERIENCE_ORB, Swappers),
-	PACKET_CLIENT_ENTITY_VELOCITY:          minecraft.NewPacketGenericCodec(PACKET_CLIENT_ENTITY_VELOCITY, Swappers),
-	PACKET_CLIENT_DESTROY_ENTITIES:         minecraft.NewPacketGenericCodec(PACKET_CLIENT_DESTROY_ENTITIES, Swappers),
+	PACKET_CLIENT_KEEPALIVE:                     minecraft.NewPacketGenericCodec(PACKET_CLIENT_KEEPALIVE, Swappers),
+	PACKET_CLIENT_JOIN_GAME:                     &CodecClientJoinGame{IdMap},
+	PACKET_CLIENT_CHAT:                          minecraft.NewPacketGenericCodec(PACKET_CLIENT_CHAT, Swappers),
+	PACKET_CLIENT_TIME_UPDATE:                   minecraft.NewPacketGenericCodec(PACKET_CLIENT_TIME_UPDATE, Swappers),
+	PACKET_CLIENT_ENTITY_EQUIPMENT:              minecraft.NewPacketGenericCodec(PACKET_CLIENT_ENTITY_EQUIPMENT, Swappers),
+	PACKET_CLIENT_SPAWN_POSITION:                minecraft.NewPacketGenericCodec(PACKET_CLIENT_SPAWN_POSITION, Swappers),
+	PACKET_CLIENT_UPDATE_HEALTH:                 minecraft.NewPacketGenericCodec(PACKET_CLIENT_UPDATE_HEALTH, Swappers),
+	PACKET_CLIENT_RESPAWN:                       &mc1162.CodecClientRespawn{IdMap},
+	PACKET_CLIENT_PLAYER_POSITION_AND_LOOK:      minecraft.NewPacketGenericCodec(PACKET_CLIENT_PLAYER_POSITION_AND_LOOK, Swappers),
+	PACKET_CLIENT_HELD_ITEM_CHANGE:              minecraft.NewPacketGenericCodec(PACKET_CLIENT_HELD_ITEM_CHANGE, Swappers),
+	PACKET_CLIENT_ANIMATION:                     minecraft.NewPacketGenericCodec(PACKET_CLIENT_ANIMATION, Swappers),
+	PACKET_CLIENT_SPAWN_PLAYER:                  minecraft.NewPacketGenericCodec(PACKET_CLIENT_SPAWN_PLAYER, Swappers),
+	PACKET_CLIENT_COLLECT_ITEM:                  minecraft.NewPacketGenericCodec(PACKET_CLIENT_COLLECT_ITEM, Swappers),
+	PACKET_CLIENT_SPAWN_OBJECT:                  minecraft.NewPacketGenericCodec(PACKET_CLIENT_SPAWN_OBJECT, Swappers),
+	PACKET_CLIENT_SPAWN_MOB:                     minecraft.NewPacketGenericCodec(PACKET_CLIENT_SPAWN_MOB, Swappers),
+	PACKET_CLIENT_SPAWN_PAINTING:                minecraft.NewPacketGenericCodec(PACKET_CLIENT_SPAWN_PAINTING, Swappers),
+	PACKET_CLIENT_SPAWN_EXPERIENCE_ORB:          minecraft.NewPacketGenericCodec(PACKET_CLIENT_SPAWN_EXPERIENCE_ORB, Swappers),
+	PACKET_CLIENT_ENTITY_VELOCITY:               minecraft.NewPacketGenericCodec(PACKET_CLIENT_ENTITY_VELOCITY, Swappers),
+	PACKET_CLIENT_DESTROY_ENTITIES:              minecraft.NewPacketGenericCodec(PACKET_CLIENT_DESTROY_ENTITIES, Swappers),
 	PACKET_CLIENT_ENTITY_RELATIVE_MOVE:          minecraft.NewPacketGenericCodec(PACKET_CLIENT_ENTITY_RELATIVE_MOVE, Swappers),
 	PACKET_CLIENT_ENTITY_LOOK:                   minecraft.NewPacketGenericCodec(PACKET_CLIENT_ENTITY_LOOK, Swappers),
 	PACKET_CLIENT_ENTITY_LOOK_AND_RELATIVE_MOVE: minecraft.NewPacketGenericCodec(PACKET_CLIENT_ENTITY_LOOK_AND_RELATIVE_MOVE, Swappers),
@@ -225,29 +225,29 @@ var PlayPacketServerCodec = packet.NewPacketCodecRegistryDual([]packet.PacketCod
 	PACKET_CLIENT_NAMED_SOUND_EFFECT:            minecraft.NewPacketGenericCodec(PACKET_CLIENT_NAMED_SOUND_EFFECT, Swappers),
 	PACKET_CLIENT_PARTICLE:                      minecraft.NewPacketGenericCodec(PACKET_CLIENT_PARTICLE, Swappers),
 	PACKET_CLIENT_CHANGE_GAME_STATE:             minecraft.NewPacketGenericCodec(PACKET_CLIENT_CHANGE_GAME_STATE, Swappers),
-	PACKET_CLIENT_OPEN_WINDOW:     minecraft.NewPacketGenericCodec(PACKET_CLIENT_OPEN_WINDOW, Swappers),
-	PACKET_CLIENT_CLOSE_WINDOW:    minecraft.NewPacketGenericCodec(PACKET_CLIENT_CLOSE_WINDOW, Swappers),
-	PACKET_CLIENT_SET_SLOT:        minecraft.NewPacketGenericCodec(PACKET_CLIENT_SET_SLOT, Swappers),
-	PACKET_CLIENT_WINDOW_ITEMS:    minecraft.NewPacketGenericCodec(PACKET_CLIENT_WINDOW_ITEMS, Swappers),
-	PACKET_CLIENT_WINDOW_PROPERTY: minecraft.NewPacketGenericCodec(PACKET_CLIENT_WINDOW_PROPERTY, Swappers),
-	PACKET_CLIENT_MAPS:                 minecraft.NewPacketGenericCodec(PACKET_CLIENT_MAPS, Swappers),
-	PACKET_CLIENT_UPDATE_BLOCK_ENTITY:  minecraft.NewPacketGenericCodec(PACKET_CLIENT_UPDATE_BLOCK_ENTITY, Swappers),
-	PACKET_CLIENT_SIGN_EDITOR_OPEN:     minecraft.NewPacketGenericCodec(PACKET_CLIENT_SIGN_EDITOR_OPEN, Swappers),
-	PACKET_CLIENT_PING: minecraft.NewPacketGenericCodec(PACKET_CLIENT_PING, Swappers),
-	PACKET_CLIENT_STATISTICS:           minecraft.NewPacketGenericCodec(PACKET_CLIENT_STATISTICS, Swappers),
-	PACKET_CLIENT_PLAYER_LIST:          &mc18.CodecClientPlayerList{IdMap},
-	PACKET_CLIENT_PLAYER_ABILITIES:     minecraft.NewPacketGenericCodec(PACKET_CLIENT_PLAYER_ABILITIES, Swappers),
-	PACKET_CLIENT_TAB_COMPLETE:         minecraft.NewPacketGenericCodec(PACKET_CLIENT_TAB_COMPLETE, Swappers),
-	PACKET_CLIENT_SCOREBOARD_OBJECTIVE: &mc113.CodecClientScoreboardObjective{IdMap},
-	PACKET_CLIENT_UPDATE_SCORE:         minecraft.NewPacketGenericCodec(PACKET_CLIENT_UPDATE_SCORE, Swappers),
-	PACKET_CLIENT_DISPLAY_SCOREBOARD:   minecraft.NewPacketGenericCodec(PACKET_CLIENT_DISPLAY_SCOREBOARD, Swappers),
-	PACKET_CLIENT_TEAMS:                &mc113.CodecClientTeams{IdMap},
-	PACKET_CLIENT_PLUGIN_MESSAGE:       minecraft.NewPacketGenericCodec(PACKET_CLIENT_PLUGIN_MESSAGE, Swappers),
-	PACKET_CLIENT_DISCONNECT:           &mc18.CodecClientDisconnect{IdMap},
-	PACKET_CLIENT_DIFFICULTY:           minecraft.NewPacketGenericCodec(PACKET_CLIENT_DIFFICULTY, Swappers),
-	PACKET_CLIENT_CAMERA: minecraft.NewPacketGenericCodec(PACKET_CLIENT_CAMERA, Swappers),
-	PACKET_CLIENT_PLAYER_LIST_HEAD_FOOT: minecraft.NewPacketGenericCodec(PACKET_CLIENT_PLAYER_LIST_HEAD_FOOT, Swappers),
-	PACKET_CLIENT_RESOURCE_PACK:         minecraft.NewPacketGenericCodec(PACKET_CLIENT_RESOURCE_PACK, Swappers),
+	PACKET_CLIENT_OPEN_WINDOW:                   minecraft.NewPacketGenericCodec(PACKET_CLIENT_OPEN_WINDOW, Swappers),
+	PACKET_CLIENT_CLOSE_WINDOW:                  minecraft.NewPacketGenericCodec(PACKET_CLIENT_CLOSE_WINDOW, Swappers),
+	PACKET_CLIENT_SET_SLOT:                      minecraft.NewPacketGenericCodec(PACKET_CLIENT_SET_SLOT, Swappers),
+	PACKET_CLIENT_WINDOW_ITEMS:                  minecraft.NewPacketGenericCodec(PACKET_CLIENT_WINDOW_ITEMS, Swappers),
+	PACKET_CLIENT_WINDOW_PROPERTY:               minecraft.NewPacketGenericCodec(PACKET_CLIENT_WINDOW_PROPERTY, Swappers),
+	PACKET_CLIENT_MAPS:                          minecraft.NewPacketGenericCodec(PACKET_CLIENT_MAPS, Swappers),
+	PACKET_CLIENT_UPDATE_BLOCK_ENTITY:           minecraft.NewPacketGenericCodec(PACKET_CLIENT_UPDATE_BLOCK_ENTITY, Swappers),
+	PACKET_CLIENT_SIGN_EDITOR_OPEN:              minecraft.NewPacketGenericCodec(PACKET_CLIENT_SIGN_EDITOR_OPEN, Swappers),
+	PACKET_CLIENT_PING:                          minecraft.NewPacketGenericCodec(PACKET_CLIENT_PING, Swappers),
+	PACKET_CLIENT_STATISTICS:                    minecraft.NewPacketGenericCodec(PACKET_CLIENT_STATISTICS, Swappers),
+	PACKET_CLIENT_PLAYER_LIST:                   &mc18.CodecClientPlayerList{IdMap},
+	PACKET_CLIENT_PLAYER_ABILITIES:              minecraft.NewPacketGenericCodec(PACKET_CLIENT_PLAYER_ABILITIES, Swappers),
+	PACKET_CLIENT_TAB_COMPLETE:                  minecraft.NewPacketGenericCodec(PACKET_CLIENT_TAB_COMPLETE, Swappers),
+	PACKET_CLIENT_SCOREBOARD_OBJECTIVE:          &mc113.CodecClientScoreboardObjective{IdMap},
+	PACKET_CLIENT_UPDATE_SCORE:                  minecraft.NewPacketGenericCodec(PACKET_CLIENT_UPDATE_SCORE, Swappers),
+	PACKET_CLIENT_DISPLAY_SCOREBOARD:            minecraft.NewPacketGenericCodec(PACKET_CLIENT_DISPLAY_SCOREBOARD, Swappers),
+	PACKET_CLIENT_TEAMS:                         &mc113.CodecClientTeams{IdMap},
+	PACKET_CLIENT_PLUGIN_MESSAGE:                minecraft.NewPacketGenericCodec(PACKET_CLIENT_PLUGIN_MESSAGE, Swappers),
+	PACKET_CLIENT_DISCONNECT:                    &mc18.CodecClientDisconnect{IdMap},
+	PACKET_CLIENT_DIFFICULTY:                    minecraft.NewPacketGenericCodec(PACKET_CLIENT_DIFFICULTY, Swappers),
+	PACKET_CLIENT_CAMERA:                        minecraft.NewPacketGenericCodec(PACKET_CLIENT_CAMERA, Swappers),
+	PACKET_CLIENT_PLAYER_LIST_HEAD_FOOT:         minecraft.NewPacketGenericCodec(PACKET_CLIENT_PLAYER_LIST_HEAD_FOOT, Swappers),
+	PACKET_CLIENT_RESOURCE_PACK:                 minecraft.NewPacketGenericCodec(PACKET_CLIENT_RESOURCE_PACK, Swappers),
 	// 1.9
 	PACKET_CLIENT_BOSS_BAR:       &mc19.CodecClientBossBar{IdMap},
 	PACKET_CLIENT_SET_COOLDOWN:   minecraft.NewPacketGenericCodec(PACKET_CLIENT_SET_COOLDOWN, Swappers),
@@ -350,7 +350,7 @@ var PlayPacketServerCodec = packet.NewPacketCodecRegistryDual([]packet.PacketCod
 	// 1.16
 	PACKET_SERVER_GENERATE_STRUCTURE: minecraft.NewPacketGenericCodec(PACKET_SERVER_GENERATE_STRUCTURE, Swappers),
 	// 1.17
-	PACKET_SERVER_PONG:  minecraft.NewPacketGenericCodec(PACKET_SERVER_PONG, Swappers),
+	PACKET_SERVER_PONG: minecraft.NewPacketGenericCodec(PACKET_SERVER_PONG, Swappers),
 })
 
 var PlayPacketClientCodec = PlayPacketServerCodec.Flip()
@@ -531,6 +531,16 @@ var IdMap = &minecraft.IdMap{
 	PacketClientEntitySoundEffect:  PACKET_CLIENT_ENTITY_SOUND_EFFECT,
 	// 1.18
 	PacketClientUpdateSimulationDistance: PACKET_CLIENT_UPDATE_SIMULATION_DISTANCE,
+	// 1.19 - unsupported
+	PacketClientChatPreview:           -1,
+	PacketClientPlayerChatMessage:     -1,
+	PacketClientSystemChatMessage:     -1,
+	PacketClientSetDisplayChatPreview: -1,
+	PacketClientServerData:            -1,
+	PacketServerChatCommand:           -1,
+	PacketServerChatMessage:           -1,
+	PacketServerChatPreview:           -1,
+	PacketServerSetDisplayedRecipe:    -1,
 
 	PacketClientLoginDisconnect:      mc18.PACKET_CLIENT_LOGIN_DISCONNECT,
 	PacketClientLoginEncryptRequest:  mc18.PACKET_CLIENT_LOGIN_ENCRYPT_REQUEST,
