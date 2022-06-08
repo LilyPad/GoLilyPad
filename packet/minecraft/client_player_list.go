@@ -25,16 +25,11 @@ type PacketClientPlayerListItem struct {
 
 type PacketClientPlayerListAddPlayer struct {
 	Name        string
-	Properties  []PacketClientPlayerListAddPlayerProperty
+	Properties  []GameProfileProperty
 	Gamemode    int
 	Latency     int
 	DisplayName string
-}
-
-type PacketClientPlayerListAddPlayerProperty struct {
-	Name      string
-	Value     string
-	Signature string
+	PublicKey   *ProfilePublicKey // 1.19+
 }
 
 type PacketClientPlayerListUpdateGamemode struct {

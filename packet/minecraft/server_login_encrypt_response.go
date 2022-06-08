@@ -4,14 +4,8 @@ type PacketServerLoginEncryptResponse struct {
 	IdMapPacket
 	SharedSecret []byte
 	VerifyToken  []byte
-}
-
-func NewPacketServerLoginEncryptResponse(idMap *IdMap, sharedSecret []byte, verifyToken []byte) (this *PacketServerLoginEncryptResponse) {
-	this = new(PacketServerLoginEncryptResponse)
-	this.IdFrom(idMap)
-	this.SharedSecret = sharedSecret
-	this.VerifyToken = verifyToken
-	return
+	Salt         int64  // 1.19+
+	Signature    []byte // 1.19+
 }
 
 func (this *PacketServerLoginEncryptResponse) IdFrom(idMap *IdMap) {

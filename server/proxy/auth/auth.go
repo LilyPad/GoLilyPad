@@ -4,28 +4,17 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/LilyPad/GoLilyPad/packet/minecraft"
 	"net/http"
 )
 
-type GameProfile struct {
-	Id         string                `json:"id"`
-	Name       string                `json:"name"`
-	Properties []GameProfileProperty `json:"properties"`
-}
-
-type GameProfileProperty struct {
-	Name      string `json:"name"`
-	Value     string `json:"value"`
-	Signature string `json:"signature"`
-}
-
-func Authenticate(name string, serverId string, sharedSecret []byte, publicKey []byte) (profile GameProfile, err error) {
+func Authenticate(name string, serverId string, sharedSecret []byte, publicKey []byte) (profile minecraft.GameProfile, err error) {
 	response, err := http.Get(fmt.Sprintf(URL, name, MojangSha1Hex([]byte(serverId), sharedSecret, publicKey)))
 	if err != nil {
 		return
 	}
 	jsonDecoder := json.NewDecoder(response.Body)
-	profile = GameProfile{}
+	profile = minecraft.GameProfile{}
 	err = jsonDecoder.Decode(&profile)
 	response.Body.Close()
 	if err != nil {

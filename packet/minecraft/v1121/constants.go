@@ -421,6 +421,17 @@ var IdMap = &minecraft.IdMap{
 	PacketClientEntitySoundEffect:  -1,
 	// 1.18 - unsupported
 	PacketClientUpdateSimulationDistance: -1,
+	// 1.19 - unsupported
+	PacketClientChatPreview:           -1,
+	PacketClientPlayerChatMessage:     -1,
+	PacketClientSystemChatMessage:     -1,
+	PacketClientSetDisplayChatPreview: -1,
+	PacketClientServerData:            -1,
+	PacketServerChatCommand:           -1,
+	PacketServerChatMessage:           -1,
+	PacketServerChatPreview:           -1,
+	PacketServerSetDisplayedRecipe:    -1,
+	PacketServerSetBeaconEffect:       -1,
 
 	PacketClientLoginDisconnect:      mc18.PACKET_CLIENT_LOGIN_DISCONNECT,
 	PacketClientLoginEncryptRequest:  mc18.PACKET_CLIENT_LOGIN_ENCRYPT_REQUEST,

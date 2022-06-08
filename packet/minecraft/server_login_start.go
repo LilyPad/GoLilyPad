@@ -2,7 +2,8 @@ package minecraft
 
 type PacketServerLoginStart struct {
 	IdMapPacket
-	Name string
+	Name      string
+	PublicKey *ProfilePublicKey
 }
 
 func NewPacketServerLoginStart(idMap *IdMap, name string) (this *PacketServerLoginStart) {
