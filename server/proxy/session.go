@@ -5,6 +5,7 @@ import (
 	"crypto"
 	cryptoRand "crypto/rand"
 	"crypto/rsa"
+	"crypto/sha256"
 	"crypto/x509"
 	"encoding/base64"
 	"encoding/binary"
@@ -466,7 +467,8 @@ func (this *Session) handlePacket(packet packet.Packet) (err error) {
 					return errors.New("failed to parse public key")
 				}
 
-				err = rsa.VerifyPKCS1v15(rsaPublicKey, crypto.SHA256, append(this.verifyToken, arrSalt...), loginEncryptResponse.VerifyToken)
+				sum := sha256.Sum256(append(this.verifyToken, arrSalt...))
+				err = rsa.VerifyPKCS1v15(rsaPublicKey, crypto.SHA256, sum[:], loginEncryptResponse.VerifyToken)
 				if err != nil {
 					return err
 				}
