@@ -5,8 +5,6 @@ import (
 	"github.com/LilyPad/GoLilyPad/packet/minecraft"
 	mc113 "github.com/LilyPad/GoLilyPad/packet/minecraft/v113"
 	mc114 "github.com/LilyPad/GoLilyPad/packet/minecraft/v114"
-	mc116 "github.com/LilyPad/GoLilyPad/packet/minecraft/v116"
-	mc1162 "github.com/LilyPad/GoLilyPad/packet/minecraft/v1162"
 	mc118 "github.com/LilyPad/GoLilyPad/packet/minecraft/v118"
 	mc18 "github.com/LilyPad/GoLilyPad/packet/minecraft/v18"
 	mc19 "github.com/LilyPad/GoLilyPad/packet/minecraft/v19"
@@ -192,12 +190,12 @@ const (
 
 var PlayPacketServerCodec = packet.NewPacketCodecRegistryDual([]packet.PacketCodec{
 	PACKET_CLIENT_KEEPALIVE:                     minecraft.NewPacketGenericCodec(PACKET_CLIENT_KEEPALIVE, Swappers),
-	PACKET_CLIENT_JOIN_GAME:                     &mc118.CodecClientJoinGame{IdMap},
+	PACKET_CLIENT_JOIN_GAME:                     &CodecClientJoinGame{IdMap},
 	PACKET_CLIENT_TIME_UPDATE:                   minecraft.NewPacketGenericCodec(PACKET_CLIENT_TIME_UPDATE, Swappers),
 	PACKET_CLIENT_ENTITY_EQUIPMENT:              minecraft.NewPacketGenericCodec(PACKET_CLIENT_ENTITY_EQUIPMENT, Swappers),
 	PACKET_CLIENT_SPAWN_POSITION:                minecraft.NewPacketGenericCodec(PACKET_CLIENT_SPAWN_POSITION, Swappers),
 	PACKET_CLIENT_UPDATE_HEALTH:                 minecraft.NewPacketGenericCodec(PACKET_CLIENT_UPDATE_HEALTH, Swappers),
-	PACKET_CLIENT_RESPAWN:                       &mc1162.CodecClientRespawn{IdMap},
+	PACKET_CLIENT_RESPAWN:                       &CodecClientRespawn{IdMap},
 	PACKET_CLIENT_PLAYER_POSITION_AND_LOOK:      minecraft.NewPacketGenericCodec(PACKET_CLIENT_PLAYER_POSITION_AND_LOOK, Swappers),
 	PACKET_CLIENT_HELD_ITEM_CHANGE:              minecraft.NewPacketGenericCodec(PACKET_CLIENT_HELD_ITEM_CHANGE, Swappers),
 	PACKET_CLIENT_ANIMATION:                     minecraft.NewPacketGenericCodec(PACKET_CLIENT_ANIMATION, Swappers),
@@ -369,11 +367,11 @@ var PlayPacketClientCodec = PlayPacketServerCodec.Flip()
 var LoginPacketServerCodec = packet.NewPacketCodecRegistryDual([]packet.PacketCodec{
 	mc18.PACKET_CLIENT_LOGIN_DISCONNECT:      &mc18.CodecClientLoginDisconnect{IdMap},
 	mc18.PACKET_CLIENT_LOGIN_ENCRYPT_REQUEST: &mc18.CodecClientLoginEncryptRequest{IdMap},
-	mc18.PACKET_CLIENT_LOGIN_SUCCESS:         &mc116.CodecClientLoginSuccess{IdMap},
+	mc18.PACKET_CLIENT_LOGIN_SUCCESS:         &CodecClientLoginSuccess{IdMap},
 	mc18.PACKET_CLIENT_LOGIN_SET_COMPRESSION: &mc18.CodecClientLoginSetCompression{IdMap},
 }, []packet.PacketCodec{
-	mc18.PACKET_SERVER_LOGIN_START:            &mc18.CodecServerLoginStart{IdMap},
-	mc18.PACKET_SERVER_LOGIN_ENCRYPT_RESPONSE: &mc18.CodecServerLoginEncryptResponse{IdMap},
+	mc18.PACKET_SERVER_LOGIN_START:            &CodecServerLoginStart{IdMap},
+	mc18.PACKET_SERVER_LOGIN_ENCRYPT_RESPONSE: &CodecServerLoginEncryptResponse{IdMap},
 })
 
 var LoginPacketClientCodec = LoginPacketServerCodec.Flip()

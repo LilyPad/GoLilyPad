@@ -2,13 +2,16 @@ package minecraft
 
 type PacketServerLoginStart struct {
 	IdMapPacket
-	Name string
+	Name         string
+	HasPlayerKey bool
+	PlayerKey    *GameKey
 }
 
-func NewPacketServerLoginStart(idMap *IdMap, name string) (this *PacketServerLoginStart) {
+func NewPacketServerLoginStart(idMap *IdMap, name string, playerKey *GameKey) (this *PacketServerLoginStart) {
 	this = new(PacketServerLoginStart)
 	this.IdFrom(idMap)
 	this.Name = name
+	this.PlayerKey = playerKey
 	return
 }
 

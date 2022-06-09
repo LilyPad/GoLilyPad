@@ -2,12 +2,16 @@ package proxy
 
 import (
 	"bytes"
+	"crypto"
 	cryptoRand "crypto/rand"
 	"crypto/rsa"
+	"crypto/x509"
 	"encoding/base64"
+	"encoding/binary"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/LilyPad/GoLilyPad/auth"
 	"github.com/LilyPad/GoLilyPad/packet"
 	"github.com/LilyPad/GoLilyPad/packet/minecraft"
 	mc112 "github.com/LilyPad/GoLilyPad/packet/minecraft/v112"
@@ -24,7 +28,6 @@ import (
 	mc18 "github.com/LilyPad/GoLilyPad/packet/minecraft/v18"
 	mc19 "github.com/LilyPad/GoLilyPad/packet/minecraft/v19"
 	"github.com/LilyPad/GoLilyPad/server/proxy/api"
-	"github.com/LilyPad/GoLilyPad/server/proxy/auth"
 	"github.com/LilyPad/GoLilyPad/server/proxy/connect"
 	uuid "github.com/satori/go.uuid"
 	"io/ioutil"
@@ -74,6 +77,7 @@ type Session struct {
 	serverAddress    string
 	rawServerAddress string
 	name             string
+	key              *minecraft.GameKey
 	uuid             uuid.UUID
 	profile          auth.GameProfile
 	serverId         string
@@ -228,9 +232,9 @@ func (this *Session) SetAuthenticated(result bool) {
 		this.SetCompression(256)
 	}
 	if this.protocolVersion >= 5 {
-		this.Write(minecraft.NewPacketClientLoginSuccess(this.protocol.IdMap, FormatUUID(this.profile.Id), this.name))
+		this.Write(minecraft.NewPacketClientLoginSuccess(this.protocol.IdMap, FormatUUID(this.profile.Id), this.name, this.profile.Properties))
 	} else {
-		this.Write(minecraft.NewPacketClientLoginSuccess(this.protocol.IdMap, this.profile.Id, this.name))
+		this.Write(minecraft.NewPacketClientLoginSuccess(this.protocol.IdMap, this.profile.Id, this.name, this.profile.Properties))
 	}
 	this.pipeline.Replace("registry", this.protocol.PlayServerCodec)
 	this.connCodec.SetTimeout(20 * time.Second)
@@ -413,6 +417,7 @@ func (this *Session) handlePacket(packet packet.Packet) (err error) {
 	case STATE_LOGIN:
 		if loginStart, ok := packet.(*minecraft.PacketServerLoginStart); ok {
 			this.name = loginStart.Name
+			this.key = loginStart.PlayerKey
 			if len(this.name) > 16 {
 				err = errors.New("Unexpected name: length is more than 16")
 				return
@@ -448,20 +453,41 @@ func (this *Session) handlePacket(packet packet.Packet) (err error) {
 		}
 	case STATE_LOGIN_ENCRYPT:
 		if loginEncryptResponse, ok := packet.(*minecraft.PacketServerLoginEncryptResponse); ok {
+			if !loginEncryptResponse.DisableSaltAuth {
+				arrSalt := make([]byte, 8)
+				binary.BigEndian.PutUint64(arrSalt, loginEncryptResponse.Salt)
+
+				publicKey, err := x509.ParsePKIXPublicKey(this.key.Key)
+				if err != nil {
+					return err
+				}
+				rsaPublicKey, isRsaKey := publicKey.(*rsa.PublicKey)
+				if !isRsaKey {
+					return errors.New("failed to parse public key")
+				}
+
+				err = rsa.VerifyPKCS1v15(rsaPublicKey, crypto.SHA256, append(this.verifyToken, arrSalt...), loginEncryptResponse.VerifyToken)
+				if err != nil {
+					return err
+				}
+			} else {
+				var verifyToken []byte
+				verifyToken, err = rsa.DecryptPKCS1v15(cryptoRand.Reader, this.server.privateKey, loginEncryptResponse.VerifyToken)
+				if err != nil {
+					return
+				}
+				if bytes.Compare(this.verifyToken, verifyToken) != 0 {
+					err = errors.New("verify token does not match")
+					return
+				}
+			}
+
 			var sharedSecret []byte
 			sharedSecret, err = rsa.DecryptPKCS1v15(cryptoRand.Reader, this.server.privateKey, loginEncryptResponse.SharedSecret)
 			if err != nil {
 				return
 			}
-			var verifyToken []byte
-			verifyToken, err = rsa.DecryptPKCS1v15(cryptoRand.Reader, this.server.privateKey, loginEncryptResponse.VerifyToken)
-			if err != nil {
-				return
-			}
-			if bytes.Compare(this.verifyToken, verifyToken) != 0 {
-				err = errors.New("Verify token does not match")
-				return
-			}
+
 			err = this.SetEncryption(sharedSecret)
 			if err != nil {
 				return
@@ -519,6 +545,7 @@ func (this *Session) handlePacket(packet packet.Packet) (err error) {
 }
 
 func (this *Session) ErrorCaught(err error) {
+	fmt.Println("err:", err)
 	if this.Authenticated() {
 		this.server.connect.RemoveLocalPlayer(this.name, this.uuid)
 		this.server.sessionRegistry.Unregister(this)

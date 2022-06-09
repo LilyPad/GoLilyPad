@@ -4,6 +4,7 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
+	"github.com/LilyPad/GoLilyPad/auth"
 	uuid "github.com/satori/go.uuid"
 	"io"
 	"math"
@@ -229,4 +230,107 @@ func ReadFloat64(reader io.Reader) (val float64, err error) {
 	ival, err := ReadUint64(reader)
 	val = math.Float64frombits(ival)
 	return
+}
+
+func WriteArrByte(writer io.Writer, value []byte) error {
+	err := WriteVarInt(writer, len(value))
+	if err != nil {
+		return err
+	}
+	_, err = writer.Write(value)
+	return err
+}
+
+func ReadArrByte(reader io.Reader) ([]byte, error) {
+	return ReadArrByteLimit(reader, -1)
+}
+
+func ReadArrByteLimit(reader io.Reader, maxLength int) ([]byte, error) {
+	length, err := ReadVarInt(reader)
+	if err != nil {
+		return nil, err
+	}
+	if maxLength != -1 && length > maxLength {
+		return nil, fmt.Errorf("array length %d is greater than max length %d", length, maxLength)
+	}
+
+	result := make([]byte, length)
+	_, err = reader.Read(result)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+func ReadArrGameProfileProperty(reader io.Reader) ([]auth.GameProfileProperty, error) {
+	length, err := ReadVarInt(reader)
+	if err != nil {
+		return nil, err
+	}
+	result := make([]auth.GameProfileProperty, length)
+	for i := 0; i < length; i++ {
+		result[i], err = ReadGameProfileProperty(reader)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return result, nil
+}
+
+func WriteArrGameProfileProperty(writer io.Writer, properties []auth.GameProfileProperty) error {
+	err := WriteVarInt(writer, len(properties))
+	if err != nil {
+		return err
+	}
+	for _, property := range properties {
+		err = WriteGameProfileProperty(writer, property)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func ReadGameProfileProperty(reader io.Reader) (result auth.GameProfileProperty, err error) {
+	result = auth.GameProfileProperty{}
+	result.Name, err = ReadString(reader)
+	if err != nil {
+		return result, err
+	}
+	result.Value, err = ReadString(reader)
+	if err != nil {
+		return result, err
+	}
+	hasSignature, err := ReadBool(reader)
+	if err != nil {
+		return result, err
+	}
+	if hasSignature {
+		result.Signature, err = ReadString(reader)
+		if err != nil {
+			return result, err
+		}
+	} else {
+		result.Signature = ""
+	}
+	return result, nil
+}
+
+func WriteGameProfileProperty(writer io.Writer, property auth.GameProfileProperty) error {
+	err := WriteString(writer, property.Name)
+	if err != nil {
+		return err
+	}
+	err = WriteString(writer, property.Value)
+	if err != nil {
+		return err
+	}
+	err = WriteBool(writer, property.HasSignature())
+	if err != nil {
+		return err
+	}
+	if property.HasSignature() {
+		return WriteString(writer, property.Signature)
+	}
+	return nil
 }

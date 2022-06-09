@@ -32,6 +32,7 @@ func (this *CodecServerLoginEncryptResponse) Decode(reader io.Reader) (decode pa
 	if err != nil {
 		return
 	}
+
 	verifyTokenLength, err := packet.ReadVarInt(reader)
 	if err != nil {
 		return

@@ -19,6 +19,10 @@ type GameProfileProperty struct {
 	Signature string `json:"signature"`
 }
 
+func (property *GameProfileProperty) HasSignature() bool {
+	return len(property.Signature) != 0
+}
+
 func Authenticate(name string, serverId string, sharedSecret []byte, publicKey []byte) (profile GameProfile, err error) {
 	response, err := http.Get(fmt.Sprintf(URL, name, MojangSha1Hex([]byte(serverId), sharedSecret, publicKey)))
 	if err != nil {

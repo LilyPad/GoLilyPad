@@ -6,18 +6,21 @@ import (
 
 type PacketClientRespawn struct {
 	IdMapPacket
-	Dimension        int32   // removed in 1.16+
-	DimensionName    string  // 1.16+ // removed in 1.16.2+
-	DimensionNBT     nbt.Nbt // 1.16.2+
-	WorldName        string  // 1.16+
-	HashedSeed       int64
-	Difficulty       int8
-	Gamemode         int8
-	PreviousGamemode int8   // 1.16+
-	LevelType        string // removed in 1.16+
-	IsDebug          bool   // 1.16+
-	IsFlat           bool   // 1.16+
-	CopyMetadata     bool   // 1.16+
+	Dimension              int32   // removed in 1.16+
+	DimensionName          string  // 1.16+ // removed in 1.16.2+
+	DimensionNBT           nbt.Nbt // 1.16.2+
+	WorldName              string  // 1.16+
+	HashedSeed             int64
+	Difficulty             int8
+	Gamemode               int8
+	PreviousGamemode       int8   // 1.16+
+	LevelType              string // removed in 1.16+
+	IsDebug                bool   // 1.16+
+	IsFlat                 bool   // 1.16+
+	CopyMetadata           bool   // 1.16+
+	HasLastDeathPosition   bool   // 1.19
+	LastDeathPositionWorld string // 1.19
+	LastDeathPosition      uint64 // 1.19
 }
 
 func NewPacketClientRespawnFrom(idMap *IdMap, joinGame *PacketClientJoinGame) (this *PacketClientRespawn) {
@@ -35,6 +38,9 @@ func NewPacketClientRespawnFrom(idMap *IdMap, joinGame *PacketClientJoinGame) (t
 	this.IsDebug = joinGame.IsDebug
 	this.IsFlat = joinGame.IsFlat
 	this.CopyMetadata = false
+	this.HasLastDeathPosition = joinGame.HasLastDeathPosition
+	this.LastDeathPositionWorld = joinGame.LastDeathPositionWorld
+	this.LastDeathPosition = joinGame.LastDeathPosition
 	return
 }
 
