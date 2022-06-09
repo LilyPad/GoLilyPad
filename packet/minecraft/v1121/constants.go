@@ -431,6 +431,7 @@ var IdMap = &minecraft.IdMap{
 	PacketServerChatMessage:           -1,
 	PacketServerChatPreview:           -1,
 	PacketServerSetDisplayedRecipe:    -1,
+	PacketServerSetBeaconEffect:       -1,
 
 	PacketClientLoginDisconnect:      mc18.PACKET_CLIENT_LOGIN_DISCONNECT,
 	PacketClientLoginEncryptRequest:  mc18.PACKET_CLIENT_LOGIN_ENCRYPT_REQUEST,
