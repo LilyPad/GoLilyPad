@@ -467,7 +467,10 @@ func (this *Session) handlePacket(packet packet.Packet) (err error) {
 					return errors.New("failed to parse public key")
 				}
 
-				sum := sha256.Sum256(append(this.verifyToken, arrSalt...))
+				merged := make([]byte, len(this.verifyToken), len(this.verifyToken)+len(arrSalt))
+				_ = copy(merged, this.verifyToken)
+				merged = append(merged, arrSalt...)
+				sum := sha256.Sum256(merged)
 				err = rsa.VerifyPKCS1v15(rsaPublicKey, crypto.SHA256, sum[:], loginEncryptResponse.VerifyToken)
 				if err != nil {
 					return err
