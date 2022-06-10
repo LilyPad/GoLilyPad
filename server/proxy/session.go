@@ -477,6 +477,7 @@ func (this *Session) handlePacket(packet packet.Packet) (err error) {
 				}
 				var publicKey *rsa.PublicKey
 				if publicKey, ok = parsedKey.(*rsa.PublicKey); !ok {
+					err = errors.New("Public key is not an RSA key")
 					return
 				}
 				saltBytes := make([]byte, 8)
