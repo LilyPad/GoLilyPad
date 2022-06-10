@@ -481,7 +481,10 @@ func (this *Session) handlePacket(packet packet.Packet) (err error) {
 				}
 				saltBytes := make([]byte, 8)
 				binary.BigEndian.PutUint64(saltBytes, uint64(loginEncryptResponse.Salt))
-				digest := sha256.Sum256(append(this.verifyToken, saltBytes...))
+				data := make([]byte, len(this.verifyToken), len(this.verifyToken)+len(saltBytes))
+				copy(data, this.verifyToken)
+				data = append(data, saltBytes...)
+				digest := sha256.Sum256(data)
 				err = rsa.VerifyPKCS1v15(publicKey, crypto.SHA256, digest[:], loginEncryptResponse.Signature)
 				if err != nil {
 					return
