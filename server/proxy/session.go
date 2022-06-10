@@ -2,9 +2,13 @@ package proxy
 
 import (
 	"bytes"
+	"crypto"
 	cryptoRand "crypto/rand"
 	"crypto/rsa"
+	"crypto/sha256"
+	"crypto/x509"
 	"encoding/base64"
+	"encoding/binary"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -17,8 +21,9 @@ import (
 	mc115 "github.com/LilyPad/GoLilyPad/packet/minecraft/v115"
 	mc116 "github.com/LilyPad/GoLilyPad/packet/minecraft/v116"
 	mc1162 "github.com/LilyPad/GoLilyPad/packet/minecraft/v1162"
-	mc118 "github.com/LilyPad/GoLilyPad/packet/minecraft/v118"
 	mc117 "github.com/LilyPad/GoLilyPad/packet/minecraft/v117"
+	mc118 "github.com/LilyPad/GoLilyPad/packet/minecraft/v118"
+	mc119 "github.com/LilyPad/GoLilyPad/packet/minecraft/v119"
 	mc17 "github.com/LilyPad/GoLilyPad/packet/minecraft/v17"
 	mc18 "github.com/LilyPad/GoLilyPad/packet/minecraft/v18"
 	mc19 "github.com/LilyPad/GoLilyPad/packet/minecraft/v19"
@@ -49,6 +54,7 @@ var sessionVersionTable *minecraft.VersionTable = minecraft.NewVersionTableFrom(
 	mc1162.Version,
 	mc117.Version,
 	mc118.Version,
+	mc119.Version,
 )
 
 type Session struct {
@@ -73,9 +79,10 @@ type Session struct {
 	rawServerAddress string
 	name             string
 	uuid             uuid.UUID
-	profile          auth.GameProfile
+	profile          minecraft.GameProfile
 	serverId         string
 	verifyToken      []byte
+	publicKey        *minecraft.ProfilePublicKey
 
 	mcBrand        packet.Packet
 	clientSettings packet.Packet
@@ -226,9 +233,9 @@ func (this *Session) SetAuthenticated(result bool) {
 		this.SetCompression(256)
 	}
 	if this.protocolVersion >= 5 {
-		this.Write(minecraft.NewPacketClientLoginSuccess(this.protocol.IdMap, FormatUUID(this.profile.Id), this.name))
+		this.Write(minecraft.NewPacketClientLoginSuccess(this.protocol.IdMap, FormatUUID(this.profile.Id), this.name, this.profile.Properties))
 	} else {
-		this.Write(minecraft.NewPacketClientLoginSuccess(this.protocol.IdMap, this.profile.Id, this.name))
+		this.Write(minecraft.NewPacketClientLoginSuccess(this.protocol.IdMap, this.profile.Id, this.name, this.profile.Properties))
 	}
 	this.pipeline.Replace("registry", this.protocol.PlayServerCodec)
 	this.connCodec.SetTimeout(20 * time.Second)
@@ -419,6 +426,7 @@ func (this *Session) handlePacket(packet packet.Packet) (err error) {
 				err = errors.New("Unexpected name: pattern mismatch")
 				return
 			}
+			this.publicKey = loginStart.PublicKey
 			if this.server.Authenticate() {
 				this.serverId, err = GenSalt()
 				if err != nil {
@@ -434,9 +442,9 @@ func (this *Session) handlePacket(packet packet.Packet) (err error) {
 				}
 				this.SetState(STATE_LOGIN_ENCRYPT)
 			} else {
-				this.profile = auth.GameProfile{
+				this.profile = minecraft.GameProfile{
 					Id:         GenNameUUID("OfflinePlayer:" + this.name),
-					Properties: make([]auth.GameProfileProperty, 0),
+					Properties: make([]minecraft.GameProfileProperty, 0),
 				}
 				this.SetAuthenticated(true)
 			}
@@ -451,14 +459,37 @@ func (this *Session) handlePacket(packet packet.Packet) (err error) {
 			if err != nil {
 				return
 			}
-			var verifyToken []byte
-			verifyToken, err = rsa.DecryptPKCS1v15(cryptoRand.Reader, this.server.privateKey, loginEncryptResponse.VerifyToken)
-			if err != nil {
-				return
-			}
-			if bytes.Compare(this.verifyToken, verifyToken) != 0 {
-				err = errors.New("Verify token does not match")
-				return
+			if loginEncryptResponse.VerifyToken != nil {
+				var verifyToken []byte
+				verifyToken, err = rsa.DecryptPKCS1v15(cryptoRand.Reader, this.server.privateKey, loginEncryptResponse.VerifyToken)
+				if err != nil {
+					return
+				}
+				if bytes.Compare(this.verifyToken, verifyToken) != 0 {
+					err = errors.New("Verify token does not match")
+					return
+				}
+			} else {
+				var parsedKey interface{}
+				parsedKey, err = x509.ParsePKIXPublicKey(this.publicKey.Key)
+				if err != nil {
+					return
+				}
+				var publicKey *rsa.PublicKey
+				if publicKey, ok = parsedKey.(*rsa.PublicKey); !ok {
+					err = errors.New("Public key is not an RSA key")
+					return
+				}
+				saltBytes := make([]byte, 8)
+				binary.BigEndian.PutUint64(saltBytes, uint64(loginEncryptResponse.Salt))
+				data := make([]byte, len(this.verifyToken), len(this.verifyToken)+len(saltBytes))
+				copy(data, this.verifyToken)
+				data = append(data, saltBytes...)
+				digest := sha256.Sum256(data)
+				err = rsa.VerifyPKCS1v15(publicKey, crypto.SHA256, digest[:], loginEncryptResponse.Signature)
+				if err != nil {
+					return
+				}
 			}
 			err = this.SetEncryption(sharedSecret)
 			if err != nil {

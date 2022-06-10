@@ -83,49 +83,49 @@ const (
 	PACKET_CLIENT_WORLD_BORDER_SIZE             = 0x44
 	PACKET_CLIENT_WORLD_BORDER_WARNING_DELAY    = 0x45
 	PACKET_CLIENT_WORLD_BORDER_WARNING_REACH    = 0x46
-	PACKET_CLIENT_CAMERA               = 0x47
-	PACKET_CLIENT_HELD_ITEM_CHANGE     = 0x48
-	PACKET_CLIENT_UPDATE_VIEW_POSITION = 0x49
-	PACKET_CLIENT_UPDATE_VIEW_DISTANCE = 0x4A
-	PACKET_CLIENT_SPAWN_POSITION       = 0x4B
-	PACKET_CLIENT_DISPLAY_SCOREBOARD   = 0x4C
-	PACKET_CLIENT_ENTITY_METADATA      = 0x4D
-	PACKET_CLIENT_ATTACH_ENTITY        = 0x4E
-	PACKET_CLIENT_ENTITY_VELOCITY      = 0x4F
-	PACKET_CLIENT_ENTITY_EQUIPMENT     = 0x50
-	PACKET_CLIENT_SET_EXPERIENCE       = 0x51
-	PACKET_CLIENT_UPDATE_HEALTH        = 0x52
-	PACKET_CLIENT_SCOREBOARD_OBJECTIVE = 0x53
-	PACKET_CLIENT_SET_PASSENGERS       = 0x54
-	PACKET_CLIENT_TEAMS                = 0x55
-	PACKET_CLIENT_UPDATE_SCORE         = 0x56
-	PACKET_CLIENT_SET_TITLE_SUBTITLE   = 0x57
-	PACKET_CLIENT_TIME_UPDATE    = 0x58
-	PACKET_CLIENT_SET_TITLE_TEXT = 0x59
-	PACKET_CLIENT_SET_TITLE_TIME = 0x5A
-	PACKET_CLIENT_ENTITY_SOUND_EFFECT   = 0x5B
-	PACKET_CLIENT_SOUND_EFFECT          = 0x5C
-	PACKET_CLIENT_STOP_SOUND            = 0x5D
-	PACKET_CLIENT_PLAYER_LIST_HEAD_FOOT = 0x5E
-	PACKET_CLIENT_NBT_QUERY_RESPONSE    = 0x5F
-	PACKET_CLIENT_COLLECT_ITEM          = 0x60
-	PACKET_CLIENT_ENTITY_TELEPORT       = 0x61
-	PACKET_CLIENT_ADVANCEMENTS          = 0x62
-	PACKET_CLIENT_ENTITY_PROPERTIES     = 0x63
-	PACKET_CLIENT_ENTITY_EFFECT         = 0x64
-	PACKET_CLIENT_DECLARE_RECIPES       = 0x65
-	PACKET_CLIENT_TAGS                  = 0x66
-	PACKET_CLIENT_UPDATE_SIGN           = -1
-	PACKET_CLIENT_MAP_CHUNK_BULK        = -1
-	PACKET_CLIENT_SET_COMPRESSION       = -1
-	PACKET_CLIENT_UPDATE_ENTITY_NBT     = -1
-	PACKET_CLIENT_USE_BED               = -1
-	PACKET_CLIENT_SPAWN_GLOBAL_ENTITY   = -1
-	PACKET_CLIENT_CONFIRM_TRANSACTION   = -1 // removed
-	PACKET_CLIENT_ENTITY                = -1 // removed
-	PACKET_CLIENT_COMBAT_EVENT          = -1 // removed
-	PACKET_CLIENT_WORLD_BORDER          = -1 // removed?
-	PACKET_CLIENT_TITLE                 = -1 // removed
+	PACKET_CLIENT_CAMERA                        = 0x47
+	PACKET_CLIENT_HELD_ITEM_CHANGE              = 0x48
+	PACKET_CLIENT_UPDATE_VIEW_POSITION          = 0x49
+	PACKET_CLIENT_UPDATE_VIEW_DISTANCE          = 0x4A
+	PACKET_CLIENT_SPAWN_POSITION                = 0x4B
+	PACKET_CLIENT_DISPLAY_SCOREBOARD            = 0x4C
+	PACKET_CLIENT_ENTITY_METADATA               = 0x4D
+	PACKET_CLIENT_ATTACH_ENTITY                 = 0x4E
+	PACKET_CLIENT_ENTITY_VELOCITY               = 0x4F
+	PACKET_CLIENT_ENTITY_EQUIPMENT              = 0x50
+	PACKET_CLIENT_SET_EXPERIENCE                = 0x51
+	PACKET_CLIENT_UPDATE_HEALTH                 = 0x52
+	PACKET_CLIENT_SCOREBOARD_OBJECTIVE          = 0x53
+	PACKET_CLIENT_SET_PASSENGERS                = 0x54
+	PACKET_CLIENT_TEAMS                         = 0x55
+	PACKET_CLIENT_UPDATE_SCORE                  = 0x56
+	PACKET_CLIENT_SET_TITLE_SUBTITLE            = 0x57
+	PACKET_CLIENT_TIME_UPDATE                   = 0x58
+	PACKET_CLIENT_SET_TITLE_TEXT                = 0x59
+	PACKET_CLIENT_SET_TITLE_TIME                = 0x5A
+	PACKET_CLIENT_ENTITY_SOUND_EFFECT           = 0x5B
+	PACKET_CLIENT_SOUND_EFFECT                  = 0x5C
+	PACKET_CLIENT_STOP_SOUND                    = 0x5D
+	PACKET_CLIENT_PLAYER_LIST_HEAD_FOOT         = 0x5E
+	PACKET_CLIENT_NBT_QUERY_RESPONSE            = 0x5F
+	PACKET_CLIENT_COLLECT_ITEM                  = 0x60
+	PACKET_CLIENT_ENTITY_TELEPORT               = 0x61
+	PACKET_CLIENT_ADVANCEMENTS                  = 0x62
+	PACKET_CLIENT_ENTITY_PROPERTIES             = 0x63
+	PACKET_CLIENT_ENTITY_EFFECT                 = 0x64
+	PACKET_CLIENT_DECLARE_RECIPES               = 0x65
+	PACKET_CLIENT_TAGS                          = 0x66
+	PACKET_CLIENT_UPDATE_SIGN                   = -1
+	PACKET_CLIENT_MAP_CHUNK_BULK                = -1
+	PACKET_CLIENT_SET_COMPRESSION               = -1
+	PACKET_CLIENT_UPDATE_ENTITY_NBT             = -1
+	PACKET_CLIENT_USE_BED                       = -1
+	PACKET_CLIENT_SPAWN_GLOBAL_ENTITY           = -1
+	PACKET_CLIENT_CONFIRM_TRANSACTION           = -1 // removed
+	PACKET_CLIENT_ENTITY                        = -1 // removed
+	PACKET_CLIENT_COMBAT_EVENT                  = -1 // removed
+	PACKET_CLIENT_WORLD_BORDER                  = -1 // removed?
+	PACKET_CLIENT_TITLE                         = -1 // removed
 
 	PACKET_SERVER_TELEPORT_CONFIRM              = 0x00
 	PACKET_SERVER_QUERY_BLOCK_NBT               = 0x01
@@ -235,7 +235,7 @@ var PlayPacketServerCodec = packet.NewPacketCodecRegistryDual([]packet.PacketCod
 	PACKET_CLIENT_MAPS:                 minecraft.NewPacketGenericCodec(PACKET_CLIENT_MAPS, Swappers),
 	PACKET_CLIENT_UPDATE_BLOCK_ENTITY:  minecraft.NewPacketGenericCodec(PACKET_CLIENT_UPDATE_BLOCK_ENTITY, Swappers),
 	PACKET_CLIENT_SIGN_EDITOR_OPEN:     minecraft.NewPacketGenericCodec(PACKET_CLIENT_SIGN_EDITOR_OPEN, Swappers),
-	PACKET_CLIENT_PING: minecraft.NewPacketGenericCodec(PACKET_CLIENT_PING, Swappers),
+	PACKET_CLIENT_PING:                 minecraft.NewPacketGenericCodec(PACKET_CLIENT_PING, Swappers),
 	PACKET_CLIENT_STATISTICS:           minecraft.NewPacketGenericCodec(PACKET_CLIENT_STATISTICS, Swappers),
 	PACKET_CLIENT_PLAYER_LIST:          &mc18.CodecClientPlayerList{IdMap},
 	PACKET_CLIENT_PLAYER_ABILITIES:     minecraft.NewPacketGenericCodec(PACKET_CLIENT_PLAYER_ABILITIES, Swappers),
@@ -353,7 +353,7 @@ var PlayPacketServerCodec = packet.NewPacketCodecRegistryDual([]packet.PacketCod
 	// 1.16
 	PACKET_SERVER_GENERATE_STRUCTURE: minecraft.NewPacketGenericCodec(PACKET_SERVER_GENERATE_STRUCTURE, Swappers),
 	// 1.17
-	PACKET_SERVER_PONG:  minecraft.NewPacketGenericCodec(PACKET_SERVER_PONG, Swappers),
+	PACKET_SERVER_PONG: minecraft.NewPacketGenericCodec(PACKET_SERVER_PONG, Swappers),
 })
 
 var PlayPacketClientCodec = PlayPacketServerCodec.Flip()
@@ -534,6 +534,17 @@ var IdMap = &minecraft.IdMap{
 	PacketClientEntitySoundEffect:  PACKET_CLIENT_ENTITY_SOUND_EFFECT,
 	// 1.18 - unsupported
 	PacketClientUpdateSimulationDistance: -1,
+	// 1.19 - unsupported
+	PacketClientChatPreview:           -1,
+	PacketClientPlayerChatMessage:     -1,
+	PacketClientSystemChatMessage:     -1,
+	PacketClientSetDisplayChatPreview: -1,
+	PacketClientServerData:            -1,
+	PacketServerChatCommand:           -1,
+	PacketServerChatMessage:           -1,
+	PacketServerChatPreview:           -1,
+	PacketServerSetDisplayedRecipe:    -1,
+	PacketServerSetBeaconEffect:       -1,
 
 	PacketClientLoginDisconnect:      mc18.PACKET_CLIENT_LOGIN_DISCONNECT,
 	PacketClientLoginEncryptRequest:  mc18.PACKET_CLIENT_LOGIN_ENCRYPT_REQUEST,

@@ -131,10 +131,22 @@ type IdMap struct {
 	PlayServerAdvancementTab      int
 
 	// 1.13
-	PacketClientStopSound         int
+	PacketClientStopSound int
 
 	// 1.18
 	PacketClientUpdateSimulationDistance int
+
+	// 1.19
+	PacketClientChatPreview           int
+	PacketClientPlayerChatMessage     int
+	PacketClientSystemChatMessage     int
+	PacketClientSetDisplayChatPreview int
+	PacketClientServerData            int
+	PacketServerChatCommand           int
+	PacketServerChatMessage           int
+	PacketServerChatPreview           int
+	PacketServerSetDisplayedRecipe    int
+	PacketServerSetBeaconEffect       int
 
 	// Entities
 	EntityArrow         int

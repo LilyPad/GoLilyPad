@@ -1,4 +1,4 @@
-package v18
+package v119
 
 import (
 	"errors"
@@ -64,6 +64,17 @@ func (this *CodecClientPlayerList) Decode(reader io.Reader) (decode packet.Packe
 			}
 			if hasDisplayName {
 				addPlayer.DisplayName, err = packet.ReadString(reader)
+				if err != nil {
+					return
+				}
+			}
+			var publicKeyPresent bool
+			publicKeyPresent, err = packet.ReadBool(reader)
+			if err != nil {
+				return
+			}
+			if publicKeyPresent {
+				addPlayer.PublicKey, err = minecraft.ReadProfilePublicKey(reader)
 				if err != nil {
 					return
 				}
@@ -152,6 +163,21 @@ func (this *CodecClientPlayerList) Encode(writer io.Writer, encode packet.Packet
 					return
 				}
 				err = packet.WriteString(writer, addPlayer.DisplayName)
+				if err != nil {
+					return
+				}
+			}
+			if addPlayer.PublicKey == nil {
+				err = packet.WriteBool(writer, false)
+				if err != nil {
+					return
+				}
+			} else {
+				err = packet.WriteBool(writer, true)
+				if err != nil {
+					return
+				}
+				err = minecraft.WriteProfilePublicKey(writer, addPlayer.PublicKey)
 				if err != nil {
 					return
 				}
