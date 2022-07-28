@@ -76,7 +76,7 @@ func (this *SessionOutBridge) Serve() {
 	this.Write(minecraft.NewPacketServerHandshake(this.session.protocolVersion, EncodeLoginPayload(loginPayload), uint16(outRemotePort), 2))
 
 	this.pipeline.Replace("registry", this.protocol.LoginClientCodec)
-	this.Write(minecraft.NewPacketServerLoginStart(this.protocol.IdMap, this.session.name))
+	this.Write(minecraft.NewPacketServerLoginStart(this.protocol.IdMap, this.session.name, &this.session.uuid))
 
 	this.state = STATE_LOGIN
 	go this.connCodec.ReadConn(this)
