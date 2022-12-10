@@ -222,13 +222,20 @@ func (this *SessionOutBridge) handlePacketConnected(packet packet.Packet) (err e
 					for player := range this.session.playerList {
 						this.session.Write(mc17.NewPacketClientPlayerListRemove(player))
 					}
-				} else {
+				} else if this.session.protocolVersion < 761 { // < 1.19.3
 					items := make([]minecraft.PacketClientPlayerListItem, 0, len(this.session.playerList))
 					for uuidString := range this.session.playerList {
 						uuid, _ := uuid.FromBytes([]byte(uuidString))
 						items = append(items, minecraft.PacketClientPlayerListItem{UUID: uuid})
 					}
 					this.session.Write(minecraft.NewPacketClientPlayerList(this.protocol.IdMap, minecraft.PACKET_CLIENT_PLAYER_LIST_ACTION_REMOVE, items))
+				} else {
+					uuids := make([]uuid.UUID, 0, len(this.session.playerList))
+					for uuidString := range this.session.playerList {
+						uuid, _ := uuid.FromBytes([]byte(uuidString))
+						uuids = append(uuids, uuid)
+					}
+					this.session.Write(minecraft.NewPacketClientPlayerInfoRemove(this.protocol.IdMap, uuids))
 				}
 				this.session.playerList = make(map[string]struct{})
 			}
@@ -282,6 +289,20 @@ func (this *SessionOutBridge) handlePacketConnected(packet packet.Packet) (err e
 			} else if playerListPacket.Action == minecraft.PACKET_CLIENT_PLAYER_LIST_ACTION_REMOVE {
 				for _, item := range playerListPacket.Items {
 					delete(this.session.playerList, string(item.UUID[:]))
+				}
+			}
+		}
+	} else if id == this.protocol.IdMap.PacketClientPlayerInfoRemove {
+		playerInfoRemovePacket := packet.(*minecraft.PacketClientPlayerInfoRemove)
+		for _, uuid := range playerInfoRemovePacket.UUIDs {
+			delete(this.session.playerList, string(uuid[:]))
+		}
+	} else if id == this.protocol.IdMap.PacketClientPlayerInfoUpdate {
+		playerInfoUpdatePacket := packet.(*minecraft.PacketClientPlayerInfoUpdate)
+		for _, item := range playerInfoUpdatePacket.Items {
+			for _, action := range playerInfoUpdatePacket.Actions {
+				if action == minecraft.PACKET_CLIENT_PLAYER_INFO_UPDATE_ACTION_ADD_PLAYER {
+					this.session.playerList[string(item.UUID[:])] = struct{}{}
 				}
 			}
 		}

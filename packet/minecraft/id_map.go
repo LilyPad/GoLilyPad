@@ -154,6 +154,13 @@ type IdMap struct {
 	PacketClientPlayerChatHeader      int
 	PacketServerChatAck               int
 
+	// 1.19.3
+	PacketClientDisguisedChat         int
+	PacketClientPlayerInfoRemove      int
+	PacketClientPlayerInfoUpdate      int
+	PacketClientUpdateEnabledFeatures int
+	PacketServerChatSessionUpdate     int
+
 	// Entities
 	EntityArrow         int
 	EntityFishingBobber int

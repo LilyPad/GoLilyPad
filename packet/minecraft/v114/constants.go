@@ -497,6 +497,12 @@ var IdMap = &minecraft.IdMap{
 	PacketClientDeleteChatMessage:     -1,
 	PacketClientPlayerChatHeader:      -1,
 	PacketServerChatAck:               -1,
+	// 1.19.3 - unsupported
+	PacketClientDisguisedChat:         -1,
+	PacketClientPlayerInfoRemove:      -1,
+	PacketClientPlayerInfoUpdate:      -1,
+	PacketClientUpdateEnabledFeatures: -1,
+	PacketServerChatSessionUpdate:     -1,
 
 	PacketClientLoginDisconnect:      mc18.PACKET_CLIENT_LOGIN_DISCONNECT,
 	PacketClientLoginEncryptRequest:  mc18.PACKET_CLIENT_LOGIN_ENCRYPT_REQUEST,
