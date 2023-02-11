@@ -1,4 +1,4 @@
-package v119
+package v1191
 
 import (
 	"github.com/LilyPad/GoLilyPad/packet"
@@ -559,6 +559,17 @@ var IdMap = &minecraft.IdMap{
 	PacketServerChatPreview:           PACKET_SERVER_CHAT_PREVIEW,
 	PacketServerSetDisplayedRecipe:    PACKET_SERVER_SET_DISPLAYED_RECIPE,
 	PacketServerSetBeaconEffect:       PACKET_SERVER_SET_BEACON_EFFECT,
+	// 1.19.1
+	PacketClientCustomChatCompletions: PACKET_CLIENT_CUSTOM_CHAT_COMPLETIONS,
+	PacketClientDeleteChatMessage:     PACKET_CLIENT_DELETE_CHAT_MESSAGE,
+	PacketClientPlayerChatHeader:      PACKET_CLIENT_PLAYER_CHAT_HEADER,
+	PacketServerChatAck:               PACKET_SERVER_CHAT_ACK,
+	// 1.19.3 - unsupported
+	PacketClientDisguisedChat:         -1,
+	PacketClientPlayerInfoRemove:      -1,
+	PacketClientPlayerInfoUpdate:      -1,
+	PacketClientUpdateEnabledFeatures: -1,
+	PacketServerChatSessionUpdate:     -1,
 
 	PacketClientLoginDisconnect:      mc18.PACKET_CLIENT_LOGIN_DISCONNECT,
 	PacketClientLoginEncryptRequest:  mc18.PACKET_CLIENT_LOGIN_ENCRYPT_REQUEST,
@@ -574,7 +585,7 @@ var IdMap = &minecraft.IdMap{
 
 var Version = &minecraft.Version{
 	Name:             "1.19.1",
-	NameLatest:       "1.19.1",
+	NameLatest:       "1.19.2",
 	LoginClientCodec: LoginPacketClientCodec,
 	LoginServerCodec: LoginPacketServerCodec,
 	PlayClientCodec:  PlayPacketClientCodec,

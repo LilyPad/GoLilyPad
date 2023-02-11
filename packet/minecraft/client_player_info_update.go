@@ -1,0 +1,57 @@
+package minecraft
+
+import (
+	uuid "github.com/satori/go.uuid"
+)
+
+const (
+	PACKET_CLIENT_PLAYER_INFO_UPDATE_ACTION_ADD_PLAYER int = iota
+	PACKET_CLIENT_PLAYER_INFO_UPDATE_ACTION_INITIALIZE_CHAT
+	PACKET_CLIENT_PLAYER_INFO_UPDATE_ACTION_UPDATE_GAMEMODE
+	PACKET_CLIENT_PLAYER_INFO_UPDATE_ACTION_UPDATE_LISTED
+	PACKET_CLIENT_PLAYER_INFO_UPDATE_ACTION_UPDATE_LATENCY
+	PACKET_CLIENT_PLAYER_INFO_UPDATE_ACTION_UPDATE_DISPLAY_NAME
+)
+
+var PacketClientPlayerInfoUpdateActions = []int{
+	PACKET_CLIENT_PLAYER_INFO_UPDATE_ACTION_ADD_PLAYER,
+	PACKET_CLIENT_PLAYER_INFO_UPDATE_ACTION_INITIALIZE_CHAT,
+	PACKET_CLIENT_PLAYER_INFO_UPDATE_ACTION_UPDATE_GAMEMODE,
+	PACKET_CLIENT_PLAYER_INFO_UPDATE_ACTION_UPDATE_LISTED,
+	PACKET_CLIENT_PLAYER_INFO_UPDATE_ACTION_UPDATE_LATENCY,
+	PACKET_CLIENT_PLAYER_INFO_UPDATE_ACTION_UPDATE_DISPLAY_NAME,
+}
+
+type PacketClientPlayerInfoUpdate struct {
+	IdMapPacket
+	Actions []int
+	Items   []PacketClientPlayerInfoUpdateItem
+}
+
+type PacketClientPlayerInfoUpdateItem struct {
+	UUID uuid.UUID
+
+	// ADD_PLAYER
+	Name       string
+	Properties []GameProfileProperty
+
+	// INITIALIZE_CHAT
+	ChatSessionId *uuid.UUID
+	PublicKey     *ProfilePublicKey
+
+	// UPDATE_GAMEMODE
+	Gamemode int
+
+	// UPDATE_LISTED
+	Listed bool
+
+	// UPDATE_LATENCY
+	Latency int
+
+	// UPDATE_DISPLAY_NAME
+	DisplayName string
+}
+
+func (this *PacketClientPlayerInfoUpdate) IdFrom(idMap *IdMap) {
+	this.IdMapPacket.id = idMap.PacketClientPlayerInfoUpdate
+}

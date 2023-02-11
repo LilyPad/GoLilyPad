@@ -230,3 +230,37 @@ func ReadFloat64(reader io.Reader) (val float64, err error) {
 	val = math.Float64frombits(ival)
 	return
 }
+
+func WriteFixedBitSet(writer io.Writer, val *BitSet, size int) (err error) {
+	length := val.Len()
+	if length > size {
+		err = errors.New(fmt.Sprintf("Encode, BitSet length is above fixed size: %d size: %d", length, size))
+		return
+	}
+	bytes := make([]byte, positiveCeilDiv(size, 8))
+	copy(bytes, val.ToByteArray())
+	_, err = writer.Write(bytes)
+	return
+}
+
+func ReadFixedBitSet(reader io.Reader, size int) (val *BitSet, err error) {
+	bytes := make([]byte, positiveCeilDiv(size, 8))
+	_, err = reader.Read(bytes)
+	if err != nil {
+		return
+	}
+	val = NewBitSetFrom(bytes)
+	return
+}
+
+func positiveCeilDiv(x int, y int) int {
+	return -floorDiv(-x, y)
+}
+
+func floorDiv(x int, y int) int {
+	r := x / y
+	if (x^y) < 0 && (r*y != x) {
+		r--
+	}
+	return r
+}

@@ -148,6 +148,19 @@ type IdMap struct {
 	PacketServerSetDisplayedRecipe    int
 	PacketServerSetBeaconEffect       int
 
+	// 1.19.1
+	PacketClientCustomChatCompletions int
+	PacketClientDeleteChatMessage     int
+	PacketClientPlayerChatHeader      int
+	PacketServerChatAck               int
+
+	// 1.19.3
+	PacketClientDisguisedChat         int
+	PacketClientPlayerInfoRemove      int
+	PacketClientPlayerInfoUpdate      int
+	PacketClientUpdateEnabledFeatures int
+	PacketServerChatSessionUpdate     int
+
 	// Entities
 	EntityArrow         int
 	EntityFishingBobber int
