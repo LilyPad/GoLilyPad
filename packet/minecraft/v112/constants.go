@@ -440,6 +440,11 @@ var IdMap = &minecraft.IdMap{
 	PacketClientPlayerInfoUpdate:      -1,
 	PacketClientUpdateEnabledFeatures: -1,
 	PacketServerChatSessionUpdate:     -1,
+	// 1.19.4 - unsupported
+	PacketClientBundle:       -1,
+	PacketClientChunkBiomes:  -1,
+	PacketClientDamageEvent:  -1,
+	PacketClientHitAnimation: -1,
 
 	PacketClientLoginDisconnect:      mc18.PACKET_CLIENT_LOGIN_DISCONNECT,
 	PacketClientLoginEncryptRequest:  mc18.PACKET_CLIENT_LOGIN_ENCRYPT_REQUEST,

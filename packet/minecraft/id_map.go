@@ -161,6 +161,12 @@ type IdMap struct {
 	PacketClientUpdateEnabledFeatures int
 	PacketServerChatSessionUpdate     int
 
+	// 1.19.4
+	PacketClientBundle       int
+	PacketClientChunkBiomes  int
+	PacketClientDamageEvent  int
+	PacketClientHitAnimation int
+
 	// Entities
 	EntityArrow         int
 	EntityFishingBobber int
