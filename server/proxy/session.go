@@ -463,17 +463,7 @@ func (this *Session) handlePacket(packet packet.Packet) (err error) {
 			if err != nil {
 				return
 			}
-			if loginEncryptResponse.VerifyToken != nil {
-				var verifyToken []byte
-				verifyToken, err = rsa.DecryptPKCS1v15(cryptoRand.Reader, this.server.privateKey, loginEncryptResponse.VerifyToken)
-				if err != nil {
-					return
-				}
-				if bytes.Compare(this.verifyToken, verifyToken) != 0 {
-					err = errors.New("Verify token does not match")
-					return
-				}
-			} else {
+			if this.publicKey != nil {
 				var parsedKey interface{}
 				parsedKey, err = x509.ParsePKIXPublicKey(this.publicKey.Key)
 				if err != nil {
@@ -492,6 +482,16 @@ func (this *Session) handlePacket(packet packet.Packet) (err error) {
 				digest := sha256.Sum256(data)
 				err = rsa.VerifyPKCS1v15(publicKey, crypto.SHA256, digest[:], loginEncryptResponse.Signature)
 				if err != nil {
+					return
+				}
+			} else {
+				var verifyToken []byte
+				verifyToken, err = rsa.DecryptPKCS1v15(cryptoRand.Reader, this.server.privateKey, loginEncryptResponse.VerifyToken)
+				if err != nil {
+					return
+				}
+				if bytes.Compare(this.verifyToken, verifyToken) != 0 {
+					err = errors.New("Verify token does not match")
 					return
 				}
 			}
